@@ -1,0 +1,3 @@
+[submodule "Dependencies/VTIL-Core"]
+	path = Dependencies/VTIL-Core
+	url = https://github.com/vtil-project/VTIL-Core.git
