@@ -35,4 +35,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 
 # Include subprojects
-add_subdirectory(NativeLifters-X86)
+add_subdirectory(NativeLifters-Core)
+
+# Tests
+if(VTIL_BUILD_TESTS)
+    add_subdirectory(NativeLifters-Tests)
+endif()
