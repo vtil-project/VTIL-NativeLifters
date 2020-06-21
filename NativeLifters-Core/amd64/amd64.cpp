@@ -62,8 +62,16 @@ namespace vtil::lifter::amd64
 				process_add( block, insn );
 				break;
 
+			case X86_INS_ADC:
+				process_adc( block, insn );
+				break;
+
 			case X86_INS_SUB:
 				process_sub( block, insn );
+				break;
+
+			case X86_INS_MOV:
+				process_mov( block, insn );
 				break;
 
 			default:

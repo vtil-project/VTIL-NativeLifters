@@ -24,7 +24,7 @@ namespace vtil::lifter
 
             // Create and populate a temp register to hold the current register's value
             // 
-            auto tmp = block->tmp( size() );
+            auto tmp = block->tmp( bit_count( ) );
             block->mov( tmp, decay( ) );
 
             // Create & return a new operative using the temp register
@@ -76,7 +76,7 @@ namespace vtil::lifter
         operative& operator=( T&& other )
         {
             fassert( is_valid() );
-            block->mov( decay(), other );
+            block->mov( decay( ), other );
             return *this;
         }
         
@@ -85,7 +85,7 @@ namespace vtil::lifter
 		operative operator&&( const operative& other )
 		{
 			fassert( is_valid( ) );
-			auto [a1, a2] = block->tmp( size( ), other.size( ) );
+			auto [a1, a2] = block->tmp( bit_count( ), other.bit_count( ) );
 
 			block->tne( a1, decay( ), 0 );
 			block->tne( a2, other.decay( ), 0 );
@@ -98,7 +98,7 @@ namespace vtil::lifter
         operative operator||( const operative& other )
         {
             fassert( is_valid( ) );
-            auto [a1, a2] = block->tmp( size( ), other.size( ) );
+            auto [a1, a2] = block->tmp( bit_count( ), other.bit_count( ) );
 
             block->tne( a1, decay( ), 0 );
             block->tne( a2, other.decay( ), 0 );
@@ -114,7 +114,7 @@ namespace vtil::lifter
         operative operator==( T&& other ) const
         { 
             fassert( is_valid( ) );
-            auto tmp = block->tmp( size( ) );
+            auto tmp = block->tmp( bit_count( ) );
             block->te( tmp, decay( ), other );
             return { tmp, block };
         }
@@ -123,7 +123,7 @@ namespace vtil::lifter
         operative operator!=( T&& other ) const
         {
 			fassert( is_valid( ) );
-			auto tmp = block->tmp( size( ) );
+			auto tmp = block->tmp( bit_count( ) );
             block->tne( tmp, decay( ), other );
             return { tmp, block };
         }
@@ -132,7 +132,7 @@ namespace vtil::lifter
         operative operator>=( T&& other ) const
         {
 			fassert( is_valid( ) );
-			auto tmp = block->tmp( size( ) );
+			auto tmp = block->tmp( bit_count( ) );
 			block->tge( tmp, decay( ), other );
 			return { tmp, block };
         }
@@ -141,7 +141,7 @@ namespace vtil::lifter
         operative operator>( T&& other ) const
         {
 			fassert( is_valid( ) );
-			auto tmp = block->tmp( size( ) );
+			auto tmp = block->tmp( bit_count( ) );
 			block->tg( tmp, decay( ), other );
 			return { tmp, block };
         }
@@ -150,7 +150,7 @@ namespace vtil::lifter
         operative operator<=( T&& other ) const
         {
 			fassert( is_valid( ) );
-			auto tmp = block->tmp( size( ) );
+			auto tmp = block->tmp( bit_count( ) );
 			block->tle( tmp, decay( ), other );
 			return { tmp, block };
         }
@@ -159,7 +159,7 @@ namespace vtil::lifter
         operative operator<( T&& other ) const
         {
 			fassert( is_valid( ) );
-			auto tmp = block->tmp( size( ) );
+			auto tmp = block->tmp( bit_count( ) );
 			block->tl( tmp, decay( ), other );
 			return { tmp, block };
         }
@@ -171,7 +171,7 @@ namespace vtil::lifter
         operative operator&( T&& other ) const
         {
 			fassert( is_valid( ) );
-			auto tmp = block->tmp( size( ) );
+			auto tmp = block->tmp( bit_count( ) );
 			block
 				->mov( tmp, decay( ) )
                 ->band( tmp, other );
@@ -182,7 +182,7 @@ namespace vtil::lifter
 		operative operator|( T&& other ) const
 		{
 			fassert( is_valid( ) );
-			auto tmp = block->tmp( size( ) );
+			auto tmp = block->tmp( bit_count( ) );
 			block
 				->mov( tmp, decay( ) )
                 ->bor( tmp, other );
@@ -193,7 +193,7 @@ namespace vtil::lifter
 		operative operator^( T&& other ) const
 		{
 			fassert( is_valid( ) );
-			auto tmp = block->tmp( size( ) );
+			auto tmp = block->tmp( bit_count( ) );
 			block
 				->mov( tmp, decay( ) )
                 ->bxor( tmp, other );
@@ -204,7 +204,7 @@ namespace vtil::lifter
 		operative operator+( T&& other ) const
 		{
 			fassert( is_valid( ) );
-			auto tmp = block->tmp( size( ) );
+			auto tmp = block->tmp( bit_count( ) );
 			block
 				->mov( tmp, decay( ) )
                 ->add( tmp, other );
@@ -215,7 +215,7 @@ namespace vtil::lifter
 		operative operator-( T&& other ) const
 		{
 			fassert( is_valid( ) );
-			auto tmp = block->tmp( size( ) );
+			auto tmp = block->tmp( bit_count( ) );
 			block
                 ->mov( tmp, decay( ) )
                 ->sub( tmp, other );
@@ -226,7 +226,7 @@ namespace vtil::lifter
 		operative operator>>( T&& other ) const
 		{
 			fassert( is_valid( ) );
-			auto tmp = block->tmp( size( ) );
+			auto tmp = block->tmp( bit_count( ) );
 			block
 				->mov( tmp, decay( ) )
                 ->bshl( tmp, other );
@@ -237,7 +237,7 @@ namespace vtil::lifter
 		operative operator<<( T&& other ) const
 		{
 			fassert( is_valid( ) );
-			auto tmp = block->tmp( size( ) );
+			auto tmp = block->tmp( bit_count( ) );
 			block
 				->mov( tmp, decay( ) )
                 ->bshr( tmp, other );
