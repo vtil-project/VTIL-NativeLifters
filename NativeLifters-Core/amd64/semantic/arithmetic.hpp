@@ -1,55 +1,57 @@
 // Various x86 arithmetic instructions.
 // 
 
-// Process the flags for a specific arithmetic instruction.
-//
-template<flag_operation Op>
-void process_flags( basic_block* block, const operand& lhs, const operand& rhs )
+namespace vtil::lifter::amd64
 {
-	operative { flags::OF, block } = flags::overflow<Op>::flag( lhs, rhs, result );
-	operative { flags::CF, block } = flags::carry<Op>::flag( lhs, rhs, result );
-	operative { flags::SF, block } = flags::sign( result );
-	operative { flags::ZF, block } = flags::zero( result );
-	operative { flags::AF, block } = flags::aux_carry( lhs, rhs, result );
-	operative { flags::PF, block } = flags::parity( result );
-}
-
-void process_add( basic_block* block, const instruction_info& insn )
-{
-	// Define result
+	// Process the flags for a specific arithmetic instruction.
 	//
-	operative result = { get_operand( block, insn, 0 ), block };
+	template<flags::flag_operation Op>
+	void process_flags( basic_block* block, const operative& lhs, const operative& rhs, const operative& result )
+	{
+		operative { flags::OF, block } = flags::overflow<Op>::flag( lhs, rhs, result );
+		operative { flags::CF, block } = flags::carry<Op>::flag( lhs, rhs, result );
+		operative { flags::SF, block } = flags::sign( result );
+		operative { flags::ZF, block } = flags::zero( result );
+		operative { flags::AF, block } = flags::aux_carry( lhs, rhs, result );
+		operative { flags::PF, block } = flags::parity( result );
+	}
 
-	// Define & clone writeable lhs, define rhs
-	//
-	operative lhs = { get_operand( block, insn, 0 ), block, true };
-	operative rhs = { get_operand( block, insn, 1 ), block };
+	void process_add( basic_block* block, const instruction_info& insn )
+	{
+		// Define & clone writeable lhs, define rhs
+		//
+		operative lhs = { get_operand( block, insn, 0 ), block };
+		fassert( lhs.is_valid( ) );
 
-	// Perform operation
-	//
-	result = lhs + rhs;
+		operative rhs = { get_operand( block, insn, 1 ), block };
+		fassert( rhs.is_valid( ) );
 
-	// Process flags values
-	// 
-	process_flags<flags::flag_operation::add>( block, lhs, rhs );
-}
+		operative lhs_copy = lhs.clone( );
 
-void process_sub( basic_block* block, const instruction_info& insn )
-{
-	// Define result
-	//
-	operative result = { get_operand( block, insn, 0 ), block };
+		// Perform operation
+		//
+		lhs += rhs;
 
-	// Define & clone writeable lhs, define rhs
-	//
-	operative lhs = { get_operand( block, insn, 0 ), block, true };
-	operative rhs = { get_operand( block, insn, 1 ), block };
+		// Process flags values
+		// 
+		process_flags<flags::flag_operation::add>( block, lhs, rhs, lhs_copy );
+	}
 
-	// Perform operation
-	//
-	result = lhs - rhs;
+	void process_sub( basic_block* block, const instruction_info& insn )
+	{
+		// Define & clone writeable lhs, define rhs
+		//
+		operative lhs = { get_operand( block, insn, 0 ), block };
+		operative lhs_copy = lhs.clone( );
 
-	// Process flags values
-	// 
-	process_flags<flags::flag_operation::add>( block, lhs, rhs );
+		operative rhs = { get_operand( block, insn, 1 ), block };
+
+		// Perform operation
+		//
+		lhs -= rhs;
+
+		// Process flags values
+		// 
+		process_flags<flags::flag_operation::sub>( block, lhs, rhs, lhs_copy );
+	}
 }

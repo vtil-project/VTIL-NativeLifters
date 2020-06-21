@@ -1,10 +1,9 @@
-@@ - 1, 225 + 0, 0 @@
 #pragma once
 #include <cstdint>
 #include <vtil/utility>
 #include <vtil/arch>
-#include "../operations.hpp"
-#include "../operative.hpp"
+#include "operations.hpp"
+#include "operative.hpp"
 
 namespace vtil::lifter
 {
@@ -61,7 +60,7 @@ namespace vtil::lifter
 		// Checks SF
 		//
 		template <typename T>
-		static bool sign( T value )
+		static T sign( T value )
 		{
 			return get_sign( value ) & 1;
 		}
@@ -69,9 +68,9 @@ namespace vtil::lifter
 		// Checks PF
 		//
 		template <typename T>
-		static bool parity( T value )
+		static T parity( T value )
 		{
-			return !( popcnt( value ) & 1 );
+			return ( popcnt( value ) & 1 ) == 0;
 		}
 
 		// Specifies the type of operation flags should be determined for
@@ -172,7 +171,7 @@ namespace vtil::lifter
 			template <typename T>
 			static T flag( T lhs, T rhs, T result )
 			{
-				return result < lhs || result < rhs
+				return result < lhs || result < rhs;
 			}
 		};
 

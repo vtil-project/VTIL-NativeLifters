@@ -1,3 +1,6 @@
+#include <vtil/amd64>
+#include <vtil/arch>
+
 #include <capstone/capstone.h>
 
 // This file defines any global arch-specific information for the AMD64 target
@@ -19,14 +22,14 @@ namespace vtil
 
 	namespace lifter
 	{
-		using instruction_info = cs_insn;
+		using instruction_info = vtil::amd64::instruction;
 		using operand_info = cs_x86_op;
 
 		namespace amd64
 		{
 			operand get_operand( basic_block* block, const instruction_info& insn, size_t idx );
 
-			void process( x86_insn insn, basic_block* block, const instruction_info& insn );
+			void process( instruction_info& insn, basic_block* block );
 		}
 	}
 }
