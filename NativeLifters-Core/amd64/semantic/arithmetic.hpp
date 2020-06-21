@@ -21,10 +21,7 @@ namespace vtil::lifter::amd64
 		// Define & clone writeable lhs, define rhs
 		//
 		operative lhs = { get_operand( block, insn, 0 ), block };
-		fassert( lhs.is_valid( ) );
-
 		operative rhs = { get_operand( block, insn, 1 ), block };
-		fassert( rhs.is_valid( ) );
 
 		operative lhs_copy = lhs.clone( );
 
@@ -42,9 +39,9 @@ namespace vtil::lifter::amd64
 		// Define & clone writeable lhs, define rhs
 		//
 		operative lhs = { get_operand( block, insn, 0 ), block };
-		operative lhs_copy = lhs.clone( );
-
 		operative rhs = { get_operand( block, insn, 1 ), block };
+
+		operative lhs_copy = lhs.clone( );
 
 		// Perform operation
 		//
