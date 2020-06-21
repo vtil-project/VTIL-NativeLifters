@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="AMD64\flags.hpp">
+      <Filter>AMD64</Filter>
+    </ClInclude>
+    <ClInclude Include="AMD64\amd64.hpp">
+      <Filter>AMD64</Filter>
+    </ClInclude>
+    <ClInclude Include="AMD64\arithmetic.hpp">
+      <Filter>AMD64</Filter>
+    </ClInclude>
+    <ClInclude Include="native_operand.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="operand_desc.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="operations.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="operative.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="semantic.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="AMD64">
+      <UniqueIdentifier>{bf0ef0f6-5928-4182-822c-3d332b5fbf8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{665bcea0-0811-46e9-9db9-5f7f3f44f459}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Processor">
+      <UniqueIdentifier>{e29b1433-e159-4540-81d1-d278475c4aa8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+</Project>
