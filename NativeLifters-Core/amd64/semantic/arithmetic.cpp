@@ -299,6 +299,44 @@ namespace vtil::lifter::amd64
 		store_operand( block, insn, 0, result );
 	}
 
+	void process_rol( basic_block* block, const instruction_info& insn )
+	{
+		auto lhs = load_operand( block, insn, 0 );
+		auto rhs = load_operand( block, insn, 1 );
+
+		auto result = block->tmp( lhs.bit_count( ) );
+		block
+			->mov( result, lhs )
+			->brol( result, rhs )
+			->mov( flags::CF, ( operand( result ) & 1 ).op );
+
+		store_operand( block, insn, 0, result );
+	}
+
+	void process_ror( basic_block* block, const instruction_info& insn )
+	{
+		auto lhs = load_operand( block, insn, 0 );
+		auto rhs = load_operand( block, insn, 1 );
+
+		auto result = block->tmp( lhs.bit_count( ) );
+		block
+			->mov( result, lhs )
+			->bror( result, rhs )
+			->mov( flags::CF, flags::sign( { result } ).op );
+
+		store_operand( block, insn, 0, result );
+	}
+
+	void process_rcl( basic_block* block, const instruction_info& insn )
+	{
+
+	}
+
+	void process_rcr( basic_block* block, const instruction_info& insn )
+	{
+
+	}
+
 	void process_inc( basic_block* block, const instruction_info& insn )
 	{
 		auto lhs = operative( load_operand( block, insn, 0 ) );
@@ -343,6 +381,8 @@ namespace vtil::lifter::amd64
 		operand_mappings[ X86_INS_SAL ] = process_shl;
 		operand_mappings[ X86_INS_SHR ] = process_shr;
 		operand_mappings[ X86_INS_SAR ] = process_sar;
+		operand_mappings[ X86_INS_ROL ] = process_rol;
+		operand_mappings[ X86_INS_ROR ] = process_ror;
 		operand_mappings[ X86_INS_INC ] = process_inc;
 		operand_mappings[ X86_INS_DEC ] = process_dec;
 	}

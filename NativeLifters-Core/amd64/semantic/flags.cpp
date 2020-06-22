@@ -47,6 +47,8 @@ namespace vtil::lifter::amd64
 			->bnot( flags::CF );
 	}
 
+	//TODO: SETcc
+
 	void initialize_flags( )
 	{
 		operand_mappings[ X86_INS_CLC ] = process_clc;
