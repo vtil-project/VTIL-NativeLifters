@@ -25,8 +25,24 @@ namespace vtil::lifter::amd64
 			->mov( flags::PF, flags::parity( result ).op );
 	}
 
+	void process_test( basic_block* block, const instruction_info& insn )
+	{
+		auto lhs = operative( load_operand( block, insn, 0 ) );
+		auto rhs = operative( load_operand( block, insn, 1 ) );
+
+		auto result = lhs & rhs;
+
+		block
+			->mov( flags::CF, 0 )
+			->mov( flags::OF, 0 )
+			->mov( flags::SF, flags::sign( result ).op )
+			->mov( flags::ZF, flags::zero( result ).op )
+			->mov( flags::PF, flags::parity( result ).op );
+	}
+
 	void initialize_comparison( )
 	{
 		operand_mappings[ X86_INS_CMP ] = process_cmp;
+		operand_mappings[ X86_INS_TEST ] = process_test;
 	}
 }

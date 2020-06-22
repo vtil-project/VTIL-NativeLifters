@@ -20,7 +20,6 @@ namespace vtil::lifter::amd64
 	register_desc get_disp_from_operand( basic_block* block, const operand_info& operand );
 	operand load_operand( basic_block* block, const instruction_info& insn, size_t idx );
 	void store_operand( basic_block* block, const instruction_info& insn, size_t idx, const operand& source );
-	register_desc get_rip_relative( basic_block* block, const instruction_info& insn, size_t idx );
 
 	struct lifter_t
 	{
