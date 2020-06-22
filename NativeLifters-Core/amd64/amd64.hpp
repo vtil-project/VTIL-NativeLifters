@@ -27,7 +27,8 @@ namespace vtil
 
 		namespace amd64
 		{
-			operand get_operand( basic_block* block, const instruction_info& insn, size_t idx );
+			operand load_operand( basic_block* block, const instruction_info& insn, size_t idx );
+			void store_operand( basic_block* block, const instruction_info& insn, size_t idx, const operand& source );
 
 			void process( instruction_info& insn, basic_block* block );
 		}

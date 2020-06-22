@@ -5,7 +5,6 @@ namespace vtil::lifter::amd64
 {
 	void process_mov( basic_block* block, const instruction_info& insn )
 	{
-		block
-			->mov( get_operand( block, insn, 0 ), get_operand( block, insn, 1 ) );
+		store_operand( block, insn, 0, load_operand( block, insn, 1 ) );
 	}
 }

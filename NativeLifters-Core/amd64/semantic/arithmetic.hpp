@@ -19,28 +19,29 @@ namespace vtil::lifter::amd64
 
 #define PROCESS_BINOP( name, op ) void process_##name( basic_block* block, const instruction_info& insn ) \
 	{ \
-		auto lhs = get_operand( block, insn, 0 ); \
-		auto rhs = get_operand( block, insn, 1 ); \
+		auto lhs = load_operand( block, insn, 0 ); \
+		auto rhs = load_operand( block, insn, 1 ); \
 		auto tmp = block->tmp( lhs.bit_count( ) ); \
 		block->mov( tmp, lhs )->op( tmp, rhs ); \
 		process_flags<flags::flag_operation::##op>( block, lhs, rhs, tmp ); \
-		block->mov( lhs, tmp ); \
+		store_operand( block, insn, 0, tmp ); \
 	}
 
 	PROCESS_BINOP( add, add );
 	PROCESS_BINOP( sub, sub );
 	//PROCESS_BINOP( mul, mul );
 	//PROCESS_BINOP( imul, imul );
-	//PROCESS_BINOP( and, band );
-	//PROCESS_BINOP( or, bor );
-	//PROCESS_BINOP( xor, bxor );
+
+	PROCESS_BINOP( and, band );
+	PROCESS_BINOP( or, bor );
+	PROCESS_BINOP( xor, bxor );
 	//PROCESS_BINOP( shl, bshl );
 	//PROCESS_BINOP( shr, bshr );
 
 	void process_adc( basic_block* block, const instruction_info& insn )
 	{
-		auto lhs = get_operand( block, insn, 0 );
-		auto rhs = get_operand( block, insn, 1 );
+		auto lhs = load_operand( block, insn, 0 );
+		auto rhs = load_operand( block, insn, 1 );
 
 		auto tmp = block->tmp( lhs.bit_count( ) );
 
@@ -51,7 +52,6 @@ namespace vtil::lifter::amd64
 
 		process_flags<flags::flag_operation::add>( block, lhs, rhs, tmp );
 
-		block
-			->mov( lhs, tmp );
+		store_operand( block, insn, 1, { tmp } );
 	}
 }
