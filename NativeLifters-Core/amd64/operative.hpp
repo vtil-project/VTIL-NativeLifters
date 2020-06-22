@@ -29,7 +29,7 @@ namespace vtil::lifter
 				? symbolic::make_register_ex( rhs.op.reg( ), true )
 				: symbolic::expression { rhs.op.imm( ).u64, rhs.op.bit_count( ) };
 
-			op = *translator << symbolic::expression { elhs, opr, erhs };
+			op = *translator << symbolic::variable::pack_all( symbolic::expression { elhs, opr, erhs } );
 		}
 
 		operative( math::operator_id opr, const operative& rhs )
@@ -38,7 +38,7 @@ namespace vtil::lifter
 				? symbolic::make_register_ex( rhs.op.reg( ), true )
 				: symbolic::expression { rhs.op.imm( ).u64, rhs.op.bit_count( ) };
 
-			op = *translator << symbolic::expression { opr, erhs };
+			op = *translator << symbolic::variable::pack_all( symbolic::expression { opr, erhs } );
 		}
 
 		operative& operator=( const operative& o )
