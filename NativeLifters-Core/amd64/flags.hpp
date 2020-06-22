@@ -64,7 +64,7 @@ namespace vtil::lifter
 		//
 		static operative parity( const operative& value )
 		{
-			return ( value.popcnt( ) & 1 ) == 0;
+			return ( ( value & 0xFF ).popcnt( ) & 1 ) == 0;
 		}
 
 		// Specifies the type of operation flags should be determined for
