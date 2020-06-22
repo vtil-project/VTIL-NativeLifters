@@ -287,16 +287,46 @@ namespace vtil::lifter::amd64
 		auto lhs = operative( load_operand( block, insn, 0 ) );
 		auto rhs = load_operand( block, insn, 1 );
 
-		auto result = ( ( lhs >> ( operative( rhs ) & ( lhs.op.size( ) == 8 ? 0x3F : 0x1F ) ) ) | ( lhs & ( 1ULL << ( lhs.op.bit_count( ) - 1 ) ) )).op;
+		auto result = ( ( lhs >> ( operative( rhs ) & ( lhs.op.size( ) == 8 ? 0x3F : 0x1F ) ) ) | ( lhs & ( 1ULL << ( lhs.op.bit_count( ) - 1 ) ) ) ).op;
 
 		block
 			->mov( flags::CF, ( lhs & 1 ).op )
-			->mov( flags::OF, flags::sign( lhs ).op )
+			->mov( flags::OF, 0 )
 			->mov( flags::SF, flags::sign( result ).op )
 			->mov( flags::ZF, flags::zero( result ).op )
 			->mov( flags::PF, flags::parity( result ).op );
 
 		store_operand( block, insn, 0, result );
+	}
+
+	void process_inc( basic_block* block, const instruction_info& insn )
+	{
+		auto lhs = operative( load_operand( block, insn, 0 ) );
+		auto result = lhs + 1;
+
+		block
+			->mov( flags::AF, flags::aux_carry( lhs, { 1 }, result ).op )
+			->mov( flags::OF, flags::overflow<flags::add>::flag( lhs, { 1 }, result ).op )
+			->mov( flags::SF, flags::sign( result ).op )
+			->mov( flags::ZF, flags::zero( result ).op )
+			->mov( flags::PF, flags::parity( result ).op );
+
+		store_operand( block, insn, 0, result.op );
+	}
+
+	void process_dec( basic_block* block, const instruction_info& insn )
+	{
+		auto lhs = operative( load_operand( block, insn, 0 ) );
+		auto result = lhs - 1;
+
+		block
+			->mov( flags::AF, flags::aux_carry( lhs, { -1 }, result ).op )
+			->mov( flags::OF, flags::overflow<flags::sub>::flag( lhs, { -1 }, result ).op )
+			->mov( flags::SF, flags::sign( result ).op )
+			->mov( flags::ZF, flags::zero( result ).op )
+			->mov( flags::PF, flags::parity( result ).op );
+
+		store_operand( block, insn, 0, result.op );
 	}
 
 	void initialize_arithmetic( )
@@ -313,5 +343,7 @@ namespace vtil::lifter::amd64
 		operand_mappings[ X86_INS_SAL ] = process_shl;
 		operand_mappings[ X86_INS_SHR ] = process_shr;
 		operand_mappings[ X86_INS_SAR ] = process_sar;
+		operand_mappings[ X86_INS_INC ] = process_inc;
+		operand_mappings[ X86_INS_DEC ] = process_dec;
 	}
 }

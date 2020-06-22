@@ -123,40 +123,6 @@ namespace vtil::lifter
 			}
 		};
 
-		// Binary bitwise and
-		//
-		template<>
-		struct overflow<band>
-		{
-			static operative flag( const operative& lhs, const operative& rhs, const operative& result )
-			{
-				return { 0 };
-			}
-		};
-
-		// Binary bitwise or
-		//
-		template<>
-		struct overflow<bor>
-		{
-			static operative flag( const operative& lhs, const operative& rhs, const operative& result )
-			{
-				return { 0 };
-			}
-		};
-
-
-		// Binary bitwise xor
-		//
-		template<>
-		struct overflow<bxor>
-		{
-			static operative flag( const operative& lhs, const operative& rhs, const operative& result )
-			{
-				return { 0 };
-			}
-		};
-
 		// Unsigned Multiplication
 		//
 		template<>
@@ -189,6 +155,39 @@ namespace vtil::lifter
 			}
 		};
 
+		// Binary bitwise and
+		//
+		template<>
+		struct overflow<band>
+		{
+			static operative flag( const operative& lhs, const operative& rhs, const operative& result )
+			{
+				return { 0 };
+			}
+		};
+
+		// Binary bitwise or
+		//
+		template<>
+		struct overflow<bor>
+		{
+			static operative flag( const operative& lhs, const operative& rhs, const operative& result )
+			{
+				return { 0 };
+			}
+		};
+
+		// Binary bitwise xor
+		//
+		template<>
+		struct overflow<bxor>
+		{
+			static operative flag( const operative& lhs, const operative& rhs, const operative& result )
+			{
+				return { 0 };
+			}
+		};
+
 		// Carry bit varies per operation, so it cannot have a generic computation
 		//
 		template <flag_operation Op>
@@ -213,40 +212,6 @@ namespace vtil::lifter
 			static operative flag( const operative& lhs, const operative& rhs, const operative& result )
 			{
 				return lhs < rhs;
-			}
-		};
-
-		// Binary bitwise and
-		//
-		template<>
-		struct carry<band>
-		{
-			static operative flag( const operative& lhs, const operative& rhs, const operative& result )
-			{
-				return { 0 };
-			}
-		};
-
-		// Binary bitwise or
-		//
-		template<>
-		struct carry<bor>
-		{
-			static operative flag( const operative& lhs, const operative& rhs, const operative& result )
-			{
-				return { 0 };
-			}
-		};
-
-
-		// Binary bitwise xor
-		//
-		template<>
-		struct carry<bxor>
-		{
-			static operative flag( const operative& lhs, const operative& rhs, const operative& result )
-			{
-				return { 0 };
 			}
 		};
 
@@ -277,6 +242,39 @@ namespace vtil::lifter
 			static T flag( T first, T second, T result )
 			{
 
+			}
+		};
+
+		// Binary bitwise and
+		//
+		template<>
+		struct carry<band>
+		{
+			static operative flag( const operative& lhs, const operative& rhs, const operative& result )
+			{
+				return { 0 };
+			}
+		};
+
+		// Binary bitwise or
+		//
+		template<>
+		struct carry<bor>
+		{
+			static operative flag( const operative& lhs, const operative& rhs, const operative& result )
+			{
+				return { 0 };
+			}
+		};
+
+		// Binary bitwise xor
+		//
+		template<>
+		struct carry<bxor>
+		{
+			static operative flag( const operative& lhs, const operative& rhs, const operative& result )
+			{
+				return { 0 };
 			}
 		};
 	}
