@@ -8,6 +8,11 @@ namespace vtil::lifter::amd64
 		block->vemits( "int 0xB" );
 	}
 
+	void process_lea( basic_block* block, const instruction_info& insn )
+	{
+		store_operand( block, insn, 0, get_disp_from_operand( block, insn.operands[ 1 ] ) );
+	}
+
 	void process_mov( basic_block* block, const instruction_info& insn )
 	{
 		store_operand( block, insn, 0, load_operand( block, insn, 1 ) );
@@ -23,6 +28,7 @@ namespace vtil::lifter::amd64
 	void initialize_misc( )
 	{
 		operand_mappings[ X86_INS_INVALID ] = process_invalid;
+		operand_mappings[ X86_INS_LEA ] = process_lea;
 		operand_mappings[ X86_INS_MOV ] = process_mov;
 		operand_mappings[ X86_INS_MOVABS ] = process_mov;
 		operand_mappings[ X86_INS_MOVZX ] = process_mov;
