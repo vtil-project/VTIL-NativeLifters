@@ -238,7 +238,24 @@ namespace vtil::lifter::amd64
 
 		process_flags<flags::flag_operation::add>( block, lhs, rhs, tmp );
 
-		store_operand( block, insn, 1, { tmp } );
+		store_operand( block, insn, 0, { tmp } );
+	}
+
+	void process_sbb( basic_block* block, const instruction_info& insn )
+	{
+		auto lhs = load_operand( block, insn, 0 );
+		auto rhs = load_operand( block, insn, 1 );
+
+		auto tmp = block->tmp( lhs.bit_count( ) );
+
+		block
+			->mov( tmp, lhs )
+			->sub( tmp, rhs )
+			->sub( tmp, flags::CF );
+
+		process_flags<flags::flag_operation::sub>( block, lhs, rhs, tmp );
+
+		store_operand( block, insn, 0, { tmp } );
 	}
 
 	// NOTE:
@@ -370,6 +387,7 @@ namespace vtil::lifter::amd64
 	void initialize_arithmetic( )
 	{
 		operand_mappings[ X86_INS_ADC ] = process_adc;
+		operand_mappings[ X86_INS_SBB ] = process_sbb;
 		operand_mappings[ X86_INS_ADD ] = process_add;
 		operand_mappings[ X86_INS_SUB ] = process_sub;
 		operand_mappings[ X86_INS_MUL ] = process_mul;
