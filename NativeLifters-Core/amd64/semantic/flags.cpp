@@ -96,7 +96,7 @@ namespace vtil::lifter::amd64
 		operative of( flags::OF );
 
 		block
-			->mov( load_operand( block, insn, 0 ), (sf == of).op );
+			->mov( load_operand( block, insn, 0 ), ( sf == of ).op );
 	}
 
 	void process_setg( basic_block* block, const instruction_info& insn )
