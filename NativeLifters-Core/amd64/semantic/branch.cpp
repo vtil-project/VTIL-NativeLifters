@@ -8,7 +8,7 @@ namespace vtil::lifter::amd64
 {
 	void process_jmp( basic_block* block, const instruction_info& insn )
 	{
-		block->vexit( get_rip_relative( block, insn, 0 ) );
+		block->jmp( load_operand( block, insn, 0 ) );
 	}
 
 	void initialize_branch( )

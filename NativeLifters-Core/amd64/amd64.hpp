@@ -22,5 +22,11 @@ namespace vtil::lifter::amd64
 	void store_operand( basic_block* block, const instruction_info& insn, size_t idx, const operand& source );
 	register_desc get_rip_relative( basic_block* block, const instruction_info& insn, size_t idx );
 
-	void process( instruction_info& insn, basic_block* block );
+	struct lifter_t
+	{
+		// Disassemble and process an instruction.
+		// Returns the length of the instruction processed.
+		//
+		static int process( basic_block* block, uint64_t vip, uint8_t* code );
+	};
 }

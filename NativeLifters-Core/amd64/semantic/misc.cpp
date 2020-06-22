@@ -6,6 +6,7 @@ namespace vtil::lifter::amd64
 	void process_invalid( basic_block* block, const instruction_info& insn )
 	{
 		block->vemits( "int 0xB" );
+		block->vexit( -1ULL );
 	}
 
 	void process_lea( basic_block* block, const instruction_info& insn )

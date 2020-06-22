@@ -1,31 +1,33 @@
+#include <lifters/core>
 #include <lifters/amd64>
 
 #include <vtil/vtil>
 
+#include <memory>
+
 using namespace vtil;
+
+struct byte_input
+{
+	uint8_t* bytes;
+	uint8_t* get_at( vip_t offs )
+	{
+		return &bytes[ offs ];
+	}
+};
+
+using amd64_recursive_descent = lifter::recursive_descent<byte_input, lifter::amd64::lifter_t>;
+
+uint8_t code [ ] { 0xEB, 0x00, 0x48, 0x8B, 0x04, 0x25, 0x00, 0x00, 0x00, 0x00, 0xEB, 0x00, 0xFF, 0xE0 };
 
 int main( int argc, char** argv )
 {
-	basic_block* blk = basic_block::begin( 0 );
-	blk->owner->routine_convention = preserve_all_convention;
-
-	uint8_t code [ ] { 0x48, 0xC7, 0xC0, 0x0A, 0x00, 0x00, 0x00, 0x48, 0xC1, 0xD9, 0x0B, 0x48, 0xC7, 0xC1, 0x01, 0x00, 0x00, 0x00, 0x48, 0xC1, 0xC0, 0x04, 0x48, 0xC1, 0xC8, 0x04, 0xFF, 0xE0 };
-
 	lifter::amd64::initialize_mappings( );
 
-	auto insns = amd64::disasm( code, 0, sizeof( code ) );
-	for ( auto& ins : insns )
-	{
-		printf( "[LIFT] %s\n", ins.to_string().c_str() );
-		lifter::amd64::process( ins, blk );
-	}
+	byte_input input = { code };
 
-	if (!blk->is_complete( ))
-		blk->vexit( 0ULL );
+	lifter::recursive_descent<byte_input, lifter::amd64::lifter_t> rec_desc( &input, 0 );
+	rec_desc.populate( rec_desc.entry );
 
-	debug::dump( blk );
-
-	optimizer::apply_all( blk->owner );
-
-	debug::dump( blk );
+	debug::dump( rec_desc.entry );
 }

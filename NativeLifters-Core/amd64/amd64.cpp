@@ -1,7 +1,7 @@
-#include <cstdint>
-
 #include "amd64.hpp"
 #include "flags.hpp"
+
+#include <vtil/amd64>
 
 namespace vtil::lifter
 {
@@ -68,34 +68,6 @@ namespace vtil::lifter
 					fassert( false );
 			}
 		}
-		// Get the actual offset from am RIP-relative instruction and operand.
-		//
-		register_desc get_rip_relative( basic_block* block, const instruction_info& insn, size_t idx )
-		{
-			const auto& opr = insn.operands[ idx ];
-
-			// Create a temporary register to store the target IP.
-			auto current_offs = block->tmp( 64 );
-
-			// Load operand.
-			auto loaded = load_operand( block, insn, idx );
-
-			if ( opr.type == X86_OP_IMM )
-			{
-				// Move current_offs to rip + offset if operand is immediate
-				block
-					->mov( current_offs, insn.address )
-					->add( current_offs, loaded );
-			}
-			else
-			{
-				// Just set to operand.
-				block
-					->mov( current_offs, loaded );
-			}
-
-			return current_offs;
-		}
 
 		// Store to a register or memory operand given the instruction, block, operand index, and source operand.
 		//
@@ -138,8 +110,18 @@ namespace vtil::lifter
 			initialize_misc( );
 		}
 
-		void process( vtil::amd64::instruction& insn, basic_block* block )
+		int lifter_t::process( basic_block* block, uint64_t vip, uint8_t* code )
 		{
+			const auto& insns = vtil::amd64::disasm( code, vip, 0 );
+			if ( insns.empty( ) )
+			{
+				operand_mappings[ X86_INS_INVALID ]( block, { } );
+				return 0;
+			}
+
+			const auto& insn = insns[ 0 ];
+			code += insn.bytes.size( );
+
 			batch_translator translator = { block };
 			vtil::lifter::operative::translator = &translator;
 
@@ -199,6 +181,8 @@ namespace vtil::lifter
 				// Call the instruction handler.
 				mapping->second( block, insn );
 			}
+
+			return insn.bytes.size( );
 		}
 	}
 }
