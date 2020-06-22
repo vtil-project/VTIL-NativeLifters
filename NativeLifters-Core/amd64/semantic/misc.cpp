@@ -26,6 +26,46 @@ namespace vtil::lifter::amd64
 		store_operand( block, insn, 0, result );
 	}
 
+	void process_push( basic_block* block, const instruction_info& insn )
+	{
+		auto oper = load_operand( block, insn, 0 );
+
+		if ( oper.bit_count( ) == 16 )
+		{
+			block
+				->sub( X86_REG_RSP, 2 );
+		}
+		else
+		{
+			block
+				->sub( X86_REG_RSP, 8 );
+		}
+
+		block
+			->str( X86_REG_RSP, 0, oper );
+	}
+
+	void process_pop( basic_block* block, const instruction_info& insn )
+	{
+		store_operand( block, insn, 0, { X86_REG_RSP } );
+
+		if ( insn.operands[ 0 ].size == 2 )
+		{
+			block
+				->add( X86_REG_RSP, 2 );
+		}
+		else
+		{
+			block
+				->add( X86_REG_RSP, 8 );
+		}
+	}
+
+	void process_call( basic_block* block, const instruction_info& insn )
+	{
+
+	}
+
 	void initialize_misc( )
 	{
 		operand_mappings[ X86_INS_INVALID ] = process_invalid;
@@ -35,5 +75,7 @@ namespace vtil::lifter::amd64
 		operand_mappings[ X86_INS_MOVZX ] = process_mov;
 		operand_mappings[ X86_INS_MOVSX ] = process_movsx;
 		operand_mappings[ X86_INS_MOVSXD ] = process_movsx;
+		operand_mappings[ X86_INS_PUSH ] = process_push;
+		operand_mappings[ X86_INS_POP ] = process_pop;
 	}
 }

@@ -30,7 +30,12 @@ namespace vtil::lifter
 			// While the basic block is not complete, populate with instructions.
 			//
 			uint64_t vip = start_block->entry_vip;
-			uint8_t* entry_ptr = input->get_at( vip );
+			uint8_t* entry_ptr = nullptr;
+			if ( !input->get_at( vip, entry_ptr ) )
+			{
+				start_block->vexit( -1ULL );
+				return;
+			}
 
 			leaders.emplace( vip, start_block );
 
@@ -53,7 +58,6 @@ namespace vtil::lifter
 
 			// Run local optimizer passes on this block.
 			//
-
 			optimizer::apply_all( start_block );
 
 			// Try to explore branches.
@@ -68,6 +72,7 @@ namespace vtil::lifter
 					const auto branch_imm = *branch.get<uint64_t>( );
 					if ( auto next_blk = start_block->fork( branch_imm ) )
 					{
+						printf( "target: %llx\n", branch_imm );
 						populate( next_blk );
 					}
 				}

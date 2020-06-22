@@ -125,6 +125,9 @@ namespace vtil::lifter
 			batch_translator translator = { block };
 			vtil::lifter::operative::translator = &translator;
 
+			block
+				->mov( X86_REG_RIP, vip + insn.bytes.size( ) );
+
 			x86_insn opcode = static_cast< x86_insn >( insn.id );
 			if ( auto mapping = operand_mappings.find( opcode ); mapping == operand_mappings.cend( ) )
 			{
@@ -151,7 +154,7 @@ namespace vtil::lifter
 						block->vpinw( operand.reg );
 
 				if ( insn.eflags & X86_EFLAGS_MODIFY_CF )
-					block->vpinw( flags::AF );
+					block->vpinw( flags::CF );
 
 				if ( insn.eflags & X86_EFLAGS_MODIFY_DF )
 					block->vpinw( flags::DF );
