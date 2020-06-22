@@ -308,7 +308,7 @@ namespace vtil::lifter::amd64
 		block
 			->mov( result, lhs )
 			->brol( result, rhs )
-			->mov( flags::CF, ( operand( result ) & 1 ).op );
+			->mov( flags::CF, ( operative( result ) & 1 ).op );
 
 		store_operand( block, insn, 0, result );
 	}

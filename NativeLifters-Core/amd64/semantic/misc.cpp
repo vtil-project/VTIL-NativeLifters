@@ -13,9 +13,20 @@ namespace vtil::lifter::amd64
 		store_operand( block, insn, 0, load_operand( block, insn, 1 ) );
 	}
 
+	void process_movsx( basic_block* block, const instruction_info& insn )
+	{
+		auto result = block->tmp( insn.operands[ 0 ].size * 8 );
+		block->movsx( result, load_operand( block, insn, 1 ) );
+		store_operand( block, insn, 0, result );
+	}
+
 	void initialize_misc( )
 	{
 		operand_mappings[ X86_INS_INVALID ] = process_invalid;
 		operand_mappings[ X86_INS_MOV ] = process_mov;
+		operand_mappings[ X86_INS_MOVABS ] = process_mov;
+		operand_mappings[ X86_INS_MOVZX ] = process_mov;
+		operand_mappings[ X86_INS_MOVSX ] = process_movsx;
+		operand_mappings[ X86_INS_MOVSXD ] = process_movsx;
 	}
 }
