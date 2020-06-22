@@ -123,18 +123,6 @@ namespace vtil::lifter
 			}
 		};
 
-		// Unsigned Multiplication
-		//
-		template<>
-		struct overflow<mul>
-		{
-			template <typename T>
-			static T flag( T first, T second, T result_upper, T result_lower )
-			{
-				return result_upper != 0;
-			}
-		};
-
 		// Binary bitwise and
 		//
 		template<>
@@ -166,6 +154,18 @@ namespace vtil::lifter
 			static operative flag( const operative& lhs, const operative& rhs, const operative& result )
 			{
 				return { 0 };
+			}
+		};
+
+		// Unsigned Multiplication
+		//
+		template<>
+		struct overflow<mul>
+		{
+			template <typename T>
+			static T flag( T first, T second, T result_upper, T result_lower )
+			{
+				return result_upper != 0;
 			}
 		};
 

@@ -47,6 +47,11 @@ namespace vtil::lifter
 			return *this;
 		}
 
+		operative operator!= ( const operative& o )
+		{
+			return ( *this == o ) == 0;
+		}
+
 		operative operator&& ( const operative& o )
 		{
 			return ( *this != 0 ) & ( o != 0 );

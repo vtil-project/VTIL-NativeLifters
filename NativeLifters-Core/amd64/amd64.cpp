@@ -117,6 +117,14 @@ namespace vtil::lifter::amd64
 				process_sub( block, insn );
 				break;
 
+			case X86_INS_MUL:
+				process_mul( block, insn );
+				break;
+
+			case X86_INS_IMUL:
+				process_imul( block, insn );
+				break;
+
 			case X86_INS_AND:
 				process_and( block, insn );
 				break;
@@ -129,13 +137,14 @@ namespace vtil::lifter::amd64
 				process_xor( block, insn );
 				break;
 			
-			//case X86_INS_SHL:
-			//	process_shl( block, insn );
-			//	break;
-			//
-			//case X86_INS_SHR:
-			//	process_shr( block, insn );
-			//	break;
+			case X86_INS_SHL:
+			case X86_INS_SAL:
+				process_shl( block, insn );
+				break;
+
+			case X86_INS_SHR:
+				process_shr( block, insn );
+				break;
 
 			case X86_INS_MOV:
 				process_mov( block, insn );
