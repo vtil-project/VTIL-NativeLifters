@@ -10,6 +10,9 @@ int main( int argc, char** argv )
 
 	uint8_t code [ ] { 0x29, 0xC0, 0x11, 0xC0 };
 
+	batch_translator translator = { blk };
+	vtil::lifter::operative::translator = &translator;
+
 	auto insns = capstone::disasm( code, 0, sizeof( code ) );
 	for ( auto& ins : insns )
 	{
@@ -19,7 +22,7 @@ int main( int argc, char** argv )
 
 	blk->vexit( 0ULL );
 
-	//optimizer::apply_all( blk->owner );
+	optimizer::apply_all( blk->owner );
 
 	debug::dump( blk );
 }

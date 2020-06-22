@@ -1,279 +1,69 @@
 #pragma once
-#include <optional>
+
 #include <vtil/arch>
-#include "operations.hpp"
 
 namespace vtil::lifter
 {
     // Provides a simple wrapper over operands to support instruction emittion via operators
     //
-    class operative : public operand
-    {
-    private:
-        // Backing target basic block for code generation
-        //
-        basic_block* block = {};
+    struct operative : math::operable<operative>
+	{
+		operand op;
+		inline static thread_local batch_translator* translator = nullptr;
 
-    public:
-        // Clones the current instance by copying its contents to a temporary register and
-        // returning said register
-        //
-        operative clone()
-        {
-            fassert( is_valid() );
+		template<typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
+		operative( T value )
+			: op( value, sizeof( T ) * 8 )
+		{ }
 
-            // Create and populate a temp register to hold the current register's value
-            // 
-            auto tmp = block->tmp( bit_count( ) );
-            block->mov( tmp, decay( ) );
+		operative( operand op )
+			: op( std::move( op ) )
+		{ }
 
-            // Create & return a new operative using the temp register
-            //
-            return { tmp, block };
-        }
-
-        // Executes the popcnt instruction on the current operative
-        //
-        operative& popcnt()
-        {
-            fassert( is_valid() );
-
-            block->popcnt( decay( ) );
-
-            return *this;
-        }
-
-        // Constructs the operative from a register and basic block
-        // Optionally clones the operative on creation
-        //
-        operative( const operand& desc, basic_block* block, bool autoclone = false )
-            : operand( desc ), block( block )
-        {
-            if ( autoclone )
-                *this = clone();
-        }
-
-        // Decays back to operand type
-        //
-        operand& decay()
-        {
-            return *this;
-        }
-
-        const operand& decay( ) const
+		operative( const operative& lhs, math::operator_id opr, const operative& rhs )
 		{
+			auto elhs = lhs.op.is_register( )
+				? symbolic::make_register_ex( lhs.op.reg( ), true )
+				: symbolic::expression { lhs.op.imm( ).u64, lhs.op.bit_count( ) };
+			auto erhs = rhs.op.is_register( )
+				? symbolic::make_register_ex( rhs.op.reg( ), true )
+				: symbolic::expression { rhs.op.imm( ).u64, rhs.op.bit_count( ) };
+
+			op = *translator << symbolic::expression { elhs, opr, erhs };
+		}
+
+		operative( math::operator_id opr, const operative& rhs )
+		{
+			auto erhs = rhs.op.is_register( )
+				? symbolic::make_register_ex( rhs.op.reg( ), true )
+				: symbolic::expression { rhs.op.imm( ).u64, rhs.op.bit_count( ) };
+
+			op = *translator << symbolic::expression { opr, erhs };
+		}
+
+		operative& operator=( const operative& o )
+		{
+			translator->block->push_back( { &ins::mov, { op, o.op } } );
 			return *this;
 		}
 
-        explicit operator operand( )
-        {
-            return decay( );
-        }
-
-        // Assignment operators
-        //
-        template <typename T>
-        operative& operator=( T&& other )
-        {
-            fassert( is_valid() );
-            block->mov( decay( ), other );
-            return *this;
-        }
-        
-        // Comparison operators
-        //
-		operative operator&&( const operative& other )
+		operative operator&& ( const operative& o )
 		{
-			fassert( is_valid( ) );
-			auto [a1, a2] = block->tmp( bit_count( ), other.bit_count( ) );
-
-			block->tne( a1, decay( ), 0 );
-			block->tne( a2, other.decay( ), 0 );
-            block->band( a1, a2 );
-
-            return { a1, block };
+			return ( *this != 0 ) & ( o != 0 );
 		}
 
-
-        operative operator||( const operative& other )
-        {
-            fassert( is_valid( ) );
-            auto [a1, a2] = block->tmp( bit_count( ), other.bit_count( ) );
-
-            block->tne( a1, decay( ), 0 );
-            block->tne( a2, other.decay( ), 0 );
-            block->bor( a1, a2 );
-
-            return { a1, block };
-        }
-
-        // Equality operators
-		//
-
-		template<typename T>
-        operative operator==( T&& other ) const
-        { 
-            fassert( is_valid( ) );
-            auto tmp = block->tmp( bit_count( ) );
-            block->te( tmp, decay( ), other );
-            return { tmp, block };
-        }
-
-		template<typename T>
-        operative operator!=( T&& other ) const
-        {
-			fassert( is_valid( ) );
-			auto tmp = block->tmp( bit_count( ) );
-            block->tne( tmp, decay( ), other );
-            return { tmp, block };
-        }
-
-		template<typename T>
-        operative operator>=( T&& other ) const
-        {
-			fassert( is_valid( ) );
-			auto tmp = block->tmp( bit_count( ) );
-			block->tge( tmp, decay( ), other );
-			return { tmp, block };
-        }
-
-		template<typename T>
-        operative operator>( T&& other ) const
-        {
-			fassert( is_valid( ) );
-			auto tmp = block->tmp( bit_count( ) );
-			block->tg( tmp, decay( ), other );
-			return { tmp, block };
-        }
-
-		template<typename T>
-        operative operator<=( T&& other ) const
-        {
-			fassert( is_valid( ) );
-			auto tmp = block->tmp( bit_count( ) );
-			block->tle( tmp, decay( ), other );
-			return { tmp, block };
-        }
-
-		template<typename T>
-        operative operator<( T&& other ) const
-        {
-			fassert( is_valid( ) );
-			auto tmp = block->tmp( bit_count( ) );
-			block->tl( tmp, decay( ), other );
-			return { tmp, block };
-        }
-
-		// Binary operators
-        //
-
-		template<typename T>
-        operative operator&( T&& other ) const
-        {
-			fassert( is_valid( ) );
-			auto tmp = block->tmp( bit_count( ) );
-			block
-				->mov( tmp, decay( ) )
-                ->band( tmp, other );
-			return { tmp, block };
-		}
-
-		template<typename T>
-		operative operator|( T&& other ) const
+		operative operator|| ( const operative& o )
 		{
-			fassert( is_valid( ) );
-			auto tmp = block->tmp( bit_count( ) );
-			block
-				->mov( tmp, decay( ) )
-                ->bor( tmp, other );
-			return { tmp, block };
+			return ( *this != 0 ) | ( o != 0 );
 		}
 
-		template<typename T>
-		operative operator^( T&& other ) const
+		operative popcnt( ) const
 		{
-			fassert( is_valid( ) );
-			auto tmp = block->tmp( bit_count( ) );
-			block
-				->mov( tmp, decay( ) )
-                ->bxor( tmp, other );
-			return { tmp, block };
+			auto tmp = translator->block->tmp( op.bit_count( ) );
+			translator->block
+				->mov( tmp, op )
+				->popcnt( tmp );
+			return { operand{ tmp } };
 		}
-
-		template<typename T>
-		operative operator+( T&& other ) const
-		{
-			fassert( is_valid( ) );
-			auto tmp = block->tmp( bit_count( ) );
-			block
-				->mov( tmp, decay( ) )
-                ->add( tmp, other );
-			return { tmp, block };
-		}
-
-		template<typename T>
-		operative operator-( T&& other ) const
-		{
-			fassert( is_valid( ) );
-			auto tmp = block->tmp( bit_count( ) );
-			block
-                ->mov( tmp, decay( ) )
-                ->sub( tmp, other );
-			return { tmp, block };
-		}
-
-		template<typename T>
-		operative operator>>( T&& other ) const
-		{
-			fassert( is_valid( ) );
-			auto tmp = block->tmp( bit_count( ) );
-			block
-				->mov( tmp, decay( ) )
-                ->bshl( tmp, other );
-			return { tmp, block };
-		}
-
-		template<typename T>
-		operative operator<<( T&& other ) const
-		{
-			fassert( is_valid( ) );
-			auto tmp = block->tmp( bit_count( ) );
-			block
-				->mov( tmp, decay( ) )
-                ->bshr( tmp, other );
-			return { tmp, block };
-		}
-
-		// Compound assignment operators
-		//
-		template<typename T>
-		operative& operator+=( T&& other )
-		{
-			fassert( is_valid( ) );
-			block->add( decay( ), other );
-			return *this;
-		}
-
-		template<typename T>
-		operative& operator-=( T&& other )
-		{
-			fassert( is_valid( ) );
-			block->sub( decay( ), other );
-			return *this;
-		}
-    };
-
-    // Helpers to provide operation functions for operatives / operands
-    //
-    template <typename T, std::enable_if_t<std::is_base_of_v<operand, std::remove_cvref_t<T>>, int> = 0>
-    bitcnt_t op_size( T value )
-    {
-        return value.size() * 8;
-    }
-
-    template <typename T, std::enable_if_t<std::is_same_v<operative, std::remove_cvref_t<T>>, int> = 0>
-    T popcnt( T value )
-    {
-        return value.popcnt();
-    }
+	};
 }

@@ -6,6 +6,7 @@
 // Instruction semantics defined here.
 #include "semantic/arithmetic.hpp"
 #include "semantic/invalid.hpp"
+#include "semantic/transfer.hpp"
 
 namespace vtil::lifter::amd64
 {
@@ -58,17 +59,37 @@ namespace vtil::lifter::amd64
 	{
 		switch ( insn.id )
 		{
-			case X86_INS_ADD:
-				process_add( block, insn );
-				break;
-
 			case X86_INS_ADC:
 				process_adc( block, insn );
+				break;
+
+			case X86_INS_ADD:
+				process_add( block, insn );
 				break;
 
 			case X86_INS_SUB:
 				process_sub( block, insn );
 				break;
+
+			//case X86_INS_AND:
+			//	process_and( block, insn );
+			//	break;
+			//
+			//case X86_INS_OR:
+			//	process_or( block, insn );
+			//	break;
+			//
+			//case X86_INS_XOR:
+			//	process_xor( block, insn );
+			//	break;
+			//
+			//case X86_INS_SHL:
+			//	process_shl( block, insn );
+			//	break;
+			//
+			//case X86_INS_SHR:
+			//	process_shr( block, insn );
+			//	break;
 
 			case X86_INS_MOV:
 				process_mov( block, insn );
