@@ -115,7 +115,29 @@ namespace vtil::lifter
 
 			x86_insn opcode = static_cast< x86_insn >( insn.id );
 			if ( auto mapping = operand_mappings.find( opcode ); mapping == operand_mappings.cend( ) )
-				operand_mappings[ X86_INS_INVALID ]( block, insn );
+			{
+				for ( auto& operand : insn.operands )
+				{
+					if ( operand.type == X86_OP_REG && ( operand.access & CS_AC_READ ) )
+						block->vpinr( operand.reg );
+
+					if ( operand.type == X86_OP_MEM )
+					{
+						if ( operand.mem.base != X86_OP_INVALID )
+							block->vpinr( operand.mem.base );
+
+						if ( operand.mem.index != X86_OP_INVALID )
+							block->vpinr( operand.mem.index );
+					}
+				}
+
+				for ( auto byte : insn.bytes )
+					block->vemit( byte );
+
+				for ( auto& operand : insn.operands )
+					if ( operand.type == X86_OP_REG && ( operand.access & CS_AC_WRITE ) )
+						block->vpinw( operand.reg );
+			}
 			else
 				mapping->second( block, insn );
 		}
