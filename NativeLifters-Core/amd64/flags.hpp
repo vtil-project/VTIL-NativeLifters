@@ -57,7 +57,7 @@ namespace vtil::lifter
 		//
 		static operative sign( const operative& value )
 		{
-			return ( value >> ( value.op.bit_count( ) - 1 ) );
+			return ( value < 0 );
 		}
 
 		// Checks PF
@@ -102,7 +102,7 @@ namespace vtil::lifter
 				auto rhs_sign = sign( rhs );
 				auto res_sign = sign( result );
 
-				return ( lhs_sign ^ res_sign ) + ( rhs_sign ^ res_sign ) == 2;
+				return ( lhs_sign ^ res_sign ) & ( rhs_sign ^ res_sign );
 			}
 		};
 
@@ -119,7 +119,7 @@ namespace vtil::lifter
 				auto rhs_sign = sign( rhs );
 				auto res_sign = sign( result );
 
-				return ( lhs_sign ^ rhs_sign ) + ( lhs_sign ^ res_sign ) == 2;
+				return ( lhs_sign ^ rhs_sign ) & ( lhs_sign ^ res_sign );
 			}
 		};
 
