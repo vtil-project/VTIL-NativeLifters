@@ -68,6 +68,34 @@ namespace vtil::lifter
 					fassert( false );
 			}
 		}
+		// Get the actual offset from am RIP-relative instruction and operand.
+		//
+		register_desc get_rip_relative( basic_block* block, const instruction_info& insn, size_t idx )
+		{
+			const auto& opr = insn.operands[ idx ];
+
+			// Create a temporary register to store the target IP.
+			auto current_offs = block->tmp( 64 );
+
+			// Load operand.
+			auto loaded = load_operand( block, insn, idx );
+
+			if ( opr.type == X86_OP_IMM )
+			{
+				// Move current_offs to rip + offset if operand is immediate
+				block
+					->mov( current_offs, insn.address )
+					->add( current_offs, loaded );
+			}
+			else
+			{
+				// Just set to operand.
+				block
+					->mov( current_offs, loaded );
+			}
+
+			return current_offs;
+		}
 
 		// Store to a register or memory operand given the instruction, block, operand index, and source operand.
 		//
@@ -96,6 +124,7 @@ namespace vtil::lifter
 		}
 
 		void initialize_arithmetic( );
+		void initialize_branch( );
 		void initialize_comparison( );
 		void initialize_flags( );
 		void initialize_misc( );
@@ -103,6 +132,7 @@ namespace vtil::lifter
 		void initialize_mappings( )
 		{
 			initialize_arithmetic( );
+			initialize_branch( );
 			initialize_comparison( );
 			initialize_flags( );
 			initialize_misc( );
@@ -137,9 +167,38 @@ namespace vtil::lifter
 				for ( auto& operand : insn.operands )
 					if ( operand.type == X86_OP_REG && ( operand.access & CS_AC_WRITE ) )
 						block->vpinw( operand.reg );
+
+				if ( insn.eflags & X86_EFLAGS_MODIFY_CF )
+					block->vpinw( flags::AF );
+
+				if ( insn.eflags & X86_EFLAGS_MODIFY_DF )
+					block->vpinw( flags::DF );
+
+				if ( insn.eflags & X86_EFLAGS_MODIFY_OF )
+					block->vpinw( flags::OF );
+
+				if ( insn.eflags & X86_EFLAGS_MODIFY_ZF )
+					block->vpinw( flags::ZF );
+
+				if ( insn.eflags & X86_EFLAGS_MODIFY_PF )
+					block->vpinw( flags::PF );
+
+				if ( insn.eflags & X86_EFLAGS_MODIFY_AF )
+					block->vpinw( flags::AF );
+
+				if ( insn.eflags & X86_EFLAGS_MODIFY_SF )
+					block->vpinw( flags::SF );
+
+				if ( insn.eflags & X86_EFLAGS_MODIFY_IF )
+					block->vpinw( flags::IF );
+
+				// Once again, our "undefined" behavior is that undefined flags stay exactly the same. :)
 			}
 			else
+			{
+				// Call the instruction handler.
 				mapping->second( block, insn );
+			}
 		}
 	}
 }
