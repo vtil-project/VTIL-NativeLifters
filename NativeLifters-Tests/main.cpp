@@ -11,6 +11,8 @@ int main( int argc, char** argv )
 
 	uint8_t code [ ] { 0x48, 0x31, 0xC0, 0x48, 0x83, 0xE8, 0x01, 0x48, 0xC1, 0xE0, 0x0A, 0x48, 0xC1, 0xE8, 0x0A };
 
+	lifter::amd64::initialize_mappings( );
+
 	auto insns = capstone::disasm( code, 0, sizeof( code ) );
 	for ( auto& ins : insns )
 	{

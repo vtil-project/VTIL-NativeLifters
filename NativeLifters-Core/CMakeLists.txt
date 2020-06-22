@@ -2,7 +2,9 @@ project(NativeLifters-Core)
 
 add_library(${PROJECT_NAME} STATIC
 	amd64/amd64.cpp
-)
+	amd64/semantic/arithmetic.cpp
+	amd64/semantic/misc.cpp
+	)
 
 target_include_directories(${PROJECT_NAME} PUBLIC includes)
 

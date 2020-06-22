@@ -3,6 +3,8 @@
 
 #include <capstone/capstone.h>
 
+#include <map>
+
 // This file defines any global arch-specific information for the AMD64 target
 // architecture.
 //
@@ -27,6 +29,10 @@ namespace vtil
 
 		namespace amd64
 		{
+			inline std::map<x86_insn, void( * )( basic_block* block, const instruction_info& insn )> operand_mappings;
+			
+			void initialize_mappings( );
+
 			operand load_operand( basic_block* block, const instruction_info& insn, size_t idx );
 			void store_operand( basic_block* block, const instruction_info& insn, size_t idx, const operand& source );
 

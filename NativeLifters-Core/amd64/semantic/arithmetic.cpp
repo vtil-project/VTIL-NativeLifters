@@ -1,3 +1,6 @@
+#include "../amd64.hpp"
+#include "../flags.hpp"
+
 // Various x86 arithmetic instructions.
 // 
 
@@ -9,7 +12,7 @@ namespace vtil::lifter::amd64
 	void process_flags( basic_block* block, const operand& lhs, const operand& rhs, const operand& result )
 	{
 		block
-			->mov( flags::OF, flags::overflow<Op>::flag( lhs, rhs, result).op )
+			->mov( flags::OF, flags::overflow<Op>::flag( lhs, rhs, result ).op )
 			->mov( flags::CF, flags::carry<Op>::flag( lhs, rhs, result ).op )
 			->mov( flags::SF, flags::sign( result ).op )
 			->mov( flags::ZF, flags::zero( result ).op )
@@ -30,8 +33,10 @@ namespace vtil::lifter::amd64
 	PROCESS_BINOP( add, add );
 	PROCESS_BINOP( sub, sub );
 	PROCESS_BINOP( and, band );
-	PROCESS_BINOP( or, bor );
+	PROCESS_BINOP( or , bor );
 	PROCESS_BINOP( xor, bxor );
+
+#undef PROCESS_BINOP
 
 	void process_mul( basic_block* block, const instruction_info& insn )
 	{
@@ -43,7 +48,7 @@ namespace vtil::lifter::amd64
 			->mov( flags::ZF, UNDEFINED )
 			->mov( flags::SF, UNDEFINED );
 
-		switch ( rhs.size() )
+		switch ( rhs.size( ) )
 		{
 			case 1:
 			{
@@ -212,12 +217,12 @@ namespace vtil::lifter::amd64
 					->mulhi( hi, rhs )
 					->mov( flags::CF, ( flags::sign( { hi } ) != flags::sign( { lo } ) ).op )
 					->mov( flags::OF, flags::CF );
-					
+
 				store_operand( block, insn, 0, lo );
 				break;
 			}
 		}
-	}	
+	}
 
 	// NOTE:
 	// In a shift, AF is either set to undefined or the same value.
@@ -276,5 +281,20 @@ namespace vtil::lifter::amd64
 		process_flags<flags::flag_operation::add>( block, lhs, rhs, tmp );
 
 		store_operand( block, insn, 1, { tmp } );
+	}
+
+	void initialize_arithmetic( )
+	{
+		operand_mappings[ X86_INS_ADC ] = process_adc;
+		operand_mappings[ X86_INS_ADD ] = process_add;
+		operand_mappings[ X86_INS_SUB ] = process_sub;
+		operand_mappings[ X86_INS_MUL ] = process_mul;
+		operand_mappings[ X86_INS_IMUL ] = process_imul;
+		operand_mappings[ X86_INS_AND ] = process_and;
+		operand_mappings[ X86_INS_OR ] = process_or;
+		operand_mappings[ X86_INS_XOR ] = process_xor;
+		operand_mappings[ X86_INS_SHL ] = process_shl;
+		operand_mappings[ X86_INS_SAL ] = process_shl;
+		operand_mappings[ X86_INS_SHR ] = process_shr;
 	}
 }
