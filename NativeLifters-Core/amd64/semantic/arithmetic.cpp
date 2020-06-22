@@ -224,6 +224,23 @@ namespace vtil::lifter::amd64
 		}
 	}
 
+	void process_adc( basic_block* block, const instruction_info& insn )
+	{
+		auto lhs = load_operand( block, insn, 0 );
+		auto rhs = load_operand( block, insn, 1 );
+
+		auto tmp = block->tmp( lhs.bit_count( ) );
+
+		block
+			->mov( tmp, lhs )
+			->add( tmp, rhs )
+			->add( tmp, flags::CF );
+
+		process_flags<flags::flag_operation::add>( block, lhs, rhs, tmp );
+
+		store_operand( block, insn, 1, { tmp } );
+	}
+
 	// NOTE:
 	// In a shift, AF is either set to undefined or the same value.
 	// This is annoying to implement and even more annoying to simplify, so
@@ -265,22 +282,21 @@ namespace vtil::lifter::amd64
 		store_operand( block, insn, 0, result );
 	}
 
-
-	void process_adc( basic_block* block, const instruction_info& insn )
+	void process_sar( basic_block* block, const instruction_info& insn )
 	{
-		auto lhs = load_operand( block, insn, 0 );
+		auto lhs = operative( load_operand( block, insn, 0 ) );
 		auto rhs = load_operand( block, insn, 1 );
 
-		auto tmp = block->tmp( lhs.bit_count( ) );
+		auto result = ( ( lhs >> ( operative( rhs ) & ( lhs.op.size( ) == 8 ? 0x3F : 0x1F ) ) ) | ( lhs & ( 1ULL << ( lhs.op.bit_count( ) - 1 ) ) )).op;
 
 		block
-			->mov( tmp, lhs )
-			->add( tmp, rhs )
-			->add( tmp, flags::CF );
+			->mov( flags::CF, ( lhs & 1 ).op )
+			->mov( flags::OF, flags::sign( lhs ).op )
+			->mov( flags::SF, flags::sign( result ).op )
+			->mov( flags::ZF, flags::zero( result ).op )
+			->mov( flags::PF, flags::parity( result ).op );
 
-		process_flags<flags::flag_operation::add>( block, lhs, rhs, tmp );
-
-		store_operand( block, insn, 1, { tmp } );
+		store_operand( block, insn, 0, result );
 	}
 
 	void initialize_arithmetic( )
@@ -296,5 +312,6 @@ namespace vtil::lifter::amd64
 		operand_mappings[ X86_INS_SHL ] = process_shl;
 		operand_mappings[ X86_INS_SAL ] = process_shl;
 		operand_mappings[ X86_INS_SHR ] = process_shr;
+		operand_mappings[ X86_INS_SAR ] = process_sar;
 	}
 }
