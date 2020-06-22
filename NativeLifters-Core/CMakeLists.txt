@@ -7,7 +7,7 @@ add_library(${PROJECT_NAME} STATIC
 	amd64/semantic/comparison.cpp
 	amd64/semantic/flags.cpp
 	amd64/semantic/misc.cpp
-	core/recursive_descent.hpp
+	core/recursive_descent.cpp
 	)
 
 target_include_directories(${PROJECT_NAME} PUBLIC includes)
