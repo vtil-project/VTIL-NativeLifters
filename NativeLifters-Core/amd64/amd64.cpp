@@ -97,12 +97,14 @@ namespace vtil::lifter
 
 		void initialize_arithmetic( );
 		void initialize_comparison( );
+		void initialize_flags( );
 		void initialize_misc( );
 
 		void initialize_mappings( )
 		{
 			initialize_arithmetic( );
 			initialize_comparison( );
+			initialize_flags( );
 			initialize_misc( );
 		}
 

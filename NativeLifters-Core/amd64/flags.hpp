@@ -15,22 +15,9 @@ namespace vtil::lifter
 		inline static const vtil::register_desc AF = { vtil::register_physical | vtil::register_flags, 0, 1, 4 };
 		inline static const vtil::register_desc ZF = { vtil::register_physical | vtil::register_flags, 0, 1, 6 };
 		inline static const vtil::register_desc SF = { vtil::register_physical | vtil::register_flags, 0, 1, 7 };
+		inline static const vtil::register_desc IF = { vtil::register_physical | vtil::register_flags, 0, 1, 9 };
 		inline static const vtil::register_desc DF = { vtil::register_physical | vtil::register_flags, 0, 1, 10 };
 		inline static const vtil::register_desc OF = { vtil::register_physical | vtil::register_flags, 0, 1, 11 };
-
-		// Clears all tracked bits, deeming them undefined
-		//
-		static void clear( vtil::basic_block* block )
-		{
-			block
-				->mov( CF, UNDEFINED )
-				->mov( PF, UNDEFINED )
-				->mov( AF, UNDEFINED )
-				->mov( ZF, UNDEFINED )
-				->mov( SF, UNDEFINED )
-				->mov( DF, UNDEFINED )
-				->mov( OF, UNDEFINED );
-		}
 
 		// Checks ZF
 		//
