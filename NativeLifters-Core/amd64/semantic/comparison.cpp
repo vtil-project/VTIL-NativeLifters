@@ -72,6 +72,264 @@ namespace vtil::lifter::amd64
 					->mov( flags::PF, flags::parity( result ) );
 			}
 		},
+		{
+			X86_INS_CMOVA,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto lhs = operative( load_operand( block, insn, 0 ) );
+				auto rhs = operative( load_operand( block, insn, 1 ) );
+
+				operative cf( flags::CF );
+				operative zf( flags::ZF );
+
+				auto result = ( zf == 0 ) & ( cf == 0 );
+				
+				store_operand( block, insn, 0, 
+							   __if( ~result, rhs ) | 
+							   __if( result, lhs ) );
+			}
+		},
+		{
+			X86_INS_CMOVAE,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto lhs = operative( load_operand( block, insn, 0 ) );
+				auto rhs = operative( load_operand( block, insn, 1 ) );
+
+				operative cf( flags::CF );
+
+				store_operand( block, insn, 0,
+							   __if( ( cf == 0 ), rhs ) |
+							   __if( ( cf == 1 ), lhs ) );
+			}
+		},
+		{
+			X86_INS_CMOVB,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto lhs = operative( load_operand( block, insn, 0 ) );
+				auto rhs = operative( load_operand( block, insn, 1 ) );
+
+				operative cf( flags::CF );
+
+				store_operand( block, insn, 0,
+							   __if( ( cf == 1 ), rhs ) |
+							   __if( ( cf == 0 ), lhs ) );
+			}
+		},
+		{
+			X86_INS_CMOVBE,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto lhs = operative( load_operand( block, insn, 0 ) );
+				auto rhs = operative( load_operand( block, insn, 1 ) );
+
+				operative cf( flags::CF );
+				operative zf( flags::ZF );
+
+				auto result = ( ( zf == 1 ) | ( cf == 1 ) );
+
+				store_operand( block, insn, 0,
+							   __if( result, rhs ) |
+							   __if( ~result, lhs ) );
+			}
+		},
+		{
+			X86_INS_CMOVE,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto lhs = operative( load_operand( block, insn, 0 ) );
+				auto rhs = operative( load_operand( block, insn, 1 ) );
+
+				operative zf( flags::ZF );
+
+				store_operand( block, insn, 0,
+							   __if( ( zf == 1 ), rhs ) |
+							   __if( ( zf == 0 ), lhs ) );
+			}
+		},
+		{
+			X86_INS_CMOVG,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto lhs = operative( load_operand( block, insn, 0 ) );
+				auto rhs = operative( load_operand( block, insn, 1 ) );
+
+				operative sf( flags::SF );
+				operative zf( flags::ZF );
+				operative of( flags::OF );
+
+				auto result = ( ( zf == 0 ) & ( sf == of ) );
+
+				store_operand( block, insn, 0,
+							   __if( result, rhs ) |
+							   __if( ~result, lhs ) );
+			}
+		},
+		{
+			X86_INS_CMOVGE,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto lhs = operative( load_operand( block, insn, 0 ) );
+				auto rhs = operative( load_operand( block, insn, 1 ) );
+
+				operative sf( flags::SF );
+				operative of( flags::OF );
+
+				auto result = ( sf == of );
+
+				store_operand( block, insn, 0,
+							   __if( result, rhs ) |
+							   __if( ~result, lhs ) );
+			}
+		},
+		{
+			X86_INS_CMOVL,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto lhs = operative( load_operand( block, insn, 0 ) );
+				auto rhs = operative( load_operand( block, insn, 1 ) );
+
+				operative sf( flags::SF );
+				operative of( flags::OF );
+
+				auto result = ( sf != of );
+
+				store_operand( block, insn, 0,
+							   __if( result, rhs ) |
+							   __if( ~result, lhs ) );
+			}
+		},
+		{
+			X86_INS_CMOVLE,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto lhs = operative( load_operand( block, insn, 0 ) );
+				auto rhs = operative( load_operand( block, insn, 1 ) );
+
+				operative sf( flags::SF );
+				operative zf( flags::ZF );
+				operative of( flags::OF );
+
+				auto result = ( ( zf == 1 ) | ( sf != of ) );
+
+				store_operand( block, insn, 0,
+							   __if( ~result, rhs ) |
+							   __if( result, lhs ) );
+			}
+		},
+		{
+			X86_INS_CMOVNE,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto lhs = operative( load_operand( block, insn, 0 ) );
+				auto rhs = operative( load_operand( block, insn, 1 ) );
+
+				operative zf( flags::ZF );
+
+				auto result = ( zf == 0 );
+
+				store_operand( block, insn, 0,
+							   __if( result, rhs ) |
+							   __if( ~result, lhs ) );
+			}
+		},
+		{
+			X86_INS_CMOVNO,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto lhs = operative( load_operand( block, insn, 0 ) );
+				auto rhs = operative( load_operand( block, insn, 1 ) );
+
+				operative of( flags::OF );
+
+				auto result = ( of == 0 );
+
+				store_operand( block, insn, 0,
+							   __if( result, rhs ) |
+							   __if( ~result, lhs ) );
+			}
+		},
+		{
+			X86_INS_CMOVNP,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto lhs = operative( load_operand( block, insn, 0 ) );
+				auto rhs = operative( load_operand( block, insn, 1 ) );
+
+				operative pf( flags::PF );
+
+				auto result = ( pf == 0 );
+
+				store_operand( block, insn, 0,
+							   __if( result, rhs ) |
+							   __if( ~result, lhs ) );
+			}
+		},
+		{
+			X86_INS_CMOVNS,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto lhs = operative( load_operand( block, insn, 0 ) );
+				auto rhs = operative( load_operand( block, insn, 1 ) );
+
+				operative sf( flags::SF );
+
+				auto result = ( sf == 0 );
+
+				store_operand( block, insn, 0,
+							   __if( result, rhs ) |
+							   __if( ~result, lhs ) );
+			}
+		},
+		{
+			X86_INS_CMOVO,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto lhs = operative( load_operand( block, insn, 0 ) );
+				auto rhs = operative( load_operand( block, insn, 1 ) );
+
+				operative of( flags::OF );
+
+				auto result = ( of == 1 );
+
+				store_operand( block, insn, 0,
+							   __if( result, rhs ) |
+							   __if( ~result, lhs ) );
+			}
+		},
+		{
+			X86_INS_CMOVP,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto lhs = operative( load_operand( block, insn, 0 ) );
+				auto rhs = operative( load_operand( block, insn, 1 ) );
+
+				operative pf( flags::PF );
+
+				auto result = ( pf == 1 );
+
+				store_operand( block, insn, 0,
+							   __if( result, rhs ) |
+							   __if( ~result, lhs ) );
+			}
+		},
+		{
+			X86_INS_CMOVS,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto lhs = operative( load_operand( block, insn, 0 ) );
+				auto rhs = operative( load_operand( block, insn, 1 ) );
+
+				operative sf( flags::SF );
+
+				auto result = ( sf == 1 );
+
+				store_operand( block, insn, 0,
+							   __if( result, rhs ) |
+							   __if( ~result, lhs ) );
+			}
+		},
 	};
 
 	static bool __init = register_subhandlers( std::move( subhandlers ) );
