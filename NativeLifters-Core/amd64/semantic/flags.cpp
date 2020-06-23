@@ -52,8 +52,7 @@ namespace vtil::lifter::amd64
 		operative cf( flags::CF );
 		operative zf( flags::ZF );
 
-		block
-			->mov( load_operand( block, insn, 0 ), ( ( cf == 0 ) & ( zf == 0 ) ).op );
+		store_operand( block, insn, 0, ( ( cf == 0 ) & ( zf == 0 ) ).op );
 	}
 
 	void process_setae( basic_block* block, const instruction_info& insn )
@@ -159,6 +158,71 @@ namespace vtil::lifter::amd64
 	{
 		store_operand( block, insn, 0, { flags::SF } );
 	}
+	
+	operative simple_bt( basic_block* block, const operative& lhs, const operative& rhs )
+	{
+		uint64_t mask;
+		switch ( lhs.op.size( ) )
+		{
+			case 2:
+				mask = 0xF;
+				break;
+
+			case 4:
+				mask = 0x1F;
+				break;
+
+			case 8:
+				mask = 0x3F;
+				break;
+
+			default:
+				fassert( false );
+				break;
+		}
+
+		auto result = rhs & mask;
+		block->mov( flags::CF, ( ( lhs& ( 1ULL << result ) ) != 0 ).op );
+		return result;
+	}
+
+	void process_bt( basic_block* block, const instruction_info& insn )
+	{
+		auto lhs = operative( load_operand( block, insn, 0 ) );
+		auto rhs = operative( load_operand( block, insn, 1 ) );
+
+		simple_bt( block, lhs, rhs );
+	}
+
+	void process_btc( basic_block* block, const instruction_info& insn )
+	{
+		auto lhs = operative( load_operand( block, insn, 0 ) );
+		auto rhs = operative( load_operand( block, insn, 1 ) );
+
+		auto result = simple_bt( block, lhs, rhs );
+
+		store_operand( block, insn, 0, ( lhs ^ ( 1ULL << result ) ).op );
+	}
+
+	void process_btr( basic_block* block, const instruction_info& insn )
+	{
+		auto lhs = operative( load_operand( block, insn, 0 ) );
+		auto rhs = operative( load_operand( block, insn, 1 ) );
+
+		auto result = simple_bt( block, lhs, rhs );
+
+		store_operand( block, insn, 0, ( lhs & ~( 1ULL << result ) ).op );
+	}
+
+	void process_bts( basic_block* block, const instruction_info& insn )
+	{
+		auto lhs = operative( load_operand( block, insn, 0 ) );
+		auto rhs = operative( load_operand( block, insn, 1 ) );
+
+		auto result = simple_bt( block, lhs, rhs );
+
+		store_operand( block, insn, 0, ( lhs | ( 1ULL << result ) ).op );
+	}
 
 	void initialize_flags( )
 	{
@@ -185,5 +249,9 @@ namespace vtil::lifter::amd64
 		operand_mappings[ X86_INS_SETO ] = process_seto;
 		operand_mappings[ X86_INS_SETP ] = process_setp;
 		operand_mappings[ X86_INS_SETS ] = process_sets;
+		operand_mappings[ X86_INS_BT ] = process_bt;
+		operand_mappings[ X86_INS_BTC ] = process_btc;
+		operand_mappings[ X86_INS_BTR ] = process_btr;
+		operand_mappings[ X86_INS_BTS ] = process_bts;
 	}
 }
