@@ -454,10 +454,7 @@ namespace vtil::lifter::amd64
 		switch ( lhs.op.size( ) )
 		{
 			case 2:
-				// this is UB, whatever :')
-				block
-					->bor( tmp, ( ( lhs & 0xFF ) << 8 ).op )
-					->bor( tmp, ( ( lhs & 0xFF00 ) >> 8 ).op );
+				// this is UB, but seems to store 0.
 				break;
 
 			case 4:
@@ -497,7 +494,8 @@ namespace vtil::lifter::amd64
 		block
 			->mov( tmp, rhs )
 			->bsf( tmp )
-			->te( flags::ZF, tmp, 0 );
+			->te( flags::ZF, tmp, 0 )
+			->sub( tmp, 1 ); // Value is UD if no bits set so -1 is acceptable.
 
 		store_operand( block, insn, 0, tmp );
 	}
@@ -511,7 +509,8 @@ namespace vtil::lifter::amd64
 		block
 			->mov( tmp, rhs )
 			->bsr( tmp )
-			->te( flags::ZF, tmp, 0 );
+			->te( flags::ZF, tmp, 0 )
+			->sub( tmp, 1 ); // Value is UD if no bits set so -1 is acceptable.
 
 		store_operand( block, insn, 0, tmp );
 	}
