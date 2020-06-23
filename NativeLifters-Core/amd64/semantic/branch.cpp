@@ -46,16 +46,23 @@ namespace vtil::lifter::amd64
 			X86_INS_CALL,
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
-				unreachable();
+				auto vip_after_insn = insn.address + insn.bytes.size();
+				block->sub( X86_REG_RSP, 8 );
+				block->str( X86_REG_RSP, 0, vip_after_insn );
+				block->jmp( load_operand( block, insn, 0 ) );
 			}
 		},
 		{
 			X86_INS_RET,
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
-				unreachable();
+				auto to_pop_after_ret = insn.operands.empty() ? 0ULL : insn.operands[ 0 ].imm;
+				auto retaddr = block->tmp( 64 );
+				block->ldd( retaddr, X86_REG_RSP, 0 );
+				block->add( X86_REG_RSP, to_pop_after_ret + 8 );
+				block->jmp( retaddr );
 			}
-		},
+		}
 	};
 
 	static bool __init = register_subhandlers( std::move( subhandlers ) );

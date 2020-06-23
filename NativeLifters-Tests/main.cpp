@@ -51,11 +51,11 @@ struct byte_input
 
 using amd64_recursive_descent = lifter::recursive_descent<byte_input, lifter::amd64::lifter_t>;
 
-uint8_t code [ ] { 0x67, 0x48, 0x8D, 0x05, 0x01, 0x00, 0x00, 0x00, 0x48, 0x01, 0xC0 };
+uint8_t code [ ] { 0xE8, 0x02, 0x00, 0x00, 0x00, 0xEB, 0x01, 0xC3, 0x31, 0xC0, 0xE8, 0xF8, 0xFF, 0xFF, 0xFF };
 
 int main( int argc, char** argv )
 {
-	printf( "handler count: %d\n", lifter::amd64::instruction_handlers.size() );
+	printf( "handler count: %lld\n", lifter::amd64::instruction_handlers.size() );
 
 	byte_input input = { code, sizeof(code) };
 
@@ -63,6 +63,10 @@ int main( int argc, char** argv )
 	rec_desc.entry->owner->routine_convention = amd64::preserve_all_convention;
 	rec_desc.entry->owner->routine_convention.purge_stack = false;
 	rec_desc.populate( rec_desc.entry );
+
+	debug::dump( rec_desc.entry->owner );
+
+	printf( "\nOPTIMIZING...\n\n" );
 
 	optimizer::apply_all( rec_desc.entry->owner );
 

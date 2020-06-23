@@ -103,7 +103,9 @@ namespace vtil::lifter::amd64
 			X86_INS_POP,
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
-				store_operand( block, insn, 0, { X86_REG_RSP } );
+				auto tmp = block->tmp( 64 );
+				block->ldd( tmp, X86_REG_RSP, 0 );
+				store_operand( block, insn, 0, tmp );
 				if ( insn.operands[ 0 ].size == 2 )
 					block->add( X86_REG_RSP, 2 );
 				else

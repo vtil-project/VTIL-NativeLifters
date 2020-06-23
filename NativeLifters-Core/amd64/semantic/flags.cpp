@@ -79,7 +79,7 @@ namespace vtil::lifter::amd64
 		operative cf( flags::CF );
 		operative zf( flags::ZF );
 
-		store_operand( block, insn, 0, ( ( cf == 0 ) & ( zf == 0 ) ) );
+		store_operand( block, insn, 0, ( cf == 0 ) & ( zf == 0 ) );
 	}
 
 	void process_setae( basic_block* block, const instruction_info& insn )

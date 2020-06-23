@@ -61,7 +61,7 @@ namespace vtil::lifter
 
 			leaders.emplace( vip, start_block );
 
-			while ( !start_block->is_complete( ) )
+			while ( true)
 			{
 				if ( !input->is_valid( vip ) )
 				{
@@ -70,6 +70,9 @@ namespace vtil::lifter
 				}
 
 				auto offs = Arch::process( start_block, vip, entry_ptr );
+
+				if ( start_block->is_complete() )
+					break;
 
 				entry_ptr += offs;
 				vip += offs;
