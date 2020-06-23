@@ -1,8 +1,6 @@
+#pragma once
 #include <vtil/amd64>
 #include <vtil/arch>
-
-#include <capstone/capstone.h>
-
 #include <map>
 
 // This file defines any global arch-specific information for the AMD64 target

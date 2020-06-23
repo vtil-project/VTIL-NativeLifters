@@ -1,5 +1,4 @@
 #pragma once
-
 #include <vtil/arch>
 
 namespace vtil::lifter

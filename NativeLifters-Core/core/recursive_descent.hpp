@@ -1,7 +1,7 @@
+#pragma once
 #include <unordered_set>
 #include <deque>
-
-#include <vtil/vtil>
+#include <vtil/arch>
 
 namespace vtil::lifter
 {
