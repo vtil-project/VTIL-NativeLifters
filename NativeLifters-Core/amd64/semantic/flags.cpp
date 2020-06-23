@@ -79,14 +79,14 @@ namespace vtil::lifter::amd64
 		operative cf( flags::CF );
 		operative zf( flags::ZF );
 
-		store_operand( block, insn, 0, ( ( cf == 0 ) & ( zf == 0 ) ).op );
+		store_operand( block, insn, 0, ( ( cf == 0 ) & ( zf == 0 ) ) );
 	}
 
 	void process_setae( basic_block* block, const instruction_info& insn )
 	{
 		operative cf( flags::CF );
 
-		store_operand( block, insn, 0, ( cf == 0 ).op );
+		store_operand( block, insn, 0, ( cf == 0 ) );
 	}
 
 
@@ -100,7 +100,7 @@ namespace vtil::lifter::amd64
 		operative cf( flags::CF );
 		operative zf( flags::ZF );
 
-		store_operand( block, insn, 0, ( cf | zf ).op );
+		store_operand( block, insn, 0, ( cf | zf ) );
 	}
 
 	void process_sete( basic_block* block, const instruction_info& insn )
@@ -113,7 +113,7 @@ namespace vtil::lifter::amd64
 		operative sf( flags::SF );
 		operative of( flags::OF );
 
-		store_operand( block, insn, 0, ( sf & of ).op );
+		store_operand( block, insn, 0, ( sf & of ) );
 	}
 
 	void process_setg( basic_block* block, const instruction_info& insn )
@@ -122,7 +122,7 @@ namespace vtil::lifter::amd64
 		operative of( flags::OF );
 		operative zf( flags::ZF );
 
-		store_operand( block, insn, 0, ( ( zf == 0 ) & ( sf == of ) ).op );
+		store_operand( block, insn, 0, ( ( zf == 0 ) & ( sf == of ) ) );
 	}
 
 	void process_setle( basic_block* block, const instruction_info& insn )
@@ -131,7 +131,7 @@ namespace vtil::lifter::amd64
 		operative of( flags::OF );
 		operative zf( flags::ZF );
 
-		store_operand( block, insn, 0, ( zf & ( sf != of ) ).op );
+		store_operand( block, insn, 0, ( zf & ( sf != of ) ) );
 	}
 
 	void process_setl( basic_block* block, const instruction_info& insn )
@@ -140,35 +140,35 @@ namespace vtil::lifter::amd64
 		operative of( flags::OF );
 		operative zf( flags::ZF );
 
-		store_operand( block, insn, 0, ( sf != of ).op );
+		store_operand( block, insn, 0, ( sf != of ) );
 	}
 
 	void process_setne( basic_block* block, const instruction_info& insn )
 	{
 		operative zf( flags::ZF );
 
-		store_operand( block, insn, 0, ( zf == 0 ).op );
+		store_operand( block, insn, 0, ( zf == 0 ) );
 	}
 
 	void process_setno( basic_block* block, const instruction_info& insn )
 	{
 		operative of( flags::OF );
 
-		store_operand( block, insn, 0, ( of == 0 ).op );
+		store_operand( block, insn, 0, ( of == 0 ) );
 	}
 
 	void process_setnp( basic_block* block, const instruction_info& insn )
 	{
 		operative pf( flags::PF );
 
-		store_operand( block, insn, 0, ( pf == 0 ).op );
+		store_operand( block, insn, 0, ( pf == 0 ) );
 	}
 
 	void process_setns( basic_block* block, const instruction_info& insn )
 	{
 		operative sf( flags::SF );
 
-		store_operand( block, insn, 0, ( sf == 0 ).op );
+		store_operand( block, insn, 0, ( sf == 0 ) );
 	}
 
 	void process_seto( basic_block* block, const instruction_info& insn )
@@ -209,7 +209,7 @@ namespace vtil::lifter::amd64
 		}
 
 		auto result = rhs & mask;
-		block->mov( flags::CF, ( ( lhs & ( 1ULL << result ) ) != 0 ).op );
+		block->mov( flags::CF, ( ( lhs & ( 1ULL << result ) ) != 0 ) );
 		return result;
 	}
 
@@ -228,7 +228,7 @@ namespace vtil::lifter::amd64
 
 		auto result = simple_bt( block, lhs, rhs );
 
-		store_operand( block, insn, 0, ( lhs ^ ( 1ULL << result ) ).op );
+		store_operand( block, insn, 0, ( lhs ^ ( 1ULL << result ) ) );
 	}
 
 	void process_btr( basic_block* block, const instruction_info& insn )
@@ -238,7 +238,7 @@ namespace vtil::lifter::amd64
 
 		auto result = simple_bt( block, lhs, rhs );
 
-		store_operand( block, insn, 0, ( lhs & ~( 1ULL << result ) ).op );
+		store_operand( block, insn, 0, ( lhs & ~( 1ULL << result ) ) );
 	}
 
 	void process_bts( basic_block* block, const instruction_info& insn )
@@ -248,7 +248,7 @@ namespace vtil::lifter::amd64
 
 		auto result = simple_bt( block, lhs, rhs );
 
-		store_operand( block, insn, 0, ( lhs | ( 1ULL << result ) ).op );
+		store_operand( block, insn, 0, ( lhs | ( 1ULL << result ) ) );
 	}
 
 	void initialize_flags()

@@ -103,4 +103,16 @@ namespace vtil::lifter
 			return { operand{ tmp } };
 		}
 	};
-}
+};
+
+// Abuse register cast to make operative castable into an operand.
+//
+namespace vtil
+{
+	template<>
+	struct register_cast<lifter::operative>
+	{
+		auto&& operator()( lifter::operative&& opr )     { return opr.op.descriptor; }
+		auto& operator()( const lifter::operative& opr ) { return opr.op.descriptor; }
+	};
+};

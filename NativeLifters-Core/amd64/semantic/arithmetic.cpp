@@ -38,12 +38,12 @@ namespace vtil::lifter::amd64
 	void process_flags( basic_block* block, const operand& lhs, const operand& rhs, const operand& result )
 	{
 		block
-			->mov( flags::OF, flags::overflow<Op>::flag( lhs, rhs, result ).op )
-			->mov( flags::CF, flags::carry<Op>::flag( lhs, rhs, result ).op )
-			->mov( flags::SF, flags::sign( result ).op )
-			->mov( flags::ZF, flags::zero( result ).op )
-			->mov( flags::AF, flags::aux_carry( lhs, rhs, result ).op )
-			->mov( flags::PF, flags::parity( result ).op );
+			->mov( flags::OF, flags::overflow<Op>::flag( lhs, rhs, result ) )
+			->mov( flags::CF, flags::carry<Op>::flag( lhs, rhs, result ) )
+			->mov( flags::SF, flags::sign( result ) )
+			->mov( flags::ZF, flags::zero( result ) )
+			->mov( flags::AF, flags::aux_carry( lhs, rhs, result ) )
+			->mov( flags::PF, flags::parity( result ) );
 	}
 
 	// List of handlers.
@@ -250,7 +250,7 @@ namespace vtil::lifter::amd64
 							->mov( hi, lhs )
 							->mul( lo, rhs )
 							->mulhi( hi, rhs )
-							->mov( flags::CF, ( flags::sign( { hi } ) != flags::sign( { lo } ) ).op )
+							->mov( flags::CF, ( flags::sign( { hi } ) != flags::sign( { lo } ) ))
 							->mov( flags::OF, flags::CF );
 
 						store_operand( block, insn, 0, lo );
@@ -268,7 +268,7 @@ namespace vtil::lifter::amd64
 							->mov( hi, lhs )
 							->mul( lo, rhs )
 							->mulhi( hi, rhs )
-							->mov( flags::CF, ( flags::sign( { hi } ) != flags::sign( { lo } ) ).op )
+							->mov( flags::CF, ( flags::sign( { hi } ) != flags::sign( { lo } ) ))
 							->mov( flags::OF, flags::CF );
 
 						store_operand( block, insn, 0, lo );
@@ -294,11 +294,11 @@ namespace vtil::lifter::amd64
 				auto lhs_sign = flags::sign( { lhs } );
 
 				block
-					->mov( flags::CF, lhs_sign.op )
-					->mov( flags::OF, ( flags::sign( { result } ) ^ lhs_sign ).op )
-					->mov( flags::SF, flags::sign( result ).op )
-					->mov( flags::ZF, flags::zero( result ).op )
-					->mov( flags::PF, flags::parity( result ).op );
+					->mov( flags::CF, lhs_sign)
+					->mov( flags::OF, ( flags::sign( { result } ) ^ lhs_sign ))
+					->mov( flags::SF, flags::sign( result ))
+					->mov( flags::ZF, flags::zero( result ))
+					->mov( flags::PF, flags::parity( result ));
 
 				store_operand( block, insn, 0, result );
 			}
@@ -313,11 +313,11 @@ namespace vtil::lifter::amd64
 				auto result = ( operative( lhs ) >> ( operative( rhs ) & ( lhs.size() == 8 ? 0x3F : 0x1F ) ) ).op;
 
 				block
-					->mov( flags::CF, ( operative( lhs ) & 1 ).op )
-					->mov( flags::OF, flags::sign( { lhs } ).op )
-					->mov( flags::SF, flags::sign( result ).op )
-					->mov( flags::ZF, flags::zero( result ).op )
-					->mov( flags::PF, flags::parity( result ).op );
+					->mov( flags::CF, ( operative( lhs ) & 1 ))
+					->mov( flags::OF, flags::sign( { lhs } ))
+					->mov( flags::SF, flags::sign( result ))
+					->mov( flags::ZF, flags::zero( result ))
+					->mov( flags::PF, flags::parity( result ));
 
 				store_operand( block, insn, 0, result );
 			}
@@ -332,11 +332,11 @@ namespace vtil::lifter::amd64
 				auto result = ( ( lhs >> ( rhs & ( lhs.op.size() == 8 ? 0x3F : 0x1F ) ) ) | ( lhs & ( 1ULL << ( lhs.op.bit_count() - 1 ) ) ) ).op;
 
 				block
-					->mov( flags::CF, ( lhs & 1 ).op )
+					->mov( flags::CF, ( lhs & 1 ))
 					->mov( flags::OF, 0 )
-					->mov( flags::SF, flags::sign( result ).op )
-					->mov( flags::ZF, flags::zero( result ).op )
-					->mov( flags::PF, flags::parity( result ).op );
+					->mov( flags::SF, flags::sign( result ))
+					->mov( flags::ZF, flags::zero( result ))
+					->mov( flags::PF, flags::parity( result ));
 
 				store_operand( block, insn, 0, result );
 			}
@@ -353,7 +353,7 @@ namespace vtil::lifter::amd64
 				block
 					->mov( result, lhs )
 					->brol( result, rhs )
-					->mov( flags::CF, ( operative( result ) & 1 ).op );
+					->mov( flags::CF, ( operative( result ) & 1 ));
 
 				store_operand( block, insn, 0, result );
 			}
@@ -369,7 +369,7 @@ namespace vtil::lifter::amd64
 				block
 					->mov( result, lhs )
 					->bror( result, rhs )
-					->mov( flags::CF, flags::sign( { result } ).op );
+					->mov( flags::CF, flags::sign( { result } ));
 
 				store_operand( block, insn, 0, result );
 			}
@@ -386,10 +386,10 @@ namespace vtil::lifter::amd64
 				auto carry_result = ( lhs & ( lhs.op.bit_count() << rhs ) );
 
 				block
-					->mov( flags::CF, carry_result.op )
-					->mov( flags::OF, ( cf^ flags::sign( result ) ).op );
+					->mov( flags::CF, carry_result)
+					->mov( flags::OF, ( cf^ flags::sign( result ) ));
 
-				store_operand( block, insn, 0, result.op );
+				store_operand( block, insn, 0, result);
 			}
 		},
 		{
@@ -404,10 +404,10 @@ namespace vtil::lifter::amd64
 				auto carry_result = ( lhs & ( 1ULL << ( rhs - 1 ) ) );
 
 				block
-					->mov( flags::CF, carry_result.op )
-					->mov( flags::OF, ( cf^ flags::sign( lhs ) ).op );
+					->mov( flags::CF, carry_result)
+					->mov( flags::OF, ( cf^ flags::sign( lhs ) ));
 
-				store_operand( block, insn, 0, result.op );
+				store_operand( block, insn, 0, result);
 			}
 		},
 		{
@@ -418,13 +418,13 @@ namespace vtil::lifter::amd64
 				auto result = lhs + 1;
 
 				block
-					->mov( flags::AF, flags::aux_carry( lhs, { 1 }, result ).op )
-					->mov( flags::OF, flags::overflow<flags::add>::flag( lhs, { 1 }, result ).op )
-					->mov( flags::SF, flags::sign( result ).op )
-					->mov( flags::ZF, flags::zero( result ).op )
-					->mov( flags::PF, flags::parity( result ).op );
+					->mov( flags::AF, flags::aux_carry( lhs, { 1 }, result ))
+					->mov( flags::OF, flags::overflow<flags::add>::flag( lhs, { 1 }, result ))
+					->mov( flags::SF, flags::sign( result ))
+					->mov( flags::ZF, flags::zero( result ))
+					->mov( flags::PF, flags::parity( result ));
 
-				store_operand( block, insn, 0, result.op );
+				store_operand( block, insn, 0, result);
 			}
 		},
 		{
@@ -435,13 +435,13 @@ namespace vtil::lifter::amd64
 				auto result = lhs - 1;
 
 				block
-					->mov( flags::AF, flags::aux_carry( lhs, { -1 }, result ).op )
-					->mov( flags::OF, flags::overflow<flags::sub>::flag( lhs, { -1 }, result ).op )
-					->mov( flags::SF, flags::sign( result ).op )
-					->mov( flags::ZF, flags::zero( result ).op )
-					->mov( flags::PF, flags::parity( result ).op );
+					->mov( flags::AF, flags::aux_carry( lhs, { -1 }, result ))
+					->mov( flags::OF, flags::overflow<flags::sub>::flag( lhs, { -1 }, result ))
+					->mov( flags::SF, flags::sign( result ))
+					->mov( flags::ZF, flags::zero( result ))
+					->mov( flags::PF, flags::parity( result ));
 
-				store_operand( block, insn, 0, result.op );
+				store_operand( block, insn, 0, result);
 			}
 		},
 		{
@@ -452,14 +452,14 @@ namespace vtil::lifter::amd64
 				auto result = 0 - lhs;
 
 				block
-					->mov( flags::CF, ( lhs != 0 ).op )
-					->mov( flags::AF, flags::aux_carry( { 0 }, lhs, result ).op )
-					->mov( flags::OF, flags::overflow<flags::sub>::flag( { 0 }, lhs, result ).op )
-					->mov( flags::SF, flags::sign( result ).op )
-					->mov( flags::ZF, flags::zero( result ).op )
-					->mov( flags::PF, flags::parity( result ).op );
+					->mov( flags::CF, ( lhs != 0 ))
+					->mov( flags::AF, flags::aux_carry( { 0 }, lhs, result ))
+					->mov( flags::OF, flags::overflow<flags::sub>::flag( { 0 }, lhs, result ))
+					->mov( flags::SF, flags::sign( result ))
+					->mov( flags::ZF, flags::zero( result ))
+					->mov( flags::PF, flags::parity( result ));
 
-				store_operand( block, insn, 0, result.op );
+				store_operand( block, insn, 0, result);
 			}
 		},
 		{
@@ -467,7 +467,7 @@ namespace vtil::lifter::amd64
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
 				auto lhs = operative( load_operand( block, insn, 0 ) );
-				store_operand( block, insn, 0, ( ~lhs ).op );
+				store_operand( block, insn, 0, ( ~lhs ));
 			}
 		},
 		{
@@ -487,22 +487,22 @@ namespace vtil::lifter::amd64
 
 					case 4:
 						block
-							->bor( tmp, ( ( lhs & 0xFF ) << 24 ).op )
-							->bor( tmp, ( ( lhs & 0xFF00 ) << 8 ).op )
-							->bor( tmp, ( ( lhs & 0xFF0000 ) >> 8 ).op )
-							->bor( tmp, ( ( lhs & 0xFF000000 ) >> 24 ).op );
+							->bor( tmp, ( ( lhs & 0xFF ) << 24 ))
+							->bor( tmp, ( ( lhs & 0xFF00 ) << 8 ))
+							->bor( tmp, ( ( lhs & 0xFF0000 ) >> 8 ))
+							->bor( tmp, ( ( lhs & 0xFF000000 ) >> 24 ));
 						break;
 
 					case 8:
 						block
-							->bor( tmp, ( ( lhs & 0xFFULL ) << 56 ).op )
-							->bor( tmp, ( ( lhs & 0xFF00ULL ) << 40 ).op )
-							->bor( tmp, ( ( lhs & 0xFF0000ULL ) << 24 ).op )
-							->bor( tmp, ( ( lhs & 0xFF000000ULL ) << 8 ).op )
-							->bor( tmp, ( ( lhs & 0xFF00000000ULL ) >> 8 ).op )
-							->bor( tmp, ( ( lhs & 0xFF0000000000ULL ) >> 24 ).op )
-							->bor( tmp, ( ( lhs & 0xFF000000000000ULL ) >> 40 ).op )
-							->bor( tmp, ( ( lhs & 0xFF00000000000000ULL ) >> 56 ).op );
+							->bor( tmp, ( ( lhs & 0xFFULL ) << 56 ))
+							->bor( tmp, ( ( lhs & 0xFF00ULL ) << 40 ))
+							->bor( tmp, ( ( lhs & 0xFF0000ULL ) << 24 ))
+							->bor( tmp, ( ( lhs & 0xFF000000ULL ) << 8 ))
+							->bor( tmp, ( ( lhs & 0xFF00000000ULL ) >> 8 ))
+							->bor( tmp, ( ( lhs & 0xFF0000000000ULL ) >> 24 ))
+							->bor( tmp, ( ( lhs & 0xFF000000000000ULL ) >> 40 ))
+							->bor( tmp, ( ( lhs & 0xFF00000000000000ULL ) >> 56 ));
 						break;
 
 					default:
@@ -573,7 +573,7 @@ namespace vtil::lifter::amd64
 			mnemonic,											       \
 			[ ] ( basic_block* block, const instruction_info& insn )   \
 			{														   \
-				block->mov( out, flags::sign( { in } ).op );		   \
+				block->mov( out, flags::sign( { in } ));		       \
 				block->neg( out );									   \
 			}														   \
 		}

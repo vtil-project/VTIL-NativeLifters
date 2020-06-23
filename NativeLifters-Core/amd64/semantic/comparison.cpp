@@ -42,18 +42,17 @@ namespace vtil::lifter::amd64
 				auto lhs = operative( load_operand( block, insn, 0 ) );
 				auto rhs = operative( block->tmp( lhs.op.bit_count() ) );
 
-				block
-					->movsx( rhs.op, load_operand( block, insn, 1 ) );
+				block->movsx( rhs, load_operand( block, insn, 1 ) );
 
 				auto result = lhs - rhs;
 
 				block
-					->mov( flags::CF, flags::carry<flags::sub>::flag( lhs, rhs, result ).op )
-					->mov( flags::OF, flags::overflow<flags::sub>::flag( lhs, rhs, result ).op )
-					->mov( flags::SF, flags::sign( result ).op )
-					->mov( flags::ZF, flags::zero( result ).op )
-					->mov( flags::AF, flags::aux_carry( lhs, rhs, result ).op )
-					->mov( flags::PF, flags::parity( result ).op );
+					->mov( flags::CF, flags::carry<flags::sub>::flag( lhs, rhs, result ) )
+					->mov( flags::OF, flags::overflow<flags::sub>::flag( lhs, rhs, result ) )
+					->mov( flags::SF, flags::sign( result ) )
+					->mov( flags::ZF, flags::zero( result ) )
+					->mov( flags::AF, flags::aux_carry( lhs, rhs, result ) )
+					->mov( flags::PF, flags::parity( result ) );
 			}
 		},
 		{
@@ -68,9 +67,9 @@ namespace vtil::lifter::amd64
 				block
 					->mov( flags::CF, 0 )
 					->mov( flags::OF, 0 )
-					->mov( flags::SF, flags::sign( result ).op )
-					->mov( flags::ZF, flags::zero( result ).op )
-					->mov( flags::PF, flags::parity( result ).op );
+					->mov( flags::SF, flags::sign( result ) )
+					->mov( flags::ZF, flags::zero( result ) )
+					->mov( flags::PF, flags::parity( result ) );
 			}
 		},
 	};
