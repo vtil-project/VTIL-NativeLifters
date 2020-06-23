@@ -192,35 +192,41 @@ namespace vtil::lifter::amd64
 
 			if ( insn.eflags & X86_EFLAGS_MODIFY_CF )
 				block->vpinw( flags::CF );
-
 			if ( insn.eflags & X86_EFLAGS_MODIFY_DF )
 				block->vpinw( flags::DF );
-
 			if ( insn.eflags & X86_EFLAGS_MODIFY_OF )
 				block->vpinw( flags::OF );
-
 			if ( insn.eflags & X86_EFLAGS_MODIFY_ZF )
 				block->vpinw( flags::ZF );
-
 			if ( insn.eflags & X86_EFLAGS_MODIFY_PF )
 				block->vpinw( flags::PF );
-
 			if ( insn.eflags & X86_EFLAGS_MODIFY_AF )
 				block->vpinw( flags::AF );
-
 			if ( insn.eflags & X86_EFLAGS_MODIFY_SF )
 				block->vpinw( flags::SF );
-
 			if ( insn.eflags & X86_EFLAGS_MODIFY_IF )
 				block->vpinw( flags::IF );
-
-			// Once again, our "undefined" behavior is that undefined flags stay exactly the same. :)
 		}
 		else
 		{
 			// Call the instruction handler.
 			mapping->second( block, insn );
 		}
+
+		// Assign undefined registers.
+		//
+		if ( insn.eflags & X86_EFLAGS_UNDEFINED_OF )
+			block->mov( flags::OF, UNDEFINED );
+		if ( insn.eflags & X86_EFLAGS_UNDEFINED_SF )
+			block->mov( flags::SF, UNDEFINED );
+		if ( insn.eflags & X86_EFLAGS_UNDEFINED_ZF )
+			block->mov( flags::ZF, UNDEFINED );
+		if ( insn.eflags & X86_EFLAGS_UNDEFINED_PF )
+			block->mov( flags::PF, UNDEFINED );
+		if ( insn.eflags & X86_EFLAGS_UNDEFINED_AF )
+			block->mov( flags::AF, UNDEFINED );
+		if ( insn.eflags & X86_EFLAGS_UNDEFINED_CF )
+			block->mov( flags::CF, UNDEFINED );
 
 		return insn.bytes.size();
 	}
