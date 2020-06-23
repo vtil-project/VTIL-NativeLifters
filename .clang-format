@@ -1,0 +1,32 @@
+---
+BasedOnStyle: Google
+ColumnLimit: '180'
+IndentWidth: '4'
+NamespaceIndentation: All
+SpaceAfterTemplateKeyword: 'false'
+SpacesInParentheses: 'true'
+SpacesInSquareBrackets: 'true'
+TabWidth: '4'
+UseTab: Always
+BraceWrapping:
+  AfterClass:      true
+  AfterControlStatement: true
+  AfterEnum:       true
+  AfterFunction:   true
+  AfterNamespace:  true
+  AfterObjCDeclaration: true
+  AfterStruct:     true
+  AfterUnion:      true
+  BeforeCatch:     true
+  BeforeElse:      true
+  IndentBraces:    false
+  SplitEmptyFunction: false
+BreakBeforeBraces: Custom
+FixNamespaceComments: false
+AllowShortFunctionsOnASingleLine: 'All'
+AllowShortBlocksOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortLambdasOnASingleLine: 'All'
+AllowShortIfStatementsOnASingleLine: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+AllowAllConstructorInitializersOnNextLine: true

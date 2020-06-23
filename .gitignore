@@ -376,3 +376,5 @@ FodyWeavers.xsd
 build/
 Capstone/
 Keystone/
+cmake-build-*
+.idea

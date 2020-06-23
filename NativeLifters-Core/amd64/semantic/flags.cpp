@@ -32,47 +32,19 @@
 //
 namespace vtil::lifter::amd64
 {
-	void process_clc( basic_block* block, const instruction_info& insn )
-	{
-		block
-			->mov( flags::CF, 0 );
-	}
+	void process_clc( basic_block* block, const instruction_info& insn ) { block->mov( flags::CF, 0 ); }
 
-	void process_cld( basic_block* block, const instruction_info& insn )
-	{
-		block
-			->mov( flags::DF, 0 );
-	}
+	void process_cld( basic_block* block, const instruction_info& insn ) { block->mov( flags::DF, 0 ); }
 
-	void process_cli( basic_block* block, const instruction_info& insn )
-	{
-		block
-			->mov( flags::IF, 0 );
-	}
+	void process_cli( basic_block* block, const instruction_info& insn ) { block->mov( flags::IF, 0 ); }
 
-	void process_stc( basic_block* block, const instruction_info& insn )
-	{
-		block
-			->mov( flags::CF, 1 );
-	}
+	void process_stc( basic_block* block, const instruction_info& insn ) { block->mov( flags::CF, 1 ); }
 
-	void process_std( basic_block* block, const instruction_info& insn )
-	{
-		block
-			->mov( flags::DF, 1 );
-	}
+	void process_std( basic_block* block, const instruction_info& insn ) { block->mov( flags::DF, 1 ); }
 
-	void process_sti( basic_block* block, const instruction_info& insn )
-	{
-		block
-			->mov( flags::IF, 1 );
-	}
+	void process_sti( basic_block* block, const instruction_info& insn ) { block->mov( flags::IF, 1 ); }
 
-	void process_cmc( basic_block* block, const instruction_info& insn )
-	{
-		block
-			->bnot( flags::CF );
-	}
+	void process_cmc( basic_block* block, const instruction_info& insn ) { block->bnot( flags::CF ); }
 
 	void process_seta( basic_block* block, const instruction_info& insn )
 	{
@@ -89,11 +61,7 @@ namespace vtil::lifter::amd64
 		store_operand( block, insn, 0, ( cf == 0 ) );
 	}
 
-
-	void process_setb( basic_block* block, const instruction_info& insn )
-	{
-		store_operand( block, insn, 0, { flags::CF } );
-	}
+	void process_setb( basic_block* block, const instruction_info& insn ) { store_operand( block, insn, 0, { flags::CF } ); }
 
 	void process_setbe( basic_block* block, const instruction_info& insn )
 	{
@@ -103,10 +71,7 @@ namespace vtil::lifter::amd64
 		store_operand( block, insn, 0, ( cf | zf ) );
 	}
 
-	void process_sete( basic_block* block, const instruction_info& insn )
-	{
-		store_operand( block, insn, 0, { flags::ZF } );
-	}
+	void process_sete( basic_block* block, const instruction_info& insn ) { store_operand( block, insn, 0, { flags::ZF } ); }
 
 	void process_setge( basic_block* block, const instruction_info& insn )
 	{
@@ -171,20 +136,11 @@ namespace vtil::lifter::amd64
 		store_operand( block, insn, 0, ( sf == 0 ) );
 	}
 
-	void process_seto( basic_block* block, const instruction_info& insn )
-	{
-		store_operand( block, insn, 0, { flags::OF } );
-	}
+	void process_seto( basic_block* block, const instruction_info& insn ) { store_operand( block, insn, 0, { flags::OF } ); }
 
-	void process_setp( basic_block* block, const instruction_info& insn )
-	{
-		store_operand( block, insn, 0, { flags::PF } );
-	}
+	void process_setp( basic_block* block, const instruction_info& insn ) { store_operand( block, insn, 0, { flags::PF } ); }
 
-	void process_sets( basic_block* block, const instruction_info& insn )
-	{
-		store_operand( block, insn, 0, { flags::SF } );
-	}
+	void process_sets( basic_block* block, const instruction_info& insn ) { store_operand( block, insn, 0, { flags::SF } ); }
 
 	operative simple_bt( basic_block* block, const operative& lhs, const operative& rhs )
 	{
@@ -251,32 +207,11 @@ namespace vtil::lifter::amd64
 		store_operand( block, insn, 0, ( lhs | ( 1ULL << result ) ) );
 	}
 
-	static bool __init = register_subhandlers( {
-		{X86_INS_CLD  , process_cld },
-		{X86_INS_CLI  , process_cli },
-		{X86_INS_STC  , process_stc },
-		{X86_INS_STD  , process_std },
-		{X86_INS_STI  , process_sti },
-		{X86_INS_CMC  , process_cmc },
-		{X86_INS_SETA , process_seta },
-		{X86_INS_SETAE, process_setae },
-		{X86_INS_SETB , process_setb },
-		{X86_INS_SETBE, process_setbe },
-		{X86_INS_SETE , process_sete },
-		{X86_INS_SETGE, process_setge },
-		{X86_INS_SETG , process_setg },
-		{X86_INS_SETLE, process_setle },
-		{X86_INS_SETL , process_setl },
-		{X86_INS_SETNE, process_setne },
-		{X86_INS_SETNO, process_setno },
-		{X86_INS_SETNP, process_setnp },
-		{X86_INS_SETNS, process_setns },
-		{X86_INS_SETO , process_seto },
-		{X86_INS_SETP , process_setp },
-		{X86_INS_SETS , process_sets },
-		{X86_INS_BT   , process_bt },
-		{X86_INS_BTC  , process_btc },
-		{X86_INS_BTR  , process_btr },
-		{X86_INS_BTS  , process_bts }
-	} );
+	static bool __init = register_subhandlers(
+		{ { X86_INS_CLD, process_cld },		{ X86_INS_CLI, process_cli },	  { X86_INS_STC, process_stc },		{ X86_INS_STD, process_std },	  { X86_INS_STI, process_sti },
+		  { X86_INS_CMC, process_cmc },		{ X86_INS_SETA, process_seta },	  { X86_INS_SETAE, process_setae }, { X86_INS_SETB, process_setb },	  { X86_INS_SETBE, process_setbe },
+		  { X86_INS_SETE, process_sete },	{ X86_INS_SETGE, process_setge }, { X86_INS_SETG, process_setg },	{ X86_INS_SETLE, process_setle }, { X86_INS_SETL, process_setl },
+		  { X86_INS_SETNE, process_setne }, { X86_INS_SETNO, process_setno }, { X86_INS_SETNP, process_setnp }, { X86_INS_SETNS, process_setns }, { X86_INS_SETO, process_seto },
+		  { X86_INS_SETP, process_setp },	{ X86_INS_SETS, process_sets },	  { X86_INS_BT, process_bt },		{ X86_INS_BTC, process_btc },	  { X86_INS_BTR, process_btr },
+		  { X86_INS_BTS, process_bts } } );
 }

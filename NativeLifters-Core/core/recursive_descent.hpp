@@ -26,10 +26,11 @@
 // POSSIBILITY OF SUCH DAMAGE.        
 //
 #pragma once
-#include <unordered_set>
-#include <deque>
 #include <vtil/arch>
 #include <vtil/compiler>
+
+#include <unordered_set>
+#include <deque>
 
 namespace vtil::lifter
 {
@@ -107,6 +108,72 @@ namespace vtil::lifter
 					}
 				}
 			}
+		}
+
+		void explore()
+		{
+			std::unordered_set< basic_block* > entries { entry };
+
+			bool changed;
+			do
+			{
+				changed = false;
+
+				// Populate entries.
+				//
+				for ( auto entry_blk : entries )
+					populate( entry_blk );
+
+				// Clear entries vector.
+				//
+				entries.clear();
+
+				// Clone the CFG.
+				//
+				auto cloned = entry->owner->clone();
+
+				// Run cross-block optimizations.
+				//
+				optimizer::apply_all( cloned );
+
+				// For every block in the newly-cloned routine
+				//
+				for ( auto [vip, explored_block] : cloned->explored_blocks )
+				{
+					// Try to explore branches.
+					//
+					cached_tracer local_tracer = {};
+					auto lbranch_info = optimizer::aux::analyze_branch( explored_block, &local_tracer, true, true );
+
+					// For every branch
+					//
+					for ( auto branch : lbranch_info.destinations )
+					{
+						// Is the branch result a constant/
+						//
+						if ( branch.is_constant() )
+						{
+							const auto branch_imm = *branch.get<uint64_t>();
+
+							// Have we found something unexplored?
+							//
+
+							if ( leaders.find( branch_imm ) == leaders.cend() )
+							{
+								// Set to changed, add to entries.
+								//
+
+								changed = true;
+								entries.emplace( entry->fork( branch_imm ) );
+							}
+						}
+					}
+				}
+
+				// Delete cloned cfg.
+				delete cloned;
+			}
+			while ( changed );
 		}
 
 		recursive_descent( Input* input, uint64_t entry_point ) : input(input), leaders( { } )

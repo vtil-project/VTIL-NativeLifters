@@ -603,7 +603,7 @@ namespace vtil::lifter::amd64
 				auto rhs = load_operand( block, insn, 1 );                          \
 				auto tmp = block->tmp( lhs.bit_count() );                           \
 				block->mov( tmp, lhs )->op( tmp, rhs );                             \
-				process_flags<flags::flag_operation::##op>( block, lhs, rhs, tmp ); \
+				process_flags<flags::flag_operation::op>( block, lhs, rhs, tmp ); \
 				store_operand( block, insn, 0, tmp );                               \
 			}														                \
 		}

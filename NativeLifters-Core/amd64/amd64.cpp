@@ -151,13 +151,13 @@ namespace vtil::lifter::amd64
 
 				if ( operand.type == X86_OP_MEM )
 				{
-					if ( operand.mem.base != X86_OP_INVALID && !vtil::amd64::is_generic( operand.mem.base ) )
+					if ( operand.mem.base != X86_REG_INVALID && !vtil::amd64::is_generic( operand.mem.base ) )
 					{
 						is_invalid = true;
 						break;
 					}
 
-					if ( operand.mem.index != X86_OP_INVALID && !vtil::amd64::is_generic( operand.mem.index ) )
+					if ( operand.mem.index != X86_REG_INVALID && !vtil::amd64::is_generic( operand.mem.index ) )
 					{
 						is_invalid = true;
 						break;
@@ -175,10 +175,10 @@ namespace vtil::lifter::amd64
 
 				if ( operand.type == X86_OP_MEM )
 				{
-					if ( operand.mem.base != X86_OP_INVALID )
+					if ( operand.mem.base != X86_REG_INVALID )
 						block->vpinr( operand.mem.base );
 
-					if ( operand.mem.index != X86_OP_INVALID )
+					if ( operand.mem.index != X86_REG_INVALID )
 						block->vpinr( operand.mem.index );
 				}
 			}
