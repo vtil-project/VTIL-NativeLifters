@@ -21,8 +21,8 @@ namespace mem
 
 	    rwx_allocator() = default;
 
-	    template <class T> 
-	    constexpr rwx_allocator( const rwx_allocator<T>& ) noexcept {}
+	    template <typename T2> 
+	    constexpr rwx_allocator( const rwx_allocator<T2>& ) noexcept {}
 
 	    inline T* allocate( size_t count ) { return ( T* ) allocate_rwx( count * sizeof( T ) ); }
 	    inline void deallocate( T* pointer, size_t ) noexcept { free_rwx( pointer ); }
