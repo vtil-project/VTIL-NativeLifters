@@ -43,6 +43,236 @@ namespace vtil::lifter::amd64
 			}
 		},
 		{
+			X86_INS_JAE,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				operative cf( flags::CF );
+
+				block
+					->js( ( cf == 0 ), 
+						  load_operand( block, insn, 0 ), 
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
+			X86_INS_JA,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				operative cf( flags::CF );
+				operative zf( flags::ZF );
+
+				block
+					->js( ( cf == 0 ) & ( zf == 0 ), 
+						  load_operand( block, insn, 0 ), 
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
+			X86_INS_JBE,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				operative cf( flags::CF );
+				operative zf( flags::ZF );
+
+				block
+					->js( ( cf == 1 ) & ( zf == 1 ), 
+						  load_operand( block, insn, 0 ), 
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
+			X86_INS_JB,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				operative cf( flags::CF );
+
+				block
+					->js( ( cf == 1 ),
+						  load_operand( block, insn, 0 ),
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
+			X86_INS_JCXZ,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				block
+					->js( ( X86_REG_CX == 0 ),
+						  load_operand( block, insn, 0 ),
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
+			X86_INS_JECXZ,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				block
+					->js( ( X86_REG_ECX == 0 ),
+						  load_operand( block, insn, 0 ),
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
+			X86_INS_JE,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				operative zf( flags::ZF );
+
+				block
+					->js( ( zf == 1 ),
+						  load_operand( block, insn, 0 ),
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
+			X86_INS_JGE,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				operative sf( flags::SF );
+				operative of( flags::OF );
+
+				block
+					->js( ( sf == of ),
+						  load_operand( block, insn, 0 ),
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
+			X86_INS_JG,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				operative sf( flags::SF );
+				operative of( flags::OF );
+				operative zf( flags::ZF );
+
+				block
+					->js( ( zf == 0 ) & ( sf == of ),
+						  load_operand( block, insn, 0 ),
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
+			X86_INS_JLE,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				operative sf( flags::SF );
+				operative of( flags::OF );
+				operative zf( flags::ZF );
+
+				block
+					->js( ( zf == 1 ) & ( sf != of ),
+						  load_operand( block, insn, 0 ),
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
+			X86_INS_JL,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				operative sf( flags::SF );
+				operative of( flags::OF );
+
+				block
+					->js( ( sf != of ),
+						  load_operand( block, insn, 0 ),
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
+			X86_INS_JNE,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				operative zf( flags::ZF );
+
+				block
+					->js( ( zf == 0 ),
+						  load_operand( block, insn, 0 ),
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
+			X86_INS_JNO,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				operative of( flags::OF );
+
+				block
+					->js( ( of == 0 ),
+						  load_operand( block, insn, 0 ),
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
+			X86_INS_JNP,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				operative pf( flags::PF );
+
+				block
+					->js( ( pf == 0 ),
+						  load_operand( block, insn, 0 ),
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
+			X86_INS_JNS,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				operative sf( flags::SF );
+
+				block
+					->js( ( sf == 0 ),
+						  load_operand( block, insn, 0 ),
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
+			X86_INS_JO,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				operative of( flags::OF );
+
+				block
+					->js( ( of == 1 ),
+						  load_operand( block, insn, 0 ),
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
+			X86_INS_JP,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				operative pf( flags::PF );
+
+				block
+					->js( ( pf == 1 ),
+						  load_operand( block, insn, 0 ),
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
+			X86_INS_JRCXZ,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				block
+					->js( ( X86_REG_RCX == 0 ),
+						  load_operand( block, insn, 0 ),
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
+			X86_INS_JS,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				operative sf( flags::SF );
+
+				block
+					->js( ( sf == 1 ),
+						  load_operand( block, insn, 0 ),
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
 			X86_INS_CALL,
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
