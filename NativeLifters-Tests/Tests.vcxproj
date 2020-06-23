@@ -182,6 +182,7 @@
   <ItemGroup>
     <ClInclude Include="emulator\emulator.hpp" />
     <ClInclude Include="emulator\rwx_allocator.hpp" />
+    <ClInclude Include="fuzzer.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

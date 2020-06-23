@@ -11,9 +11,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="NativeLifters-Tests.licenseheader" />
-    <None Include="emulator\_emulator.masm">
-      <Filter>Simple Emulator</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
@@ -30,5 +27,9 @@
     <ClInclude Include="emulator\rwx_allocator.hpp">
       <Filter>Simple Emulator</Filter>
     </ClInclude>
+    <ClInclude Include="fuzzer.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="emulator\_emulator.masm" />
   </ItemGroup>
 </Project>
