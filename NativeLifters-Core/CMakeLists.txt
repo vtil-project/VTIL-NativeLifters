@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.16)
+
 project(NativeLifters-Core)
 
 add_library(${PROJECT_NAME} STATIC
