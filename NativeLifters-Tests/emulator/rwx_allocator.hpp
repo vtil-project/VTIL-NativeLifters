@@ -27,7 +27,7 @@ namespace mem
 	    inline T* allocate( size_t count ) { return ( T* ) allocate_rwx( count * sizeof( T ) ); }
 	    inline void deallocate( T* pointer, size_t ) noexcept { free_rwx( pointer ); }
 
-	    constexpr bool operator==( const rwx_allocator<T>& ) { return true; }
-	    constexpr bool operator!=( const rwx_allocator<T>& ) { return false; }
+        template <typename T2> constexpr bool operator==( const rwx_allocator<T2>& ) { return true; }
+        template <typename T2> constexpr bool operator!=( const rwx_allocator<T2>& ) { return false; }
     };
 };
