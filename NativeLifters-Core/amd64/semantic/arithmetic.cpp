@@ -264,6 +264,7 @@ namespace vtil::lifter::amd64
 	// our "undefined behavior" is that the AF flag does not change during this 
 	// operation. :^)
 
+	// TODO: THE FLAGS SET HERE ARE WRONG; WE NEED TO CHECK FOR ZERO BEFORE MODIFYING THEM!
 	void process_shl( basic_block* block, const instruction_info& insn )
 	{
 		auto lhs = load_operand( block, insn, 0 );
@@ -282,6 +283,7 @@ namespace vtil::lifter::amd64
 		store_operand( block, insn, 0, result );
 	}
 
+	// TODO: THE FLAGS SET HERE ARE WRONG; WE NEED TO CHECK FOR ZERO BEFORE MODIFYING THEM!
 	void process_shr( basic_block* block, const instruction_info& insn )
 	{
 		auto lhs = load_operand( block, insn, 0 );
@@ -299,6 +301,7 @@ namespace vtil::lifter::amd64
 		store_operand( block, insn, 0, result );
 	}
 
+	// TODO: THE FLAGS SET HERE ARE WRONG; WE NEED TO CHECK FOR ZERO BEFORE MODIFYING THEM!
 	void process_sar( basic_block* block, const instruction_info& insn )
 	{
 		auto lhs = operative( load_operand( block, insn, 0 ) );
@@ -513,6 +516,32 @@ namespace vtil::lifter::amd64
 		store_operand( block, insn, 0, tmp );
 	}
 
+	void process_xadd( basic_block* block, const instruction_info& insn )
+	{
+		auto lhs = load_operand( block, insn, 0 );
+		auto rhs = load_operand( block, insn, 1 );
+
+		auto tmp = block->tmp( lhs.bit_count( ) );
+		block
+			->mov( tmp, lhs )
+			->add( tmp, rhs );
+
+		process_flags<flags::flag_operation::add>( block, lhs, rhs, tmp );
+
+		store_operand( block, insn, 0, tmp );
+		store_operand( block, insn, 1, rhs );
+	}
+
+	void process_shld( basic_block* block, const instruction_info& insn )
+	{
+
+	}
+
+	void process_shrd( basic_block* block, const instruction_info& insn )
+	{
+
+	}
+
 	void initialize_arithmetic( )
 	{
 		operand_mappings[ X86_INS_ADC ] = process_adc;
@@ -545,5 +574,8 @@ namespace vtil::lifter::amd64
 		operand_mappings[ X86_INS_BSWAP ] = process_bswap;
 		operand_mappings[ X86_INS_BSF ] = process_bsf;
 		operand_mappings[ X86_INS_BSR ] = process_bsr;
+		operand_mappings[ X86_INS_XADD ] = process_xadd;
+		operand_mappings[ X86_INS_SHLD ] = process_shld;
+		operand_mappings[ X86_INS_SHRD ] = process_shrd;
 	}
 }

@@ -125,11 +125,40 @@ namespace vtil::lifter
 			batch_translator translator = { block };
 			vtil::lifter::operative::translator = &translator;
 
-			block
-				->mov( X86_REG_RIP, vip + insn.bytes.size( ) );
+			block->mov( X86_REG_RIP, vip + insn.bytes.size( ) );
 
 			x86_insn opcode = static_cast< x86_insn >( insn.id );
-			if ( auto mapping = operand_mappings.find( opcode ); mapping == operand_mappings.cend( ) )
+			auto mapping = operand_mappings.find( opcode ); 
+
+			auto is_invalid = mapping == operand_mappings.cend( );
+			if ( !is_invalid )
+			{
+				for ( auto& operand : insn.operands )
+				{
+					if ( operand.type == X86_OP_REG && !vtil::amd64::is_generic( operand.reg ) )
+					{
+						is_invalid = true;
+						break;
+					}
+
+					if ( operand.type == X86_OP_MEM )
+					{
+						if ( operand.mem.base != X86_OP_INVALID && !vtil::amd64::is_generic( operand.mem.base ) )
+						{
+							is_invalid = true;
+							break;
+						}
+
+						if ( operand.mem.index != X86_OP_INVALID && !vtil::amd64::is_generic( operand.mem.index ) )
+						{
+							is_invalid = true;
+							break;
+						}
+					}
+				}
+			}
+
+			if ( is_invalid )
 			{
 				for ( auto& operand : insn.operands )
 				{
