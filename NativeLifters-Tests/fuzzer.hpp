@@ -111,6 +111,10 @@ static void fuzz_step( const lifter::byte_input& input )
 		vm.write_register( op.reg(), value );
 	}
 
+	// Debug
+	//
+	//optimizer::apply_all( rtn );
+
 	// Begin executing in the virtual machine:
 	//
 	auto it = rtn->entry_point->begin();
@@ -153,6 +157,12 @@ static void fuzz_step( const lifter::byte_input& input )
 		unreachable();
 	}
 	
+	// Dump some info.
+	//
+	//debug::dump( rtn );
+	//for ( auto& [k, v] : vm.register_state )
+	//	logger::log( "%s => %s\n", k, v );
+
 	// Begin executing in the hardware emulator.
 	//
 	std::vector<uint8_t, mem::rwx_allocator<uint8_t>> test = { 
@@ -161,7 +171,6 @@ static void fuzz_step( const lifter::byte_input& input )
 	};
 	test.push_back( 0xC3 );
 	emu.invoke( test.data() );
-
 
 	bool passed = true;
 	// Print register state:
@@ -184,7 +193,6 @@ static void fuzz_step( const lifter::byte_input& input )
 	//
 	math::bit_vector emu_v = math::bit_vector{ emu.v_rflags, 32 };
 	math::bit_vector vm_v = vm.read_register( REG_FLAGS ).value.resize( 32 );
-
 	if ( ( vm_v.known_mask() & emu.v_rflags ) != vm_v.known_one() )
 	{
 		log<CON_BRG>( "%-8s: ", "eflags" );

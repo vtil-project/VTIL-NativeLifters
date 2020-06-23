@@ -212,7 +212,7 @@ namespace vtil::lifter::amd64::flags
 	{
 		static operative flag( const operative& lhs, const operative& rhs, const operative& result )
 		{
-			return result < lhs || result < rhs;
+			return __ugreat( lhs, result );
 		}
 	};
 
@@ -223,7 +223,7 @@ namespace vtil::lifter::amd64::flags
 	{
 		static operative flag( const operative& lhs, const operative& rhs, const operative& result )
 		{
-			return lhs < rhs;
+			return __ugreat( result, lhs );
 		}
 	};
 
