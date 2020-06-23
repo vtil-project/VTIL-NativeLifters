@@ -62,7 +62,7 @@ static void fuzz_step( const lifter::byte_input& input )
 		//
 		static std::random_device rd;
 		static std::mt19937 gen( rd() );
-		static std::uniform_int_distribution<uint64_t> distrib = {};
+		static std::uniform_int_distribution<uint64_t> distrib{};
 		return distrib( gen );
 	};
 
