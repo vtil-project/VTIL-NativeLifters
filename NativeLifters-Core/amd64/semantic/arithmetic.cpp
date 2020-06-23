@@ -308,6 +308,154 @@ namespace vtil::lifter::amd64
 				}
 			}
 		},
+		{
+			X86_INS_DIV,
+			[]( basic_block* block, const instruction_info& insn )
+			{
+				auto op = load_operand( block, insn, 0 );
+
+				block
+					->mov( flags::CF, UNDEFINED )
+					->mov( flags::OF, UNDEFINED )
+					->mov( flags::PF, UNDEFINED )
+					->mov( flags::AF, UNDEFINED )
+					->mov( flags::ZF, UNDEFINED )
+					->mov( flags::SF, UNDEFINED );
+
+				switch ( op.size() )
+				{
+					case 1:
+					{
+						auto [t0, t1, t2] = block->tmp( 8, 8, 8 );
+						block
+							->mov( t0, 0 )
+							->mov( t1, X86_REG_AX )
+							->mov( t2, t1 )
+							->div( t1, t0, op )
+							->rem( t2, t0, op )
+							->mov( X86_REG_AL, t1 )
+							->mov( X86_REG_AH, t2 );
+						break;
+					}
+
+					case 2:
+					{
+						auto [t0, t1, t2] = block->tmp( 16, 16, 16 );
+						block
+							->mov( t0, X86_REG_DX )
+							->mov( t1, X86_REG_AX )
+							->mov( t2, t1 )
+							->div( t1, t0, op )
+							->rem( t2, t0, op )
+							->mov( X86_REG_AX, t1 )
+							->mov( X86_REG_DX, t2 );
+						break;
+					}
+
+					case 4:
+					{
+						auto [t0, t1, t2] = block->tmp( 32, 32, 32 );
+						block
+							->mov( t0, X86_REG_EDX )
+							->mov( t1, X86_REG_EAX )
+							->mov( t2, t1 )
+							->div( t1, t0, op )
+							->rem( t2, t0, op )
+							->mov( X86_REG_EAX, t1 )
+							->mov( X86_REG_EDX, t2 );
+						break;
+					}
+
+					case 8:
+					{
+						auto [t0, t1, t2] = block->tmp( 64, 64, 64 );
+						block
+							->mov( t0, X86_REG_RDX )
+							->mov( t1, X86_REG_RAX )
+							->mov( t2, t1 )
+							->div( t1, t0, op )
+							->rem( t2, t0, op )
+							->mov( X86_REG_RAX, t1 )
+							->mov( X86_REG_RDX, t2 );
+						break;
+					}
+				}
+			}
+		},
+		{
+			X86_INS_IDIV,
+			[]( basic_block* block, const instruction_info& insn )
+			{
+				auto op = load_operand( block, insn, 0 );
+
+				block
+					->mov( flags::CF, UNDEFINED )
+					->mov( flags::OF, UNDEFINED )
+					->mov( flags::PF, UNDEFINED )
+					->mov( flags::AF, UNDEFINED )
+					->mov( flags::ZF, UNDEFINED )
+					->mov( flags::SF, UNDEFINED );
+
+				switch ( op.size() )
+				{
+					case 1:
+					{
+						auto [t0, t1, t2] = block->tmp( 8, 8, 8 );
+						block
+							->mov( t0, 0 )
+							->mov( t1, X86_REG_AX )
+							->mov( t2, t1 )
+							->idiv( t1, t0, op )
+							->irem( t2, t0, op )
+							->mov( X86_REG_AL, t1 )
+							->mov( X86_REG_AH, t2 );
+						break;
+					}
+
+					case 2:
+					{
+						auto [t0, t1, t2] = block->tmp( 16, 16, 16 );
+						block
+							->mov( t0, X86_REG_DX )
+							->mov( t1, X86_REG_AX )
+							->mov( t2, t1 )
+							->idiv( t1, t0, op )
+							->irem( t2, t0, op )
+							->mov( X86_REG_AX, t1 )
+							->mov( X86_REG_DX, t2 );
+						break;
+					}
+
+					case 4:
+					{
+						auto [t0, t1, t2] = block->tmp( 32, 32, 32 );
+						block
+							->mov( t0, X86_REG_EDX )
+							->mov( t1, X86_REG_EAX )
+							->mov( t2, t1 )
+							->idiv( t1, t0, op )
+							->irem( t2, t0, op )
+							->mov( X86_REG_EAX, t1 )
+							->mov( X86_REG_EDX, t2 );
+						break;
+					}
+
+					case 8:
+					{
+						auto [t0, t1, t2] = block->tmp( 64, 64, 64 );
+						block
+							->mov( t0, X86_REG_RDX )
+							->mov( t1, X86_REG_RAX )
+							->mov( t2, t1 )
+							->idiv( t1, t0, op )
+							->irem( t2, t0, op )
+							->mov( X86_REG_RAX, t1 )
+							->mov( X86_REG_RDX, t2 );
+						break;
+					}
+				}
+			}
+		},
 		// NOTE:
 		// In a shift, AF is either set to undefined or the same value.
 		// This is annoying to implement and even more annoying to simplify, so
