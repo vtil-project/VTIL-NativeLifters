@@ -76,7 +76,7 @@ namespace vtil::lifter::amd64::flags
 	//
 	static operative parity( const operative& value )
 	{
-		return ( ( value & 0xFF ).popcnt() & 1 ) != 0;
+		return ( ( value & 0xFF ).popcnt() & 1 ) == 0;
 	}
 
 	// Specifies the type of operation flags should be determined for
