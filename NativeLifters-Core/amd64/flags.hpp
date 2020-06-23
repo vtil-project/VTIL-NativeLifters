@@ -55,14 +55,14 @@ namespace vtil::lifter::amd64::flags
 	//
 	static operative aux_carry( const operative& lhs, const operative& rhs, const operative& result )
 	{
-		return ( lhs ^ rhs ^ result ) & 0x10;
+		return ( ( lhs ^ rhs ^ result ) & 0x10 ) != 0;
 	}
 
 	// Checks AF
 	//
 	static operative aux_carry( const operative& lhs, const operative& rhs, const operative& carry, const operative& result )
 	{
-		return ( lhs ^ rhs ^ carry ^ result ) & 0x10;
+		return ( ( lhs ^ rhs ^ carry ^ result ) & 0x10 ) != 0;
 	}
 
 	// Checks SF
@@ -76,7 +76,7 @@ namespace vtil::lifter::amd64::flags
 	//
 	static operative parity( const operative& value )
 	{
-		return ( ( value & 0xFF ).popcnt() & 1 ) == 0;
+		return ( ( value & 0xFF ).popcnt() & 1 ) != 0;
 	}
 
 	// Specifies the type of operation flags should be determined for
