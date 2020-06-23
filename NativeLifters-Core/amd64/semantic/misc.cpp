@@ -112,6 +112,37 @@ namespace vtil::lifter::amd64
 					block->add( X86_REG_RSP, 8 );
 			}
 		},
+		{
+			X86_INS_XCHG,
+			[]( basic_block* block, const instruction_info& insn )
+			{
+				auto op0 = load_operand( block, insn, 0 );
+				auto op1 = load_operand( block, insn, 1 );
+
+				auto [t0, t1] = block->tmp( op0.bit_count(), op1.bit_count() );
+
+				block
+					->mov( t0, op0 )
+					->mov( t1, op1 );
+
+				store_operand( block, insn, 0, t1 );
+				store_operand( block, insn, 1, t0 );
+			}
+		},
+		{
+			X86_INS_PUSHFQ,
+			[]( basic_block* block, const instruction_info& insn )
+			{
+				block->pushf();
+			}
+		},
+		{
+			X86_INS_POPFQ,
+			[]( basic_block* block, const instruction_info& insn )
+			{
+				block->popf();
+			}
+		}
 	};
 
 	static bool __init = register_subhandlers( std::move( subhandlers ) );	
