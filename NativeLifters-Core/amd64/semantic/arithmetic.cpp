@@ -387,7 +387,7 @@ namespace vtil::lifter::amd64
 
 				block
 					->mov( flags::CF, carry_result)
-					->mov( flags::OF, ( cf^ flags::sign( result ) ));
+					->mov( flags::OF, ( cf ^ flags::sign( result ) ));
 
 				store_operand( block, insn, 0, result);
 			}
@@ -405,7 +405,7 @@ namespace vtil::lifter::amd64
 
 				block
 					->mov( flags::CF, carry_result)
-					->mov( flags::OF, ( cf^ flags::sign( lhs ) ));
+					->mov( flags::OF, ( cf ^ flags::sign( lhs ) ));
 
 				store_operand( block, insn, 0, result);
 			}

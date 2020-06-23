@@ -40,28 +40,22 @@ struct byte_input
 
 	bool is_valid( vip_t vip )
 	{
-		printf( "check %llx\n", vip );
 		return vip < size;
 	}
 
 	uint8_t* get_at( vip_t offs )
 	{
-		printf( "read %llx\n", offs );
 		return &bytes[ offs ];
 	}
 };
 
 using amd64_recursive_descent = lifter::recursive_descent<byte_input, lifter::amd64::lifter_t>;
 
-uint8_t code [ ] { 0x67, 0x48, 0x8D, 0x05, 0x01, 0x00, 0x00, 0x00 };
+uint8_t code [ ] { 0x67, 0x48, 0x8D, 0x05, 0x01, 0x00, 0x00, 0x00, 0x48, 0x01, 0xC0 };
 
 int main( int argc, char** argv )
 {
-	// TODO: CONVERT INTO NEW FORMAT
-	// TODO: CONVERT INTO NEW FORMAT
-	lifter::amd64::initialize_flags();
-	// TODO: CONVERT INTO NEW FORMAT
-	// TODO: CONVERT INTO NEW FORMAT
+	printf( "handler count: %d\n", lifter::amd64::instruction_handlers.size() );
 
 	byte_input input = { code, sizeof(code) };
 

@@ -54,12 +54,6 @@ namespace vtil::lifter::amd64
 	register_desc get_disp_from_operand( basic_block* block, const operand_info& operand );
 	void store_operand( basic_block* block, const instruction_info& insn, size_t idx, const operand& source );
 
-	// TODO: CONVERT INTO NEW FORMAT
-	// TODO: CONVERT INTO NEW FORMAT
-	void initialize_flags();
-	// TODO: CONVERT INTO NEW FORMAT
-	// TODO: CONVERT INTO NEW FORMAT
-
 	static bool register_subhandlers( handler_map_t&& sub_handlers )
 	{
 		for ( auto&& [k, v] : sub_handlers )

@@ -112,5 +112,5 @@ namespace vtil::lifter::amd64
 		},
 	};
 
-	static bool __init = register_subhandlers( std::move( subhandlers ) );
+	static bool __init = register_subhandlers( std::move( subhandlers ) );	
 }

@@ -251,34 +251,32 @@ namespace vtil::lifter::amd64
 		store_operand( block, insn, 0, ( lhs | ( 1ULL << result ) ) );
 	}
 
-	void initialize_flags()
-	{
-		instruction_handlers[ X86_INS_CLC ] = process_clc;
-		instruction_handlers[ X86_INS_CLD ] = process_cld;
-		instruction_handlers[ X86_INS_CLI ] = process_cli;
-		instruction_handlers[ X86_INS_STC ] = process_stc;
-		instruction_handlers[ X86_INS_STD ] = process_std;
-		instruction_handlers[ X86_INS_STI ] = process_sti;
-		instruction_handlers[ X86_INS_CMC ] = process_cmc;
-		instruction_handlers[ X86_INS_SETA ] = process_seta;
-		instruction_handlers[ X86_INS_SETAE ] = process_setae;
-		instruction_handlers[ X86_INS_SETB ] = process_setb;
-		instruction_handlers[ X86_INS_SETBE ] = process_setbe;
-		instruction_handlers[ X86_INS_SETE ] = process_sete;
-		instruction_handlers[ X86_INS_SETGE ] = process_setge;
-		instruction_handlers[ X86_INS_SETG ] = process_setg;
-		instruction_handlers[ X86_INS_SETLE ] = process_setle;
-		instruction_handlers[ X86_INS_SETL ] = process_setl;
-		instruction_handlers[ X86_INS_SETNE ] = process_setne;
-		instruction_handlers[ X86_INS_SETNO ] = process_setno;
-		instruction_handlers[ X86_INS_SETNP ] = process_setnp;
-		instruction_handlers[ X86_INS_SETNS ] = process_setns;
-		instruction_handlers[ X86_INS_SETO ] = process_seto;
-		instruction_handlers[ X86_INS_SETP ] = process_setp;
-		instruction_handlers[ X86_INS_SETS ] = process_sets;
-		instruction_handlers[ X86_INS_BT ] = process_bt;
-		instruction_handlers[ X86_INS_BTC ] = process_btc;
-		instruction_handlers[ X86_INS_BTR ] = process_btr;
-		instruction_handlers[ X86_INS_BTS ] = process_bts;
-	}
+	static bool __init = register_subhandlers( {
+		{X86_INS_CLD  , process_cld },
+		{X86_INS_CLI  , process_cli },
+		{X86_INS_STC  , process_stc },
+		{X86_INS_STD  , process_std },
+		{X86_INS_STI  , process_sti },
+		{X86_INS_CMC  , process_cmc },
+		{X86_INS_SETA , process_seta },
+		{X86_INS_SETAE, process_setae },
+		{X86_INS_SETB , process_setb },
+		{X86_INS_SETBE, process_setbe },
+		{X86_INS_SETE , process_sete },
+		{X86_INS_SETGE, process_setge },
+		{X86_INS_SETG , process_setg },
+		{X86_INS_SETLE, process_setle },
+		{X86_INS_SETL , process_setl },
+		{X86_INS_SETNE, process_setne },
+		{X86_INS_SETNO, process_setno },
+		{X86_INS_SETNP, process_setnp },
+		{X86_INS_SETNS, process_setns },
+		{X86_INS_SETO , process_seto },
+		{X86_INS_SETP , process_setp },
+		{X86_INS_SETS , process_sets },
+		{X86_INS_BT   , process_bt },
+		{X86_INS_BTC  , process_btc },
+		{X86_INS_BTR  , process_btr },
+		{X86_INS_BTS  , process_bts }
+	} );
 }
