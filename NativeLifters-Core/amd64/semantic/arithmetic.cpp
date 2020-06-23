@@ -136,13 +136,6 @@ namespace vtil::lifter::amd64
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
 				auto rhs = load_operand( block, insn, 0 );
-
-				block
-					->mov( flags::PF, UNDEFINED )
-					->mov( flags::AF, UNDEFINED )
-					->mov( flags::ZF, UNDEFINED )
-					->mov( flags::SF, UNDEFINED );
-
 				switch ( rhs.size() )
 				{
 					case 1:
@@ -208,12 +201,6 @@ namespace vtil::lifter::amd64
 			X86_INS_IMUL,
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
-				block
-					->mov( flags::PF, UNDEFINED )
-					->mov( flags::AF, UNDEFINED )
-					->mov( flags::ZF, UNDEFINED )
-					->mov( flags::SF, UNDEFINED );
-
 				switch ( insn.operands.size() )
 				{
 					case 1:
