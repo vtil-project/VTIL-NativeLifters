@@ -46,7 +46,7 @@ int main( int argc, char** argv )
 	for ( auto& ins : dasm )
 		logger::log( "%s\n", ins.to_string() );
 
-	for( int i = 0; i < 10; i++ )
+	for ( int i = 0; i < 128; i++ )
 		fuzz_step( input );
 
 	amd64_recursive_descent rec_desc( &input, 0 );
