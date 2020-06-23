@@ -193,7 +193,7 @@ static void fuzz_step( const lifter::byte_input& input )
 		passed = false;
 	}
 	
-	if ( !passed )
+	if ( passed )
 		log<CON_PRP>( "Test passed!\n" );
 	else
 		log<CON_RED>( "Test failed!\n" );
