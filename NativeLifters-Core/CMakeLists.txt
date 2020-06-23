@@ -12,4 +12,4 @@ add_library(${PROJECT_NAME} STATIC
 
 target_include_directories(${PROJECT_NAME} PUBLIC includes)
 
-target_link_libraries(${PROJECT_NAME} VTIL)
+target_link_libraries(${PROJECT_NAME} PUBLIC VTIL)
