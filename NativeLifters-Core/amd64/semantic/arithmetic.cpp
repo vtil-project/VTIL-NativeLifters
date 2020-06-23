@@ -409,6 +409,8 @@ namespace vtil::lifter::amd64
 			X86_INS_RCL,
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
+				// TODO: Fix me:
+				unreachable();
 				auto lhs = operative( load_operand( block, insn, 0 ) );
 				auto rhs = operative( load_operand( block, insn, 1 ) ) & ( lhs.op.size() == 8 ? 0x3F : 0x1F );
 				auto cf = operative( flags::CF );
@@ -427,6 +429,8 @@ namespace vtil::lifter::amd64
 			X86_INS_RCR,
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
+				// TODO: Fix me:
+				unreachable();
 				auto lhs = operative( load_operand( block, insn, 0 ) );
 				auto rhs = operative( load_operand( block, insn, 1 ) ) & ( lhs.op.size() == 8 ? 0x3F : 0x1F );
 				auto cf = operative( flags::CF );
