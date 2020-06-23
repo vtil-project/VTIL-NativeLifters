@@ -69,6 +69,26 @@ namespace vtil::lifter::amd64
 			}
 		},
 		{
+			X86_INS_AAA,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto af = operative( flags::AF );
+				auto al = X86_REG_AL;
+				auto ax = X86_REG_AX;
+
+				//
+				// https://www.youtube.com/watch?v=fkFrAW217ZU
+				//
+				auto result = ( ( ( operative( al ) & 0xF ) > 9 ) | ( af == 1 ) );
+
+				block
+					->mov( X86_REG_AX, __if( result, 0x106 ) )
+					->mov( flags::AF, result )
+					->mov( flags::CF, result )
+					->mov( X86_REG_AL, operative( X86_REG_AL ) + ( operative( X86_REG_AL ) & 0xF ) );
+			}
+		},
+		{
 			X86_INS_SBB,
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
