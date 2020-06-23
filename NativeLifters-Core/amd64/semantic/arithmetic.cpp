@@ -34,12 +34,12 @@ namespace vtil::lifter::amd64
 {
 	// Process the flags for a specific arithmetic instruction.
 	//
-	template<flags::flag_operation Op>
+	template<flags::flag_operation op>
 	void process_flags( basic_block* block, const operand& lhs, const operand& rhs, const operand& result )
 	{
 		block
-			->mov( flags::OF, flags::overflow<Op>::flag( lhs, rhs, result ) )
-			->mov( flags::CF, flags::carry<Op>::flag( lhs, rhs, result ) )
+			->mov( flags::OF, flags::overflow<op>::flag( lhs, rhs, result ) )
+			->mov( flags::CF, flags::carry<op>::flag( lhs, rhs, result ) )
 			->mov( flags::SF, flags::sign( result ) )
 			->mov( flags::ZF, flags::zero( result ) )
 			->mov( flags::AF, flags::aux_carry( lhs, rhs, result ) )

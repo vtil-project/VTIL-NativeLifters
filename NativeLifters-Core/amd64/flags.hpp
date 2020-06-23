@@ -35,14 +35,14 @@ namespace vtil::lifter::amd64::flags
 {
 	// Individual flag registers
 	//
-	inline static const vtil::register_desc CF = { vtil::register_physical | vtil::register_flags, 0, 1, 0 };
-	inline static const vtil::register_desc PF = { vtil::register_physical | vtil::register_flags, 0, 1, 2 };
-	inline static const vtil::register_desc AF = { vtil::register_physical | vtil::register_flags, 0, 1, 4 };
-	inline static const vtil::register_desc ZF = { vtil::register_physical | vtil::register_flags, 0, 1, 6 };
-	inline static const vtil::register_desc SF = { vtil::register_physical | vtil::register_flags, 0, 1, 7 };
-	inline static const vtil::register_desc IF = { vtil::register_physical | vtil::register_flags, 0, 1, 9 };
-	inline static const vtil::register_desc DF = { vtil::register_physical | vtil::register_flags, 0, 1, 10 };
-	inline static const vtil::register_desc OF = { vtil::register_physical | vtil::register_flags, 0, 1, 11 };
+	inline static const register_desc CF = { register_physical | register_flags, 0, 1, 0 };
+	inline static const register_desc PF = { register_physical | register_flags, 0, 1, 2 };
+	inline static const register_desc AF = { register_physical | register_flags, 0, 1, 4 };
+	inline static const register_desc ZF = { register_physical | register_flags, 0, 1, 6 };
+	inline static const register_desc SF = { register_physical | register_flags, 0, 1, 7 };
+	inline static const register_desc IF = { register_physical | register_flags, 0, 1, 9 };
+	inline static const register_desc DF = { register_physical | register_flags, 0, 1, 10 };
+	inline static const register_desc OF = { register_physical | register_flags, 0, 1, 11 };
 
 	// Checks ZF
 	//
@@ -98,7 +98,7 @@ namespace vtil::lifter::amd64::flags
 
 	// Overflow bit varies per operation, so it cannot have a generic computation
 	//
-	template <flag_operation Op>
+	template <flag_operation op>
 	struct overflow;
 
 	// Signed / Unsigned Add
