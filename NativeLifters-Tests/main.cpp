@@ -30,36 +30,26 @@
 #include <vtil/arch>
 #include <vtil/compiler>
 #include <memory>
+#include "fuzzer.hpp"
 
 using namespace vtil;
-
-struct byte_input
-{
-	uint8_t* bytes;
-	uint64_t size;
-
-	bool is_valid( vip_t vip )
-	{
-		return vip < size;
-	}
-
-	uint8_t* get_at( vip_t offs )
-	{
-		return &bytes[ offs ];
-	}
-};
-
-using amd64_recursive_descent = lifter::recursive_descent<byte_input, lifter::amd64::lifter_t>;
-
-uint8_t code [ ] { 0xE8, 0x02, 0x00, 0x00, 0x00, 0xEB, 0x01, 0xC3, 0x31, 0xC0, 0xE8, 0xF8, 0xFF, 0xFF, 0xFF, 0x31, 0xC0, 0xFF, 0xE0 };
+using amd64_recursive_descent = lifter::recursive_descent<lifter::byte_input, lifter::amd64::lifter_t>;
 
 int main( int argc, char** argv )
 {
 	printf( "handler count: %lld\n", lifter::amd64::instruction_handlers.size() );
 
-	byte_input input = { code, sizeof( code ) };
+	uint8_t code[] = { 0x48, 0x39, 0xD8, 0x0F, 0x97, 0xC0 };
+	lifter::byte_input input = { code, sizeof(code) };
 
-	lifter::recursive_descent<byte_input, lifter::amd64::lifter_t> rec_desc( &input, 0 );
+	auto dasm = amd64::disasm( code, 0, sizeof( code ) );
+	for ( auto& ins : dasm )
+		logger::log( "%s\n", ins.to_string() );
+
+	for( int i = 0; i < 10; i++ )
+		fuzz_step( input );
+
+	amd64_recursive_descent rec_desc( &input, 0 );
 	rec_desc.entry->owner->routine_convention = amd64::preserve_all_convention;
 	rec_desc.entry->owner->routine_convention.purge_stack = false;
 	rec_desc.populate( rec_desc.entry );
