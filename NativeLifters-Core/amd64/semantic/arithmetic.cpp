@@ -504,7 +504,7 @@ namespace vtil::lifter::amd64
 				break;
 
 			default:
-				fassert( false );
+				unreachable();
 				break;
 		}
 

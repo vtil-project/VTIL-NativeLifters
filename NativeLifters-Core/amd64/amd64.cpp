@@ -28,12 +28,10 @@
 #include "amd64.hpp"
 #include "flags.hpp"
 
-#include <vtil/amd64>
-
 namespace vtil::lifter::amd64
 {
 	// Create a series of instructions representing memory displacement given the current operand and basic block.
-// 
+	// 
 	register_desc get_disp_from_operand( basic_block* block, const operand_info& operand )
 	{
 		// Create a temporary register to store the current displacement.
@@ -90,7 +88,7 @@ namespace vtil::lifter::amd64
 				return { tmp };
 			}
 			default:
-				fassert( false );
+				unreachable();
 		}
 	}
 
@@ -116,7 +114,7 @@ namespace vtil::lifter::amd64
 			}
 			case X86_OP_IMM:
 			default:
-				fassert( false );
+				unreachable();
 		}
 	}
 
@@ -148,7 +146,7 @@ namespace vtil::lifter::amd64
 		code += insn.bytes.size();
 
 		batch_translator translator = { block };
-		vtil::lifter::operative::translator = &translator;
+		lifter::operative::translator = &translator;
 
 		block->mov( X86_REG_RIP, vip + insn.bytes.size() );
 

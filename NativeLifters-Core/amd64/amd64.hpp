@@ -35,10 +35,11 @@
 //
 namespace vtil::lifter::amd64
 {
-	using instruction_info = vtil::amd64::instruction;
 	using operand_info = cs_x86_op;
+	using instruction_info = vtil::amd64::instruction;
+	using handle_map_t = std::map<x86_insn, void(*)( basic_block* block, const instruction_info& insn )>;
 
-	inline std::map<x86_insn, void( * )( basic_block* block, const instruction_info& insn )> operand_mappings;
+	inline std::map<x86_insn, void(*)( basic_block* block, const instruction_info& insn )> operand_mappings;
 
 	void initialize_mappings();
 
