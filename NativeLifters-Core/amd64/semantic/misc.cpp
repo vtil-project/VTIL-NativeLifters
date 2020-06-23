@@ -30,74 +30,87 @@
 
 namespace vtil::lifter::amd64
 {
-	void process_invalid( basic_block* block, const instruction_info& insn )
-	{
-		block->vemits( "int 0xB" );
-		block->vexit( invalid_vip );
-	}
-
-	void process_lea( basic_block* block, const instruction_info& insn )
-	{
-		store_operand( block, insn, 0, get_disp_from_operand( block, insn.operands[ 1 ] ) );
-	}
-
-	void process_mov( basic_block* block, const instruction_info& insn )
-	{
-		store_operand( block, insn, 0, load_operand( block, insn, 1 ) );
-	}
-
-	void process_movsx( basic_block* block, const instruction_info& insn )
-	{
-		auto result = block->tmp( insn.operands[ 0 ].size * 8 );
-		block->movsx( result, load_operand( block, insn, 1 ) );
-		store_operand( block, insn, 0, result );
-	}
-
-	void process_push( basic_block* block, const instruction_info& insn )
-	{
-		auto oper = load_operand( block, insn, 0 );
-
-		if ( oper.bit_count() == 16 )
+	// List of handlers.
+	//
+	static handler_map_t subhandlers = {
 		{
-			block
-				->sub( X86_REG_RSP, 2 );
-		}
-		else
+			X86_INS_INVALID,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				block->vemits( "int 0xB" );
+				block->vexit( invalid_vip );
+			}
+		},
 		{
-			block
-				->sub( X86_REG_RSP, 8 );
-		}
-
-		block
-			->str( X86_REG_RSP, 0, oper );
-	}
-
-	void process_pop( basic_block* block, const instruction_info& insn )
-	{
-		store_operand( block, insn, 0, { X86_REG_RSP } );
-
-		if ( insn.operands[ 0 ].size == 2 )
+			X86_INS_LEA,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				store_operand( block, insn, 0, get_disp_from_operand( block, insn.operands[ 1 ] ) );
+			}
+		},
 		{
-			block
-				->add( X86_REG_RSP, 2 );
-		}
-		else
+			X86_INS_MOV,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				store_operand( block, insn, 0, load_operand( block, insn, 1 ) );
+			}
+		},
 		{
-			block
-				->add( X86_REG_RSP, 8 );
-		}
-	}
+			X86_INS_MOVABS,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				store_operand( block, insn, 0, load_operand( block, insn, 1 ) );
+			}
+		},
+		{
+			X86_INS_MOVZX,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				store_operand( block, insn, 0, load_operand( block, insn, 1 ) );
+			}
+		},
+		{
+			X86_INS_MOVSX,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto result = block->tmp( insn.operands[ 0 ].size * 8 );
+				block->movsx( result, load_operand( block, insn, 1 ) );
+				store_operand( block, insn, 0, result );
+			}
+		},
+		{
+			X86_INS_MOVSXD,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto result = block->tmp( insn.operands[ 0 ].size * 8 );
+				block->movsx( result, load_operand( block, insn, 1 ) );
+				store_operand( block, insn, 0, result );
+			}
+		},
+		{
+			X86_INS_PUSH,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto oper = load_operand( block, insn, 0 );
+				if ( oper.bit_count() == 16 )
+					block->sub( X86_REG_RSP, 2 );
+				else
+					block->sub( X86_REG_RSP, 8 );
+				block->str( X86_REG_RSP, 0, oper );
+			}
+		},
+		{
+			X86_INS_POP,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				store_operand( block, insn, 0, { X86_REG_RSP } );
+				if ( insn.operands[ 0 ].size == 2 )
+					block->add( X86_REG_RSP, 2 );
+				else
+					block->add( X86_REG_RSP, 8 );
+			}
+		},
+	};
 
-	void initialize_misc()
-	{
-		operand_mappings[ X86_INS_INVALID ] = process_invalid;
-		operand_mappings[ X86_INS_LEA ] = process_lea;
-		operand_mappings[ X86_INS_MOV ] = process_mov;
-		operand_mappings[ X86_INS_MOVABS ] = process_mov;
-		operand_mappings[ X86_INS_MOVZX ] = process_mov;
-		operand_mappings[ X86_INS_MOVSX ] = process_movsx;
-		operand_mappings[ X86_INS_MOVSXD ] = process_movsx;
-		operand_mappings[ X86_INS_PUSH ] = process_push;
-		operand_mappings[ X86_INS_POP ] = process_pop;
-	}
+	static bool __init = register_subhandlers( std::move( subhandlers ) );
 }

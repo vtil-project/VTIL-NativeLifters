@@ -30,28 +30,33 @@
 
 // Branching instructions.
 // 
-
 namespace vtil::lifter::amd64
 {
-	void process_jmp( basic_block* block, const instruction_info& insn )
-	{
-		block->jmp( load_operand( block, insn, 0 ) );
-	}
+	// List of handlers.
+	//
+	static handler_map_t subhandlers = {
+		{
+			X86_INS_JMP,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				block->jmp( load_operand( block, insn, 0 ) );
+			}
+		},
+		{
+			X86_INS_CALL,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				unreachable();
+			}
+		},
+		{
+			X86_INS_RET,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				unreachable();
+			}
+		},
+	};
 
-	void process_call( basic_block* block, const instruction_info& insn )
-	{
-
-	}
-
-	void process_ret( basic_block* block, const instruction_info& insn )
-	{
-
-	}
-
-	void initialize_branch()
-	{
-		operand_mappings[ X86_INS_JMP ] = process_jmp;
-		operand_mappings[ X86_INS_CALL ] = process_call;
-		operand_mappings[ X86_INS_RET ] = process_ret;
-	}
+	static bool __init = register_subhandlers( std::move( subhandlers ) );
 }

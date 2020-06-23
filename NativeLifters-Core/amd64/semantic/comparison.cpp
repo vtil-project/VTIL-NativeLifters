@@ -30,46 +30,50 @@
 
 // Various x86 comparison instructions.
 // 
-
 namespace vtil::lifter::amd64
 {
-	void process_cmp( basic_block* block, const instruction_info& insn )
-	{
-		auto lhs = operative( load_operand( block, insn, 0 ) );
-		auto rhs = operative( block->tmp( lhs.op.bit_count() ) );
+	// List of handlers.
+	//
+	static handler_map_t subhandlers = {
+		{
+			X86_INS_CMP,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto lhs = operative( load_operand( block, insn, 0 ) );
+				auto rhs = operative( block->tmp( lhs.op.bit_count() ) );
 
-		block
-			->movsx( rhs.op, load_operand( block, insn, 1 ) );
+				block
+					->movsx( rhs.op, load_operand( block, insn, 1 ) );
 
-		auto result = lhs - rhs;
+				auto result = lhs - rhs;
 
-		block
-			->mov( flags::CF, flags::carry<flags::sub>::flag( lhs, rhs, result ).op )
-			->mov( flags::OF, flags::overflow<flags::sub>::flag( lhs, rhs, result ).op )
-			->mov( flags::SF, flags::sign( result ).op )
-			->mov( flags::ZF, flags::zero( result ).op )
-			->mov( flags::AF, flags::aux_carry( lhs, rhs, result ).op )
-			->mov( flags::PF, flags::parity( result ).op );
-	}
+				block
+					->mov( flags::CF, flags::carry<flags::sub>::flag( lhs, rhs, result ).op )
+					->mov( flags::OF, flags::overflow<flags::sub>::flag( lhs, rhs, result ).op )
+					->mov( flags::SF, flags::sign( result ).op )
+					->mov( flags::ZF, flags::zero( result ).op )
+					->mov( flags::AF, flags::aux_carry( lhs, rhs, result ).op )
+					->mov( flags::PF, flags::parity( result ).op );
+			}
+		},
+		{
+			X86_INS_TEST,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto lhs = operative( load_operand( block, insn, 0 ) );
+				auto rhs = operative( load_operand( block, insn, 1 ) );
 
-	void process_test( basic_block* block, const instruction_info& insn )
-	{
-		auto lhs = operative( load_operand( block, insn, 0 ) );
-		auto rhs = operative( load_operand( block, insn, 1 ) );
+				auto result = lhs & rhs;
 
-		auto result = lhs & rhs;
+				block
+					->mov( flags::CF, 0 )
+					->mov( flags::OF, 0 )
+					->mov( flags::SF, flags::sign( result ).op )
+					->mov( flags::ZF, flags::zero( result ).op )
+					->mov( flags::PF, flags::parity( result ).op );
+			}
+		},
+	};
 
-		block
-			->mov( flags::CF, 0 )
-			->mov( flags::OF, 0 )
-			->mov( flags::SF, flags::sign( result ).op )
-			->mov( flags::ZF, flags::zero( result ).op )
-			->mov( flags::PF, flags::parity( result ).op );
-	}
-
-	void initialize_comparison()
-	{
-		operand_mappings[ X86_INS_CMP ] = process_cmp;
-		operand_mappings[ X86_INS_TEST ] = process_test;
-	}
+	static bool __init = register_subhandlers( std::move( subhandlers ) );
 }

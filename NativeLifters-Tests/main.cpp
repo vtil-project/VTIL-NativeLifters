@@ -57,12 +57,17 @@ uint8_t code [ ] { 0x67, 0x48, 0x8D, 0x05, 0x01, 0x00, 0x00, 0x00 };
 
 int main( int argc, char** argv )
 {
-	lifter::amd64::initialize_mappings( );
+	// TODO: CONVERT INTO NEW FORMAT
+	// TODO: CONVERT INTO NEW FORMAT
+	lifter::amd64::initialize_flags();
+	// TODO: CONVERT INTO NEW FORMAT
+	// TODO: CONVERT INTO NEW FORMAT
 
 	byte_input input = { code, sizeof(code) };
 
 	lifter::recursive_descent<byte_input, lifter::amd64::lifter_t> rec_desc( &input, 0 );
 	rec_desc.entry->owner->routine_convention = amd64::preserve_all_convention;
+	rec_desc.entry->owner->routine_convention.purge_stack = false;
 	rec_desc.populate( rec_desc.entry );
 
 	optimizer::apply_all( rec_desc.entry->owner );

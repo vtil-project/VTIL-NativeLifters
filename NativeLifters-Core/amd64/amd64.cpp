@@ -118,27 +118,12 @@ namespace vtil::lifter::amd64
 		}
 	}
 
-	void initialize_arithmetic();
-	void initialize_branch();
-	void initialize_comparison();
-	void initialize_flags();
-	void initialize_misc();
-
-	void initialize_mappings()
-	{
-		initialize_arithmetic();
-		initialize_branch();
-		initialize_comparison();
-		initialize_flags();
-		initialize_misc();
-	}
-
 	size_t lifter_t::process( basic_block* block, uint64_t vip, uint8_t* code )
 	{
 		const auto& insns = vtil::amd64::disasm( code, vip, 0 );
 		if ( insns.empty() )
 		{
-			operand_mappings[ X86_INS_INVALID ]( block, { } );
+			instruction_handlers[ X86_INS_INVALID ]( block, { } );
 			return 0;
 		}
 
@@ -151,9 +136,9 @@ namespace vtil::lifter::amd64
 		block->mov( X86_REG_RIP, vip + insn.bytes.size() );
 
 		x86_insn opcode = static_cast< x86_insn >( insn.id );
-		auto mapping = operand_mappings.find( opcode );
+		auto mapping = instruction_handlers.find( opcode );
 
-		auto is_invalid = mapping == operand_mappings.cend();
+		auto is_invalid = mapping == instruction_handlers.cend();
 		if ( !is_invalid )
 		{
 			for ( auto& operand : insn.operands )
