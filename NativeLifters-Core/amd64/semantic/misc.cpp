@@ -61,11 +61,6 @@ namespace vtil::lifter::amd64
 		}
 	}
 
-	void process_call( basic_block* block, const instruction_info& insn )
-	{
-
-	}
-
 	void initialize_misc( )
 	{
 		operand_mappings[ X86_INS_INVALID ] = process_invalid;

@@ -406,6 +406,41 @@ namespace vtil::lifter::amd64
 		store_operand( block, insn, 0, result.op );
 	}
 
+	void process_neg( basic_block* block, const instruction_info& insn )
+	{
+		auto lhs = operative( load_operand( block, insn, 0 ) );
+		auto result = 0 - lhs;
+
+		block
+			->mov( flags::CF, ( lhs != 0 ).op )
+			->mov( flags::AF, flags::aux_carry( { 0 }, lhs, result ).op )
+			->mov( flags::OF, flags::overflow<flags::sub>::flag( { 0 }, lhs, result ).op )
+			->mov( flags::SF, flags::sign( result ).op )
+			->mov( flags::ZF, flags::zero( result ).op )
+			->mov( flags::PF, flags::parity( result ).op );
+
+		store_operand( block, insn, 0, result.op );
+	}
+
+	void process_not( basic_block* block, const instruction_info& insn )
+	{
+		auto lhs = operative( load_operand( block, insn, 0 ) );
+		store_operand( block, insn, 0, ( ~lhs ).op );
+	}
+
+	template<x86_reg In, x86_reg Out>
+	void process_cx( basic_block* block, const instruction_info& insn )
+	{
+		block->mov( Out, flags::sign( { In } ).op );
+		block->neg( Out );
+	}
+
+	template<x86_reg In, x86_reg Out>
+	void process_cxe( basic_block* block, const instruction_info& insn )
+	{
+		block->movsx( Out, In );
+	}
+
 	void initialize_arithmetic( )
 	{
 		operand_mappings[ X86_INS_ADC ] = process_adc;
@@ -427,5 +462,14 @@ namespace vtil::lifter::amd64
 		operand_mappings[ X86_INS_RCR ] = process_rcr;
 		operand_mappings[ X86_INS_INC ] = process_inc;
 		operand_mappings[ X86_INS_DEC ] = process_dec;
+		operand_mappings[ X86_INS_NEG ] = process_neg;
+		operand_mappings[ X86_INS_NOT ] = process_not;
+
+		operand_mappings[ X86_INS_CWD ] = process_cx<X86_REG_AX, X86_REG_DX>;
+		operand_mappings[ X86_INS_CDQ ] = process_cx<X86_REG_EAX, X86_REG_EDX>;
+		operand_mappings[ X86_INS_CQO ] = process_cx<X86_REG_RAX, X86_REG_RDX>;
+		operand_mappings[ X86_INS_CBW ] = process_cxe<X86_REG_AL, X86_REG_AX>;
+		operand_mappings[ X86_INS_CWDE ] = process_cxe<X86_REG_AX, X86_REG_EAX>;
+		operand_mappings[ X86_INS_CDQE ] = process_cxe<X86_REG_EAX, X86_REG_RAX>;
 	}
 }
