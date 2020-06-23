@@ -13,7 +13,11 @@ namespace mem
 	// If on Windows platform, create a RWX heap.
 	//
 #if _WIN64
-	HANDLE rwx_heap = HeapCreate( HEAP_CREATE_ENABLE_EXECUTE, 0, 0 );
+	auto rwx_heap = [ ] ()
+	{
+		static HANDLE h = HeapCreate( HEAP_CREATE_ENABLE_EXECUTE, 0, 0 );
+		return h;
+	};
 #endif
 
 	// A RWX memory descriptor prefixes any allocations made by us,
@@ -36,7 +40,7 @@ namespace mem
 #if _WIN64
 		// Allocate a block of RWX memory from the heap we've created.
 		//
-		void* p = HeapAlloc( rwx_heap, HEAP_ZERO_MEMORY, size );
+		void* p = HeapAlloc( rwx_heap(), HEAP_ZERO_MEMORY, size );
 #else
 		// Allocate new RWX page(s).
 		//
@@ -69,7 +73,7 @@ namespace mem
 #if _WIN64
 		// Free the heap memory we've allocated.
 		//
-		HeapFree( rwx_heap, 0, desc );
+		HeapFree( rwx_heap(), 0, desc );
 #else
 		// Free the page(s) we've allocated.
 		//
