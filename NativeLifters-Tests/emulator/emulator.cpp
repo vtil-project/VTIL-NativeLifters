@@ -4,9 +4,6 @@
 // Stack delta if this were to be used as stack.
 // - (Thanks ICC)
 //
-#define sd 0x20
-static_assert( sd == emulator::reserved_stack_size );
-
 #ifdef _MSC_VER
 extern "C" void emulate_and_return( emulator * _this );
 #endif
@@ -27,66 +24,59 @@ void emulator::invoke( const void* routine_pointer )
         //
         mov     rax,	rsp
         mov     rsp,	this
-        add     rsp,	sd
-        mov     [ rsp - sd ] emulator.__rsp, rax
+        add     rsp,	0x20
+		mov     [rsp+0x188], rax
 
-        // Exchange general-purpose registers.
-        //
-        xchg    rax,	[ rsp - sd ] emulator.v_rax
-        xchg    rbx,	[ rsp - sd ] emulator.v_rbx
-        xchg    rcx,	[ rsp - sd ] emulator.v_rcx
-        xchg    rdx,	[ rsp - sd ] emulator.v_rdx
-        xchg    rsi,	[ rsp - sd ] emulator.v_rsi
-        xchg    rdi,	[ rsp - sd ] emulator.v_rdi
-        xchg    rbp,	[ rsp - sd ] emulator.v_rbp
-        xchg    r8,	    [ rsp - sd ] emulator.v_r8
-        xchg    r9,	    [ rsp - sd ] emulator.v_r9
-        xchg    r10,	[ rsp - sd ] emulator.v_r10
-        xchg    r11,	[ rsp - sd ] emulator.v_r11
-        xchg    r12,	[ rsp - sd ] emulator.v_r12
-        xchg    r13,	[ rsp - sd ] emulator.v_r13
-        xchg    r14,	[ rsp - sd ] emulator.v_r14
-        xchg    r15,	[ rsp - sd ] emulator.v_r15
+		lea rax, qword ptr [rsp+0x178]
 
-        // Exchange EFLAGS.
-        //
-        push	[ rsp - sd ] emulator.v_rflags
-        pushfq
-        pop	    [ rsp - sd ] emulator.v_rflags
-        popfq
+		push    qword ptr [rax]
+		pushfq
+		pop     qword ptr [rax]
+		popfq
 
-        // Call the function.
-        //
-        call	[ rsp - sd ] emulator.__rip
+		xchg    rax, [rsp+0x100]
+		xchg    rbx, [rsp+0x108]
+		xchg    rcx, [rsp+0x110]
+		xchg    rdx, [rsp+0x118]
+		xchg    rsi, [rsp+0x120]
+		xchg    rdi, [rsp+0x128]
+		xchg    rbp, [rsp+0x130]
+		xchg    r8,  [rsp+0x138]
+		xchg    r9,  [rsp+0x140]
+		xchg    r10, [rsp+0x148]
+		xchg    r11, [rsp+0x150]
+		xchg    r12, [rsp+0x158]
+		xchg    r13, [rsp+0x160]
+		xchg    r14, [rsp+0x168]
+		xchg    r15, [rsp+0x170]
 
-        // Exchange EFLAGS.
-        //
-        push	[ rsp - sd ] emulator.v_rflags
-        pushfq
-        pop	    [ rsp - sd ] emulator.v_rflags
-        popfq
+		call    qword ptr [rsp+0x180]
+	
+		xchg    rax, [rsp+0x100]
+		xchg    rbx, [rsp+0x108]
+		xchg    rcx, [rsp+0x110]
+		xchg    rdx, [rsp+0x118]
+		xchg    rsi, [rsp+0x120]
+		xchg    rdi, [rsp+0x128]
+		xchg    rbp, [rsp+0x130]
+		xchg    r8,  [rsp+0x138]
+		xchg    r9,  [rsp+0x140]
+		xchg    r10, [rsp+0x148]
+		xchg    r11, [rsp+0x150]
+		xchg    r12, [rsp+0x158]
+		xchg    r13, [rsp+0x160]
+		xchg    r14, [rsp+0x168]
+		xchg    r15, [rsp+0x170]
 
-        // Exchange general-purpose registers.
-        //
-        xchg    rax,	[ rsp - sd ] emulator.v_rax
-        xchg    rbx,	[ rsp - sd ] emulator.v_rbx
-        xchg    rcx,	[ rsp - sd ] emulator.v_rcx
-        xchg    rdx,	[ rsp - sd ] emulator.v_rdx
-        xchg    rsi,	[ rsp - sd ] emulator.v_rsi
-        xchg    rdi,	[ rsp - sd ] emulator.v_rdi
-        xchg    rbp,	[ rsp - sd ] emulator.v_rbp
-        xchg    r8,	    [ rsp - sd ] emulator.v_r8
-        xchg    r9,	    [ rsp - sd ] emulator.v_r9
-        xchg    r10,	[ rsp - sd ] emulator.v_r10
-        xchg    r11,	[ rsp - sd ] emulator.v_r11
-        xchg    r12,	[ rsp - sd ] emulator.v_r12
-        xchg    r13,	[ rsp - sd ] emulator.v_r13
-        xchg    r14,	[ rsp - sd ] emulator.v_r14
-        xchg    r15,	[ rsp - sd ] emulator.v_r15
+		lea rax, qword ptr [rsp+0x178]
 
-        // Restore stack pointer.
-        //
-        mov    rsp,	    [ rsp - sd ] emulator.__rsp
+		push    qword ptr [rax]
+		pushfq
+		pop     qword ptr [rax]
+		popfq
+
+
+		mov     rsp, [rsp+0x188]
     }
 #else
     emulate_and_return( this );
@@ -142,4 +132,3 @@ uint64_t emulator::get( x86_reg reg ) const
     memcpy( &value, ( uint8_t* ) this + off, sz );
     return value;
 }
-#undef sd
