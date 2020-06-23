@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <vtil/utility>
 #include <vtil/arch>
-#include "operative.hpp"
+#include "../core/operative.hpp"
 
 namespace vtil::lifter
 {

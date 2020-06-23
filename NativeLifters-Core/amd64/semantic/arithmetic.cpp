@@ -441,6 +441,78 @@ namespace vtil::lifter::amd64
 		block->movsx( Out, In );
 	}
 
+	void process_bswap( basic_block* block, const instruction_info& insn )
+	{
+		auto lhs = operative( load_operand( block, insn, 0 ) );
+		auto tmp = block->tmp( lhs.op.bit_count( ) );
+
+		block->mov( tmp, 0 );
+		
+		switch ( lhs.op.size( ) )
+		{
+			case 2:
+				// this is UB, whatever :')
+				block
+					->bor( tmp, ( ( lhs & 0xFF ) << 8 ).op )
+					->bor( tmp, ( ( lhs & 0xFF00 ) >> 8 ).op );
+				break;
+
+			case 4:
+				block
+					->bor( tmp, ( ( lhs & 0xFF ) << 24 ).op )
+					->bor( tmp, ( ( lhs & 0xFF00 ) << 8 ).op )
+					->bor( tmp, ( ( lhs & 0xFF0000 ) >> 8 ).op )
+					->bor( tmp, ( ( lhs & 0xFF000000 ) >> 24 ).op );
+					break;
+
+			case 8:
+				block
+					->bor( tmp, ( ( lhs & 0xFFULL ) << 56 ).op )
+					->bor( tmp, ( ( lhs & 0xFF00ULL ) << 40 ).op )
+					->bor( tmp, ( ( lhs & 0xFF0000ULL ) << 24 ).op )
+					->bor( tmp, ( ( lhs & 0xFF000000ULL ) << 8 ).op )
+					->bor( tmp, ( ( lhs & 0xFF00000000ULL ) >> 8 ).op )
+					->bor( tmp, ( ( lhs & 0xFF0000000000ULL ) >> 24 ).op )
+					->bor( tmp, ( ( lhs & 0xFF000000000000ULL ) >> 40 ).op )
+					->bor( tmp, ( ( lhs & 0xFF00000000000000ULL ) >> 56 ).op );
+					break;
+
+			default:
+				fassert( false );
+				break;
+		}
+
+		store_operand( block, insn, 0, tmp );
+	}
+
+	void process_bsf( basic_block* block, const instruction_info& insn )
+	{
+		auto lhs = load_operand( block, insn, 0 );
+		auto rhs = load_operand( block, insn, 1 );
+
+		auto tmp = block->tmp( lhs.bit_count( ) );
+		block
+			->mov( tmp, rhs )
+			->bsf( tmp )
+			->te( flags::ZF, tmp, 0 );
+
+		store_operand( block, insn, 0, tmp );
+	}
+
+	void process_bsr( basic_block* block, const instruction_info& insn )
+	{
+		auto lhs = load_operand( block, insn, 0 );
+		auto rhs = load_operand( block, insn, 1 );
+
+		auto tmp = block->tmp( lhs.bit_count( ) );
+		block
+			->mov( tmp, rhs )
+			->bsr( tmp )
+			->te( flags::ZF, tmp, 0 );
+
+		store_operand( block, insn, 0, tmp );
+	}
+
 	void initialize_arithmetic( )
 	{
 		operand_mappings[ X86_INS_ADC ] = process_adc;
@@ -464,12 +536,14 @@ namespace vtil::lifter::amd64
 		operand_mappings[ X86_INS_DEC ] = process_dec;
 		operand_mappings[ X86_INS_NEG ] = process_neg;
 		operand_mappings[ X86_INS_NOT ] = process_not;
-
 		operand_mappings[ X86_INS_CWD ] = process_cx<X86_REG_AX, X86_REG_DX>;
 		operand_mappings[ X86_INS_CDQ ] = process_cx<X86_REG_EAX, X86_REG_EDX>;
 		operand_mappings[ X86_INS_CQO ] = process_cx<X86_REG_RAX, X86_REG_RDX>;
 		operand_mappings[ X86_INS_CBW ] = process_cxe<X86_REG_AL, X86_REG_AX>;
 		operand_mappings[ X86_INS_CWDE ] = process_cxe<X86_REG_AX, X86_REG_EAX>;
 		operand_mappings[ X86_INS_CDQE ] = process_cxe<X86_REG_EAX, X86_REG_RAX>;
+		operand_mappings[ X86_INS_BSWAP ] = process_bswap;
+		operand_mappings[ X86_INS_BSF ] = process_bsf;
+		operand_mappings[ X86_INS_BSR ] = process_bsr;
 	}
 }

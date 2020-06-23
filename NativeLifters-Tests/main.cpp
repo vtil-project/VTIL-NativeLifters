@@ -27,7 +27,7 @@ struct byte_input
 
 using amd64_recursive_descent = lifter::recursive_descent<byte_input, lifter::amd64::lifter_t>;
 
-uint8_t code [ ] { 0x48, 0x31, 0xC0, 0x48, 0xFF, 0xC0, 0x48, 0xF7, 0xD8, 0x48, 0x99 };
+uint8_t code [ ] { 0x48, 0x31, 0xC0, 0x48, 0xFF, 0xC0, 0x48, 0x0F, 0xC8, 0x48, 0x0F, 0xBD, 0xC0 };
 
 int main( int argc, char** argv )
 {
@@ -36,6 +36,7 @@ int main( int argc, char** argv )
 	byte_input input = { code, sizeof(code) };
 
 	lifter::recursive_descent<byte_input, lifter::amd64::lifter_t> rec_desc( &input, 0 );
+	rec_desc.entry->owner->routine_convention = amd64::preserve_all_convention;
 	rec_desc.populate( rec_desc.entry );
 
 	optimizer::apply_all( rec_desc.entry->owner );
