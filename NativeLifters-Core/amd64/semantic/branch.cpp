@@ -97,7 +97,7 @@ namespace vtil::lifter::amd64
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
 				block
-					->js( ( X86_REG_CX == 0 ),
+					->js( ( operative( X86_REG_CX ) == 0 ),
 						  load_operand( block, insn, 0 ),
 						  insn.address + insn.bytes.size() );
 			}
@@ -107,7 +107,7 @@ namespace vtil::lifter::amd64
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
 				block
-					->js( ( X86_REG_ECX == 0 ),
+					->js( ( operative( X86_REG_ECX ) == 0 ),
 						  load_operand( block, insn, 0 ),
 						  insn.address + insn.bytes.size() );
 			}
@@ -255,7 +255,7 @@ namespace vtil::lifter::amd64
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
 				block
-					->js( ( X86_REG_RCX == 0 ),
+					->js( ( operative( X86_REG_CX ) == 0 ),
 						  load_operand( block, insn, 0 ),
 						  insn.address + insn.bytes.size() );
 			}
