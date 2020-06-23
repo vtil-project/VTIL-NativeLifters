@@ -103,7 +103,6 @@ namespace vtil::lifter
 					const auto branch_imm = *branch.get<uint64_t>( );
 					if ( auto next_blk = start_block->fork( branch_imm ) )
 					{
-						printf( "target: %llx\n", branch_imm );
 						populate( next_blk );
 					}
 				}
