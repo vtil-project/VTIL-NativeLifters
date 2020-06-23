@@ -1,9 +1,35 @@
+// Copyright (c) 2020 Can Boluk and contributors of the VTIL Project   
+// All rights reserved.   
+//    
+// Redistribution and use in source and binary forms, with or without   
+// modification, are permitted provided that the following conditions are met: 
+//    
+// 1. Redistributions of source code must retain the above copyright notice,   
+//    this list of conditions and the following disclaimer.   
+// 2. Redistributions in binary form must reproduce the above copyright   
+//    notice, this list of conditions and the following disclaimer in the   
+//    documentation and/or other materials provided with the distribution.   
+// 3. Neither the name of mosquitto nor the names of its   
+//    contributors may be used to endorse or promote products derived from   
+//    this software without specific prior written permission.   
+//    
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE   
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE  
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE   
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR   
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF   
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS   
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN   
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)   
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE  
+// POSSIBILITY OF SUCH DAMAGE.        
+//
 #include "../amd64.hpp"
 #include "../flags.hpp"
 
 // Various x86 arithmetic instructions.
 // 
-
 namespace vtil::lifter::amd64
 {
 	// Process the flags for a specific arithmetic instruction.
@@ -48,7 +74,7 @@ namespace vtil::lifter::amd64
 			->mov( flags::ZF, UNDEFINED )
 			->mov( flags::SF, UNDEFINED );
 
-		switch ( rhs.size( ) )
+		switch ( rhs.size() )
 		{
 			case 1:
 			{
@@ -117,13 +143,13 @@ namespace vtil::lifter::amd64
 			->mov( flags::ZF, UNDEFINED )
 			->mov( flags::SF, UNDEFINED );
 
-		switch ( insn.operands.size( ) )
+		switch ( insn.operands.size() )
 		{
 			case 1:
 			{
 				auto rhs = load_operand( block, insn, 0 );
 
-				switch ( rhs.size( ) )
+				switch ( rhs.size() )
 				{
 					case 1:
 					{
@@ -191,7 +217,7 @@ namespace vtil::lifter::amd64
 				auto lhs = load_operand( block, insn, 0 );
 				auto rhs = load_operand( block, insn, 1 );
 
-				auto [lo, hi] = block->tmp( lhs.bit_count( ), lhs.bit_count( ) );
+				auto [lo, hi] = block->tmp( lhs.bit_count(), lhs.bit_count() );
 				block
 					->mov( lo, lhs )
 					->mov( hi, lhs )
@@ -209,7 +235,7 @@ namespace vtil::lifter::amd64
 				auto lhs = load_operand( block, insn, 1 );
 				auto rhs = load_operand( block, insn, 2 );
 
-				auto [lo, hi] = block->tmp( lhs.bit_count( ), lhs.bit_count( ) );
+				auto [lo, hi] = block->tmp( lhs.bit_count(), lhs.bit_count() );
 				block
 					->mov( lo, lhs )
 					->mov( hi, lhs )
@@ -229,7 +255,7 @@ namespace vtil::lifter::amd64
 		auto lhs = load_operand( block, insn, 0 );
 		auto rhs = load_operand( block, insn, 1 );
 
-		auto tmp = block->tmp( lhs.bit_count( ) );
+		auto tmp = block->tmp( lhs.bit_count() );
 
 		block
 			->mov( tmp, lhs )
@@ -246,7 +272,7 @@ namespace vtil::lifter::amd64
 		auto lhs = load_operand( block, insn, 0 );
 		auto rhs = load_operand( block, insn, 1 );
 
-		auto tmp = block->tmp( lhs.bit_count( ) );
+		auto tmp = block->tmp( lhs.bit_count() );
 
 		block
 			->mov( tmp, lhs )
@@ -270,7 +296,7 @@ namespace vtil::lifter::amd64
 		auto lhs = load_operand( block, insn, 0 );
 		auto rhs = load_operand( block, insn, 1 );
 
-		auto result = ( operative( lhs ) << ( operative( rhs ) & ( lhs.size( ) == 8 ? 0x3F : 0x1F ) ) ).op;
+		auto result = ( operative( lhs ) << ( operative( rhs ) & ( lhs.size() == 8 ? 0x3F : 0x1F ) ) ).op;
 		auto lhs_sign = flags::sign( { lhs } );
 
 		block
@@ -289,7 +315,7 @@ namespace vtil::lifter::amd64
 		auto lhs = load_operand( block, insn, 0 );
 		auto rhs = load_operand( block, insn, 1 );
 
-		auto result = ( operative( lhs ) >> ( operative( rhs ) & ( lhs.size( ) == 8 ? 0x3F : 0x1F ) ) ).op;
+		auto result = ( operative( lhs ) >> ( operative( rhs ) & ( lhs.size() == 8 ? 0x3F : 0x1F ) ) ).op;
 
 		block
 			->mov( flags::CF, ( operative( lhs ) & 1 ).op )
@@ -307,7 +333,7 @@ namespace vtil::lifter::amd64
 		auto lhs = operative( load_operand( block, insn, 0 ) );
 		auto rhs = operative( load_operand( block, insn, 1 ) );
 
-		auto result = ( ( lhs >> ( rhs & ( lhs.op.size( ) == 8 ? 0x3F : 0x1F ) ) ) | ( lhs & ( 1ULL << ( lhs.op.bit_count( ) - 1 ) ) ) ).op;
+		auto result = ( ( lhs >> ( rhs & ( lhs.op.size() == 8 ? 0x3F : 0x1F ) ) ) | ( lhs & ( 1ULL << ( lhs.op.bit_count() - 1 ) ) ) ).op;
 
 		block
 			->mov( flags::CF, ( lhs & 1 ).op )
@@ -324,7 +350,7 @@ namespace vtil::lifter::amd64
 		auto lhs = load_operand( block, insn, 0 );
 		auto rhs = load_operand( block, insn, 1 );
 
-		auto result = block->tmp( lhs.bit_count( ) );
+		auto result = block->tmp( lhs.bit_count() );
 		block
 			->mov( result, lhs )
 			->brol( result, rhs )
@@ -338,7 +364,7 @@ namespace vtil::lifter::amd64
 		auto lhs = load_operand( block, insn, 0 );
 		auto rhs = load_operand( block, insn, 1 );
 
-		auto result = block->tmp( lhs.bit_count( ) );
+		auto result = block->tmp( lhs.bit_count() );
 		block
 			->mov( result, lhs )
 			->bror( result, rhs )
@@ -350,11 +376,11 @@ namespace vtil::lifter::amd64
 	void process_rcl( basic_block* block, const instruction_info& insn )
 	{
 		auto lhs = operative( load_operand( block, insn, 0 ) );
-		auto rhs = operative( load_operand( block, insn, 1 ) ) & ( lhs.op.size( ) == 8 ? 0x3F : 0x1F );
+		auto rhs = operative( load_operand( block, insn, 1 ) ) & ( lhs.op.size() == 8 ? 0x3F : 0x1F );
 		auto cf = operative( flags::CF );
 
-		auto result = ( lhs << rhs ) | ( lhs >> ( rhs + 1 ) ) | ( cf.zext( lhs.op.bit_count( ) ) << ( rhs - 1 ) );
-		auto carry_result = ( lhs & ( lhs.op.bit_count( ) << rhs ) );
+		auto result = ( lhs << rhs ) | ( lhs >> ( rhs + 1 ) ) | ( cf.zext( lhs.op.bit_count() ) << ( rhs - 1 ) );
+		auto carry_result = ( lhs & ( lhs.op.bit_count() << rhs ) );
 
 		block
 			->mov( flags::CF, carry_result.op )
@@ -366,10 +392,10 @@ namespace vtil::lifter::amd64
 	void process_rcr( basic_block* block, const instruction_info& insn )
 	{
 		auto lhs = operative( load_operand( block, insn, 0 ) );
-		auto rhs = operative( load_operand( block, insn, 1 ) ) & ( lhs.op.size( ) == 8 ? 0x3F : 0x1F );
+		auto rhs = operative( load_operand( block, insn, 1 ) ) & ( lhs.op.size() == 8 ? 0x3F : 0x1F );
 		auto cf = operative( flags::CF );
 
-		auto result = ( lhs >> rhs ) | ( lhs << ( rhs - 1 ) ) | ( cf.zext( lhs.op.bit_count( ) ) << ( lhs.op.bit_count( ) - rhs ) );
+		auto result = ( lhs >> rhs ) | ( lhs << ( rhs - 1 ) ) | ( cf.zext( lhs.op.bit_count() ) << ( lhs.op.bit_count() - rhs ) );
 		auto carry_result = ( lhs & ( 1ULL << ( rhs - 1 ) ) );
 
 		block
@@ -447,11 +473,11 @@ namespace vtil::lifter::amd64
 	void process_bswap( basic_block* block, const instruction_info& insn )
 	{
 		auto lhs = operative( load_operand( block, insn, 0 ) );
-		auto tmp = block->tmp( lhs.op.bit_count( ) );
+		auto tmp = block->tmp( lhs.op.bit_count() );
 
 		block->mov( tmp, 0 );
-		
-		switch ( lhs.op.size( ) )
+
+		switch ( lhs.op.size() )
 		{
 			case 2:
 				// this is UB, but seems to store 0.
@@ -463,7 +489,7 @@ namespace vtil::lifter::amd64
 					->bor( tmp, ( ( lhs & 0xFF00 ) << 8 ).op )
 					->bor( tmp, ( ( lhs & 0xFF0000 ) >> 8 ).op )
 					->bor( tmp, ( ( lhs & 0xFF000000 ) >> 24 ).op );
-					break;
+				break;
 
 			case 8:
 				block
@@ -475,7 +501,7 @@ namespace vtil::lifter::amd64
 					->bor( tmp, ( ( lhs & 0xFF0000000000ULL ) >> 24 ).op )
 					->bor( tmp, ( ( lhs & 0xFF000000000000ULL ) >> 40 ).op )
 					->bor( tmp, ( ( lhs & 0xFF00000000000000ULL ) >> 56 ).op );
-					break;
+				break;
 
 			default:
 				fassert( false );
@@ -490,7 +516,7 @@ namespace vtil::lifter::amd64
 		auto lhs = load_operand( block, insn, 0 );
 		auto rhs = load_operand( block, insn, 1 );
 
-		auto tmp = block->tmp( lhs.bit_count( ) );
+		auto tmp = block->tmp( lhs.bit_count() );
 		block
 			->mov( tmp, rhs )
 			->bsf( tmp )
@@ -505,7 +531,7 @@ namespace vtil::lifter::amd64
 		auto lhs = load_operand( block, insn, 0 );
 		auto rhs = load_operand( block, insn, 1 );
 
-		auto tmp = block->tmp( lhs.bit_count( ) );
+		auto tmp = block->tmp( lhs.bit_count() );
 		block
 			->mov( tmp, rhs )
 			->bsr( tmp )
@@ -520,7 +546,7 @@ namespace vtil::lifter::amd64
 		auto lhs = load_operand( block, insn, 0 );
 		auto rhs = load_operand( block, insn, 1 );
 
-		auto tmp = block->tmp( lhs.bit_count( ) );
+		auto tmp = block->tmp( lhs.bit_count() );
 		block
 			->mov( tmp, lhs )
 			->add( tmp, rhs );
@@ -541,7 +567,7 @@ namespace vtil::lifter::amd64
 
 	}
 
-	void initialize_arithmetic( )
+	void initialize_arithmetic()
 	{
 		operand_mappings[ X86_INS_ADC ] = process_adc;
 		operand_mappings[ X86_INS_SBB ] = process_sbb;

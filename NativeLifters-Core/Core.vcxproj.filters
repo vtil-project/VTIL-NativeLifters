@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Includes">
+      <UniqueIdentifier>{aa9c87e0-36b0-49f5-b7dc-f5e5a14874ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{d4580414-066d-4ad6-98c9-50cd9af1a35d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="amd64">
+      <UniqueIdentifier>{f31b7c97-1ecd-4f2c-b170-9ec2e7069cfa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="amd64\Semantics">
+      <UniqueIdentifier>{cbf34975-2a28-4f4a-8b22-af58588075f9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="includes\lifters\amd64">
+      <Filter>Includes</Filter>
+    </None>
+    <None Include="includes\lifters\core">
+      <Filter>Includes</Filter>
+    </None>
+    <None Include="NativeLifters-Core.licenseheader" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="core\operative.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\recursive_descent.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="amd64\amd64.hpp">
+      <Filter>amd64</Filter>
+    </ClInclude>
+    <ClInclude Include="amd64\flags.hpp">
+      <Filter>amd64</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="core\recursive_descent.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="amd64\amd64.cpp">
+      <Filter>amd64</Filter>
+    </ClCompile>
+    <ClCompile Include="amd64\semantic\arithmetic.cpp">
+      <Filter>amd64\Semantics</Filter>
+    </ClCompile>
+    <ClCompile Include="amd64\semantic\branch.cpp">
+      <Filter>amd64\Semantics</Filter>
+    </ClCompile>
+    <ClCompile Include="amd64\semantic\comparison.cpp">
+      <Filter>amd64\Semantics</Filter>
+    </ClCompile>
+    <ClCompile Include="amd64\semantic\flags.cpp">
+      <Filter>amd64\Semantics</Filter>
+    </ClCompile>
+    <ClCompile Include="amd64\semantic\misc.cpp">
+      <Filter>amd64\Semantics</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt" />
+  </ItemGroup>
+</Project>
