@@ -70,5 +70,13 @@ namespace vtil::lifter
 				->popcnt( tmp );
 			return { operand{ tmp } };
 		}
+
+		operative zext( bitcnt_t bit_size ) const
+		{
+			auto tmp = translator->block->tmp( bit_size );
+			translator->block
+				->mov( tmp, op );
+			return { operand{ tmp } };
+		}
 	};
 }

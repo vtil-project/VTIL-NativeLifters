@@ -302,9 +302,9 @@ namespace vtil::lifter::amd64
 	void process_sar( basic_block* block, const instruction_info& insn )
 	{
 		auto lhs = operative( load_operand( block, insn, 0 ) );
-		auto rhs = load_operand( block, insn, 1 );
+		auto rhs = operative( load_operand( block, insn, 1 ) );
 
-		auto result = ( ( lhs >> ( operative( rhs ) & ( lhs.op.size( ) == 8 ? 0x3F : 0x1F ) ) ) | ( lhs & ( 1ULL << ( lhs.op.bit_count( ) - 1 ) ) ) ).op;
+		auto result = ( ( lhs >> ( rhs & ( lhs.op.size( ) == 8 ? 0x3F : 0x1F ) ) ) | ( lhs & ( 1ULL << ( lhs.op.bit_count( ) - 1 ) ) ) ).op;
 
 		block
 			->mov( flags::CF, ( lhs & 1 ).op )
@@ -346,12 +346,34 @@ namespace vtil::lifter::amd64
 
 	void process_rcl( basic_block* block, const instruction_info& insn )
 	{
+		auto lhs = operative( load_operand( block, insn, 0 ) );
+		auto rhs = operative( load_operand( block, insn, 1 ) ) & ( lhs.op.size( ) == 8 ? 0x3F : 0x1F );
+		auto cf = operative( flags::CF );
 
+		auto result = ( lhs << rhs ) | ( lhs >> ( rhs + 1 ) ) | ( cf.zext( lhs.op.bit_count( ) ) << ( rhs - 1 ) );
+		auto carry_result = ( lhs & ( lhs.op.bit_count( ) << rhs ) );
+
+		block
+			->mov( flags::CF, carry_result.op )
+			->mov( flags::OF, ( cf ^ flags::sign( result ) ).op );
+
+		store_operand( block, insn, 0, result.op );
 	}
 
 	void process_rcr( basic_block* block, const instruction_info& insn )
 	{
+		auto lhs = operative( load_operand( block, insn, 0 ) );
+		auto rhs = operative( load_operand( block, insn, 1 ) ) & ( lhs.op.size( ) == 8 ? 0x3F : 0x1F );
+		auto cf = operative( flags::CF );
 
+		auto result = ( lhs >> rhs ) | ( lhs << ( rhs - 1 ) ) | ( cf.zext( lhs.op.bit_count( ) ) << ( lhs.op.bit_count( ) - rhs ) );
+		auto carry_result = ( lhs & ( 1ULL << ( rhs - 1 ) ) );
+
+		block
+			->mov( flags::CF, carry_result.op )
+			->mov( flags::OF, ( cf ^ flags::sign( lhs ) ).op );
+
+		store_operand( block, insn, 0, result.op );
 	}
 
 	void process_inc( basic_block* block, const instruction_info& insn )
@@ -401,6 +423,8 @@ namespace vtil::lifter::amd64
 		operand_mappings[ X86_INS_SAR ] = process_sar;
 		operand_mappings[ X86_INS_ROL ] = process_rol;
 		operand_mappings[ X86_INS_ROR ] = process_ror;
+		operand_mappings[ X86_INS_RCL ] = process_rcl;
+		operand_mappings[ X86_INS_RCR ] = process_rcr;
 		operand_mappings[ X86_INS_INC ] = process_inc;
 		operand_mappings[ X86_INS_DEC ] = process_dec;
 	}

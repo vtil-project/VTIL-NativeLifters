@@ -12,19 +12,22 @@ struct byte_input
 	uint8_t* bytes;
 	uint64_t size;
 
-	bool get_at( vip_t offs, uint8_t*& out_val )
+	bool is_valid( vip_t vip )
 	{
-		if ( offs >= size )
-			return false;
+		printf( "check %llx\n", vip );
+		return vip < size;
+	}
 
-		out_val = &bytes[ offs ];
-		return true;
+	uint8_t* get_at( vip_t offs )
+	{
+		printf( "read %llx\n", offs );
+		return &bytes[ offs ];
 	}
 };
 
 using amd64_recursive_descent = lifter::recursive_descent<byte_input, lifter::amd64::lifter_t>;
 
-uint8_t code [ ] { 0x48, 0x31, 0xC0, 0x50, 0x59, 0xFF, 0x21 };
+uint8_t code [ ] { 0x48, 0x31, 0xC9, 0x48, 0xFF, 0xC1, 0x48, 0x31, 0xC0, 0xF9, 0x48, 0xC1, 0xD0, 0x03 };
 
 int main( int argc, char** argv )
 {

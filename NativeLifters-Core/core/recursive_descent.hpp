@@ -30,17 +30,18 @@ namespace vtil::lifter
 			// While the basic block is not complete, populate with instructions.
 			//
 			uint64_t vip = start_block->entry_vip;
-			uint8_t* entry_ptr = nullptr;
-			if ( !input->get_at( vip, entry_ptr ) )
-			{
-				start_block->vexit( -1ULL );
-				return;
-			}
+			uint8_t* entry_ptr = input->get_at( vip );
 
 			leaders.emplace( vip, start_block );
 
 			while ( !start_block->is_complete( ) )
 			{
+				if ( !input->is_valid( vip ) )
+				{
+					start_block->vexit( -1ULL );
+					return;
+				}
+
 				auto offs = Arch::process( start_block, vip, entry_ptr );
 
 				entry_ptr += offs;
