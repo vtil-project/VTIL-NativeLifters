@@ -34,14 +34,30 @@
 
 namespace vtil::lifter
 {
+	struct byte_input
+	{
+		uint8_t* bytes;
+		uint64_t size;
+
+		bool is_valid( vip_t vip ) const
+		{
+			return vip < size;
+		}
+
+		uint8_t* get_at( vip_t offs ) const
+		{
+			return &bytes[ offs ];
+		}
+	};
+
 	// Generic recursive descent parser used for exploring control flow.
 	//
-	template<typename Input, typename Arch>
+	template<typename input_type, typename arch>
 	struct recursive_descent
 	{
 		// Input descriptor.
 		//
-		Input* input;
+		const input_type* input;
 
 		// Entry block.
 		//
@@ -50,6 +66,13 @@ namespace vtil::lifter
 		// Instructions corresponding to their basic blocks.
 		//
 		std::unordered_map<uint64_t, basic_block*> leaders;
+
+		// Constructor.
+		//
+		recursive_descent( const input_type* input, uint64_t entry_point ) : input( input ), leaders( { } )
+		{
+			entry = basic_block::begin( entry_point );
+		}
 
 		// Start recursive descent.
 		//
@@ -70,7 +93,7 @@ namespace vtil::lifter
 					return;
 				}
 
-				auto offs = Arch::process( start_block, vip, entry_ptr );
+				auto offs = arch::process( start_block, vip, entry_ptr );
 
 				if ( start_block->is_complete() )
 					break;
@@ -112,7 +135,7 @@ namespace vtil::lifter
 
 		void explore()
 		{
-			std::unordered_set< basic_block* > entries { entry };
+			std::unordered_set<basic_block*> entries { entry };
 
 			bool changed;
 			do
@@ -174,11 +197,6 @@ namespace vtil::lifter
 				delete cloned;
 			}
 			while ( changed );
-		}
-
-		recursive_descent( Input* input, uint64_t entry_point ) : input(input), leaders( { } )
-		{
-			entry = basic_block::begin( entry_point );
 		}
 	};
 }
