@@ -3,33 +3,29 @@
 
 #include <capstone/capstone.h>
 
+#include <map>
+
 // This file defines any global arch-specific information for the AMD64 target
 // architecture.
 //
-namespace vtil
+namespace vtil::lifter::amd64
 {
-	// Allows creation of register_desc's from the x86_reg enumeration
-	//
-	template<>
-	struct register_cast< x86_reg >
+	using instruction_info = vtil::amd64::instruction;
+	using operand_info = cs_x86_op;
+
+	inline std::map<x86_insn, void( * )( basic_block* block, const instruction_info& insn )> operand_mappings;
+
+	void initialize_mappings( );
+
+	register_desc get_disp_from_operand( basic_block* block, const operand_info& operand );
+	operand load_operand( basic_block* block, const instruction_info& insn, size_t idx );
+	void store_operand( basic_block* block, const instruction_info& insn, size_t idx, const operand& source );
+
+	struct lifter_t
 	{
-		register_desc operator()( x86_reg value )
-		{
-			auto [base, offset, size] = amd64::resolve_mapping( value );
-			return register_desc( register_physical, base, size * 8, offset * 8 );
-		}
+		// Disassemble and process an instruction.
+		// Returns the length of the instruction processed.
+		//
+		static int process( basic_block* block, uint64_t vip, uint8_t* code );
 	};
-
-	namespace lifter
-	{
-		using instruction_info = vtil::amd64::instruction;
-		using operand_info = cs_x86_op;
-
-		namespace amd64
-		{
-			operand get_operand( basic_block* block, const instruction_info& insn, size_t idx );
-
-			void process( instruction_info& insn, basic_block* block );
-		}
-	}
 }

@@ -1,23 +1,45 @@
+#include <lifters/core>
 #include <lifters/amd64>
 
 #include <vtil/vtil>
 
+#include <memory>
+
 using namespace vtil;
+
+struct byte_input
+{
+	uint8_t* bytes;
+	uint64_t size;
+
+	bool is_valid( vip_t vip )
+	{
+		printf( "check %llx\n", vip );
+		return vip < size;
+	}
+
+	uint8_t* get_at( vip_t offs )
+	{
+		printf( "read %llx\n", offs );
+		return &bytes[ offs ];
+	}
+};
+
+using amd64_recursive_descent = lifter::recursive_descent<byte_input, lifter::amd64::lifter_t>;
+
+uint8_t code [ ] { 0x67, 0x48, 0x8D, 0x05, 0x01, 0x00, 0x00, 0x00 };
 
 int main( int argc, char** argv )
 {
-	basic_block* blk = basic_block::begin( 0 );
+	lifter::amd64::initialize_mappings( );
 
-	uint8_t code [ ] { 0x48, 0x01, 0xC1 };
+	byte_input input = { code, sizeof(code) };
 
-	auto insns = capstone::disasm( code, 0, sizeof( code ) );
-	for ( auto& ins : insns )
-	{
-		printf( "%s\n", ins.to_string().c_str() );
-		lifter::amd64::process( ins, blk );
-	}
+	lifter::recursive_descent<byte_input, lifter::amd64::lifter_t> rec_desc( &input, 0 );
+	rec_desc.entry->owner->routine_convention = amd64::preserve_all_convention;
+	rec_desc.populate( rec_desc.entry );
 
-	//optimizer::apply_all( blk );
+	optimizer::apply_all( rec_desc.entry->owner );
 
-	debug::dump( blk );
+	debug::dump( rec_desc.entry->owner );
 }
