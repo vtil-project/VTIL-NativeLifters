@@ -36,7 +36,7 @@ using namespace vtil;
 
 using amd64_recursive_descent = lifter::recursive_descent<lifter::byte_input, lifter::amd64::lifter_t>;
 
-static void fuzz_step( const lifter::byte_input& input )
+static bool fuzz_step( const lifter::byte_input& input, bool optimize, bool dump_info )
 {
 	std::vector GP_REGS = {
 		X86_REG_RAX,
@@ -131,7 +131,10 @@ static void fuzz_step( const lifter::byte_input& input )
 
 	// Debug
 	//
-	//optimizer::apply_all( rtn );
+	if (optimize)
+	{
+		optimizer::apply_all( rtn );
+	}
 
 	// Begin executing in the virtual machine:
 	//
@@ -177,9 +180,12 @@ static void fuzz_step( const lifter::byte_input& input )
 	
 	// Dump some info.
 	//
-	debug::dump( rtn );
-	for ( auto& [k, v] : vm.register_state )
-		logger::log( "%s => %s\n", k, v );
+	if (dump_info)
+	{
+		debug::dump( rtn );
+		for ( auto& [k, v] : vm.register_state )
+			logger::log( "%s => %s\n", k, v );
+	}
 
 	// Begin executing in the hardware emulator.
 	//
@@ -218,9 +224,6 @@ static void fuzz_step( const lifter::byte_input& input )
 		log<CON_RED>( "          %s\n", vm.read_register( REG_FLAGS ).value.resize( 32 ) );
 		passed = false;
 	}
-	
-	if ( passed )
-		log<CON_PRP>( "Test passed!\n" );
-	else
-		log<CON_RED>( "Test failed!\n" );
+
+	return passed;
 }
