@@ -37,10 +37,13 @@ using amd64_recursive_descent = lifter::recursive_descent<lifter::byte_input, li
 
 int main( int argc, char** argv )
 {
-	uint8_t code[] = { 0xF9, 0x30, 0xC9, 0xFE, 0xC1, 0x48, 0xD3, 0xD9 } ;
-	lifter::byte_input input = { code, sizeof(code) };
 
-	auto dasm = amd64::disasm( code, 0, sizeof( code ) );
+	std::vector<uint8_t> code = amd64::assemble( R"(
+		cmova eax, rbx
+	)" );
+	lifter::byte_input input = { code.data(), code.size() };
+
+	auto dasm = amd64::disasm( code.data(), 0, code.size() );
 	for ( auto& ins : dasm )
 		logger::log( "%s\n", ins.to_string() );
 

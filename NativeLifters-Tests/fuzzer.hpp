@@ -56,14 +56,25 @@ static void fuzz_step( const lifter::byte_input& input )
 		X86_REG_R15,
 	};
 
-	auto gen_random = [ ] ()
+	auto gen_random = [ ] () -> uint64_t
 	{
 		// TODO: Improve to prioritize edge cases.
 		//
 		static std::random_device rd;
 		static std::mt19937 gen( rd() );
 		static std::uniform_int_distribution<uint64_t> distrib{};
-		return distrib( gen );
+
+		switch ( distrib( gen ) % 7 )
+		{
+			case 0: return distrib( gen );
+			case 1: return 0x4A403F5FA2C7490D;
+			case 2: return 0xFFFFFFFFFFFFFFFF;
+			case 3: return 0x7FFFFFFFFFFFFFFF;
+			case 4: return 0x7FFFFFFF;
+			case 5: return 0x7FFF;
+			case 6: return 0x7F;
+		}
+		unreachable();
 	};
 
 	// Lift all bytes
