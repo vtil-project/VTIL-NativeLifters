@@ -79,12 +79,8 @@ namespace vtil::lifter::amd64
 					->mov( spr, spr )
 					->mov( frame_tmp, spr );
 
-				if ( nesting_level == 0 )
-				{
-					block
-						->mov( fpr, frame_tmp )
-						->sub( spr, alloc_size );
-				}
+				if( nesting_level == 0 )
+					goto skip_nesting;
 				else if( nesting_level > 1 )
 				{
 					for ( auto it = 1; it < nesting_level; it++ )
@@ -96,6 +92,11 @@ namespace vtil::lifter::amd64
 				}
 				else
 					block->push( frame_tmp );
+
+			skip_nesting:
+				block
+					->mov( fpr, frame_tmp )
+					->sub( spr, alloc_size );
 			}
 		},
 		{

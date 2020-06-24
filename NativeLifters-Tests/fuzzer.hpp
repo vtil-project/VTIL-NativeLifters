@@ -177,9 +177,9 @@ static void fuzz_step( const lifter::byte_input& input )
 	
 	// Dump some info.
 	//
-	//debug::dump( rtn );
-	//for ( auto& [k, v] : vm.register_state )
-	//	logger::log( "%s => %s\n", k, v );
+	debug::dump( rtn );
+	for ( auto& [k, v] : vm.register_state )
+		logger::log( "%s => %s\n", k, v );
 
 	// Begin executing in the hardware emulator.
 	//

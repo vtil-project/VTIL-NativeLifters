@@ -39,7 +39,7 @@ int main( int argc, char** argv )
 {
 
 	std::vector<uint8_t> code = amd64::assemble( R"(
-		enter 0xFFFF, 0
+		enter 0x40, 1
 		leave
 	)" );
 	lifter::byte_input input = { code.data(), code.size() };
