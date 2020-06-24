@@ -462,23 +462,22 @@ namespace vtil::lifter::amd64
 			// This is annoying to implement and even more annoying to simplify, so
 			// our "undefined behavior" is that the AF flag does not change during this
 			// operation. :^)
-			// TODO: THE FLAGS SET HERE ARE WRONG; WE NEED TO CHECK FOR ZERO BEFORE MODIFYING THEM!
 			{
 				X86_INS_SHL,
 				[]( basic_block *block, const instruction_info &insn )
 				{
-					auto lhs = load_operand( block, insn, 0 );
-					auto rhs = load_operand( block, insn, 1 );
+					auto lhs = operative( load_operand( block, insn, 0 ));
+					auto rhs = operative( load_operand( block, insn, 1 ));
 
 					auto result = ( operative( lhs ) << ( operative( rhs ) & ( lhs.size() == 8 ? 0x3F : 0x1F ))).op;
 					auto lhs_sign = flags::sign( { lhs } );
 
 					block
-						->mov( flags::CF, lhs_sign )
-						->mov( flags::OF, ( flags::sign( { result } ) ^ lhs_sign ))
-						->mov( flags::SF, flags::sign( result ))
-						->mov( flags::ZF, flags::zero( result ))
-						->mov( flags::PF, flags::parity( result ));
+						->bxor( flags::CF, ( rhs != 0 ) & ( operative( flags::CF ) ^ lhs_sign ))
+						->bxor( flags::OF, ( rhs != 0 ) & ( operative( flags::OF ) ^ ( flags::sign( { result } ) ^ lhs_sign )))
+						->bxor( flags::SF, ( rhs != 0 ) & ( operative( flags::SF ) ^ flags::sign( result )))
+						->bxor( flags::ZF, ( rhs != 0 ) & ( operative( flags::ZF ) ^ flags::zero( result )))
+						->bxor( flags::PF, ( rhs != 0 ) & ( operative( flags::PF ) ^ flags::parity( result )));
 
 					store_operand( block, insn, 0, result );
 				}
@@ -487,17 +486,17 @@ namespace vtil::lifter::amd64
 				X86_INS_SHR,
 				[]( basic_block *block, const instruction_info &insn )
 				{
-					auto lhs = load_operand( block, insn, 0 );
-					auto rhs = load_operand( block, insn, 1 );
+					auto lhs = operative( load_operand( block, insn, 0 ));
+					auto rhs = operative( load_operand( block, insn, 1 ));
 
 					auto result = ( operative( lhs ) >> ( operative( rhs ) & ( lhs.size() == 8 ? 0x3F : 0x1F ))).op;
 
 					block
-						->mov( flags::CF, ( operative( lhs ) & 1 ))
-						->mov( flags::OF, flags::sign( { lhs } ))
-						->mov( flags::SF, flags::sign( result ))
-						->mov( flags::ZF, flags::zero( result ))
-						->mov( flags::PF, flags::parity( result ));
+						->bxor( flags::CF, ( rhs != 0 ) & ( operative( flags::CF ) ^ ( operative( lhs ) & 1 )))
+						->bxor( flags::OF, ( rhs != 0 ) & ( operative( flags::OF ) ^ flags::sign( { lhs } )))
+						->bxor( flags::SF, ( rhs != 0 ) & ( operative( flags::SF ) ^ flags::sign( result )))
+						->bxor( flags::ZF, ( rhs != 0 ) & ( operative( flags::ZF ) ^ flags::zero( result )))
+						->bxor( flags::PF, ( rhs != 0 ) & ( operative( flags::PF ) ^ flags::parity( result )));
 
 					store_operand( block, insn, 0, result );
 				}
@@ -512,28 +511,27 @@ namespace vtil::lifter::amd64
 					auto result = (( lhs >> ( rhs & ( lhs.op.size() == 8 ? 0x3F : 0x1F ))) | ( lhs & ( 1ULL << ( lhs.op.bit_count() - 1 )))).op;
 
 					block
-						->mov( flags::CF, ( lhs & 1 ))
-						->mov( flags::OF, 0 )
-						->mov( flags::SF, flags::sign( result ))
-						->mov( flags::ZF, flags::zero( result ))
-						->mov( flags::PF, flags::parity( result ));
+						->bxor( flags::CF, ( rhs != 0 ) & ( operative( flags::CF ) ^ ( lhs & 1 )))
+						->bxor( flags::OF, ( rhs != 0 ) & operative( flags::OF ))
+						->bxor( flags::SF, ( rhs != 0 ) & ( operative( flags::SF ) ^ flags::sign( result )))
+						->bxor( flags::ZF, ( rhs != 0 ) & ( operative( flags::ZF ) ^ flags::zero( result )))
+						->bxor( flags::PF, ( rhs != 0 ) & ( operative( flags::PF ) ^ flags::parity( result )));
 
 					store_operand( block, insn, 0, result );
 				}
 			},
-			// --
 			{
 				X86_INS_ROL,
 				[]( basic_block *block, const instruction_info &insn )
 				{
-					auto lhs = load_operand( block, insn, 0 );
-					auto rhs = load_operand( block, insn, 1 );
+					auto lhs =  operative( load_operand( block, insn, 0 ));
+					auto rhs =  operative( load_operand( block, insn, 1 ));
 
 					auto result = block->tmp( lhs.bit_count());
 					block
 						->mov( result, lhs )
 						->brol( result, rhs )
-						->mov( flags::CF, ( operative( result ) & 1 ));
+						->bxor( flags::CF, ( rhs != 0 ) & ( operative( result ) & 1 ));
 
 					store_operand( block, insn, 0, result );
 				}
@@ -542,14 +540,14 @@ namespace vtil::lifter::amd64
 				X86_INS_ROR,
 				[]( basic_block *block, const instruction_info &insn )
 				{
-					auto lhs = load_operand( block, insn, 0 );
-					auto rhs = load_operand( block, insn, 1 );
+					auto lhs =  operative( load_operand( block, insn, 0 ));
+					auto rhs =  operative( load_operand( block, insn, 1 ));
 
 					auto result = block->tmp( lhs.bit_count());
 					block
 						->mov( result, lhs )
 						->bror( result, rhs )
-						->mov( flags::CF, flags::sign( { result } ));
+						->bxor( flags::CF, ( rhs != 0 ) & flags::sign( { result } ));
 
 					store_operand( block, insn, 0, result );
 				}
@@ -558,18 +556,16 @@ namespace vtil::lifter::amd64
 				X86_INS_RCL,
 				[]( basic_block *block, const instruction_info &insn )
 				{
-					// TODO: Fix me:
-					unreachable();
 					auto lhs = operative( load_operand( block, insn, 0 ));
 					auto rhs = operative( load_operand( block, insn, 1 )) & ( lhs.op.size() == 8 ? 0x3F : 0x1F );
 					auto cf = operative( flags::CF );
 
-					auto result = ( lhs << rhs ) | ( lhs >> ( rhs + 1 )) | ( cf.zext( lhs.op.bit_count()) << ( rhs - 1 ));
+					auto result = ( lhs << rhs ) | ( lhs >> ( lhs.op.bit_count() - rhs + 1 )) | ( cf.zext( lhs.op.bit_count()) << ( rhs - 1 ));
 					auto carry_result = ( lhs & ( lhs.op.bit_count() << rhs ));
 
 					block
-						->mov( flags::CF, carry_result )
-						->mov( flags::OF, ( cf ^ flags::sign( result )));
+						->bxor( flags::CF, ( rhs != 0 ) & ( carry_result ))
+						->bxor( flags::OF, ( rhs != 0 ) & ( operative( flags::CF ) ^ flags::sign( result )));
 
 					store_operand( block, insn, 0, result );
 				}
@@ -586,8 +582,8 @@ namespace vtil::lifter::amd64
 					auto carry_result = ( lhs >> ( rhs - 1 )) & 1;
 
 					block
-						->mov( flags::CF, carry_result )
-						->mov( flags::OF, ( cf ^ flags::sign( lhs )));
+						->bxor( flags::CF, ( rhs != 0 ) & ( cf ^ carry_result ))
+						->bxor( flags::OF, ( rhs != 0 ) & ( operative( flags::CF ) ^ flags::sign( lhs )));
 
 					store_operand( block, insn, 0, result );
 				}
