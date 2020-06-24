@@ -65,6 +65,11 @@ namespace vtil::lifter
 			op = *translator << symbolic::variable::pack_all( symbolic::expression{ opr, erhs } );
 		}
 
+		bitcnt_t bit_count()
+		{
+			return op.bit_count();
+		}
+
 		operative& operator=( const operative& o )
 		{
 			translator->block->push_back( { &ins::mov, { op, o.op } } );
