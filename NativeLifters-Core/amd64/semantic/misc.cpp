@@ -55,7 +55,7 @@ namespace vtil::lifter::amd64
 				// LOCK prefix #UD in protected-mode.
 				//
 				if ( insn.prefix[ 0 ] == X86_PREFIX_LOCK )
-					block->vemit( "int 0xB" );
+					block->vemits( "int 0xB" );
 
 				auto op_size = 64;
 				auto frame_temp = block->tmp( 64 );
@@ -64,7 +64,7 @@ namespace vtil::lifter::amd64
 				{
 					block
 						->push( X86_REG_RBP )
-						->ldd( frame_temp, X86_REG_RSP );
+						->ldd( frame_temp, X86_REG_RSP, 0 );
 				}
 
 				if ( nesting_level == 0 )
@@ -76,7 +76,7 @@ namespace vtil::lifter::amd64
 						if ( op_size == 64 )
 						{
 							block
-								->mov( X86_REG_RBP, operative( X86_REG_RBP ) - 8 )
+								->sub( X86_REG_RBP, 8 )
 								->push( X86_REG_RBP );
 						}
 					}
@@ -90,7 +90,7 @@ namespace vtil::lifter::amd64
 				{
 					block
 						->mov( X86_REG_RBP, frame_temp )
-						->mov( X86_REG_RSP, operative( X86_REG_RSP ) - alloc_size );
+						->sub( X86_REG_RSP, alloc_size );
 				}
 			}
 		},

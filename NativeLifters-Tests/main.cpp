@@ -39,7 +39,7 @@ int main( int argc, char** argv )
 {
 
 	std::vector<uint8_t> code = amd64::assemble( R"(
-		cmova eax, ebx
+		enter 0xD0, 0
 	)" );
 	lifter::byte_input input = { code.data(), code.size() };
 
