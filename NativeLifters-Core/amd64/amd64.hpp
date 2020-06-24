@@ -77,12 +77,18 @@ namespace vtil::lifter::amd64
 	extern handler_map_t branch_handlers;
 	extern handler_map_t arithmetic_handlers;
 
-	static bool handle_instruction( basic_block* block, const instruction_info& ins )
+	static handler_map_t& get_instruction_handlers()
 	{
 		static handler_map_t& instruction_handlers = impl::merge_maps(
-			flags_handlers,      misc_handlers,        comparison_handlers, 
-			branch_handlers,     arithmetic_handlers
+			flags_handlers, misc_handlers, comparison_handlers,
+			branch_handlers, arithmetic_handlers
 		);
+		return instruction_handlers;
+	}
+
+	static bool handle_instruction( basic_block* block, const instruction_info& ins )
+	{
+		handler_map_t& instruction_handlers = get_instruction_handlers();
 
 		auto it = instruction_handlers.find( ( x86_insn ) ins.id );
 		if ( it != instruction_handlers.end() )
