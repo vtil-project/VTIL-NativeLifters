@@ -104,13 +104,55 @@ namespace vtil::lifter::amd64
 						->mov( flags::CF, 0 )
 						->add( X86_REG_AL, __if( result, 6 ))
 						->mov( flags::CF, __if( result, old_cf | operative( flags::CF )))
-						->mov( flags::AF, __if( result, 1 ));
+						->mov( flags::AF, result );
 
 					result = (( old_al > 0x99 ) | ( old_cf == 1 ));
 
 					block
 						->add( X86_REG_AL, __if( result, 0x60 ))
 						->mov( flags::CF, __if( result, 1 ));
+				}
+			},
+			{
+				X86_INS_AAS,
+				[]( basic_block *block, const instruction_info &insn )
+				{
+					auto af = operative( flags::AF );
+					auto al = X86_REG_AL;
+
+					auto result = ((( operative( al ) & 0xF ) > 9 ) | ( af == 1 ));
+
+					block
+						->sub( X86_REG_AL, __if( result, 6 ))
+						->sub( X86_REG_AH, __if( result, 1 ))
+						->mov( flags::AF, result )
+						->mov( flags::CF, result )
+						->mov( X86_REG_AL, ( operative( X86_REG_AL ) & 0xF ));
+
+				}
+			},
+			{
+				X86_INS_DAS,
+				[]( basic_block *block, const instruction_info &insn )
+				{
+					auto old_al = operative( X86_REG_AL );
+					auto old_cf = operative( flags::CF );
+					auto af = operative( flags::AF );
+					auto al = X86_REG_AL;
+
+					auto result = ((( operative( al ) & 0xF ) > 9 ) | ( af == 1 ));
+
+					block
+						->mov( flags::CF, 0 )
+						->sub( X86_REG_AL, __if( result, 6 ))
+						->mov( flags::CF,  __if( result, old_cf | operative( flags::CF )))
+						->mov( flags::AF, result );
+
+					result = (( old_al > 0x99 ) | ( old_cf == 1 ));
+
+					block
+						->sub( X86_REG_AL, __if( result, 0x60 ))
+						->mov( flags::CF,  __if( result, 1 ));
 				}
 			},
 			{
