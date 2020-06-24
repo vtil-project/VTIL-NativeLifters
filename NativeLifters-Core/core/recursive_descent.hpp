@@ -164,18 +164,22 @@ namespace vtil::lifter
 						//
 						if ( branch.is_constant() )
 						{
-							const auto branch_imm = *branch.get<uint64_t>();
+							const auto branch_imm = *branch.get< uint64_t >();
+
+							// If we're not jumping to invalid_vip
+							if ( branch_imm == invalid_vip )
+								continue;
 
 							// Have we found something unexplored?
 							//
 
-							if ( leaders.find( branch_imm ) == leaders.cend() )
+							if ( leaders.find( branch_imm ) == leaders.cend())
 							{
 								// Set to changed, add to entries.
 								//
 
 								changed = true;
-								entries.emplace( entry->fork( branch_imm ) );
+								entries.emplace( entry->fork( branch_imm ));
 							}
 						}
 					}
