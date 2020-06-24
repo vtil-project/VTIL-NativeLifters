@@ -103,13 +103,20 @@ namespace vtil::lifter::amd64
 		switch ( opr.type )
 		{
 			case X86_OP_REG:
-				block
-					->mov( opr.reg, source );
+			{
+				operand op = { ( x86_reg ) opr.reg };
+				if ( op.bit_count() == 32 )
+				{
+					operand op_hi = op;
+					op_hi.reg().bit_offset += 32;
+					block->mov( op_hi, 0ull );
+				}
+				block->mov( op, source );
 				break;
+			}
 			case X86_OP_MEM:
 			{
-				block
-					->str( get_disp_from_operand( block, opr ), 0, source );
+				block->str( get_disp_from_operand( block, opr ), 0, source );
 				break;
 			}
 			case X86_OP_IMM:

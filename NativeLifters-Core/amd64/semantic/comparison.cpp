@@ -86,7 +86,7 @@ namespace vtil::lifter::amd64
 				
 				store_operand( block, insn, 0, 
 							   __if( ~result, rhs ) | 
-							   __if( result, lhs ) );
+							   __if( result, rhs.op.bit_count() == 32 ? __ucast( lhs, 64 ) : lhs ) );
 			}
 		},
 		{
@@ -100,7 +100,7 @@ namespace vtil::lifter::amd64
 
 				store_operand( block, insn, 0,
 							   __if( ( cf == 0 ), rhs ) |
-							   __if( ( cf == 1 ), lhs ) );
+							   __if( ( cf == 1 ), rhs.op.bit_count() == 32 ? __ucast( lhs, 64 ) : lhs ) );
 			}
 		},
 		{
@@ -114,7 +114,7 @@ namespace vtil::lifter::amd64
 
 				store_operand( block, insn, 0,
 							   __if( ( cf == 1 ), rhs ) |
-							   __if( ( cf == 0 ), lhs ) );
+							   __if( ( cf == 0 ), rhs.op.bit_count() == 32 ? __ucast( lhs, 64 ) : lhs ) );
 			}
 		},
 		{
@@ -131,7 +131,7 @@ namespace vtil::lifter::amd64
 
 				store_operand( block, insn, 0,
 							   __if( result, rhs ) |
-							   __if( ~result, lhs ) );
+							   __if( ~result, rhs.op.bit_count() == 32 ? __ucast( lhs, 64 ) : lhs ) );
 			}
 		},
 		{
@@ -145,7 +145,7 @@ namespace vtil::lifter::amd64
 
 				store_operand( block, insn, 0,
 							   __if( ( zf == 1 ), rhs ) |
-							   __if( ( zf == 0 ), lhs ) );
+							   __if( ( zf == 0 ), rhs.op.bit_count() == 32 ? __ucast( lhs, 64 ) : lhs ) );
 			}
 		},
 		{
@@ -163,7 +163,7 @@ namespace vtil::lifter::amd64
 
 				store_operand( block, insn, 0,
 							   __if( result, rhs ) |
-							   __if( ~result, lhs ) );
+							   __if( ~result, rhs.op.bit_count() == 32 ? __ucast( lhs, 64 ) : lhs ) );
 			}
 		},
 		{
@@ -180,7 +180,7 @@ namespace vtil::lifter::amd64
 
 				store_operand( block, insn, 0,
 							   __if( result, rhs ) |
-							   __if( ~result, lhs ) );
+							   __if( ~result, rhs.op.bit_count() == 32 ? __ucast( lhs, 64 ) : lhs ) );
 			}
 		},
 		{
@@ -197,7 +197,7 @@ namespace vtil::lifter::amd64
 
 				store_operand( block, insn, 0,
 							   __if( result, rhs ) |
-							   __if( ~result, lhs ) );
+							   __if( ~result, rhs.op.bit_count() == 32 ? __ucast( lhs, 64 ) : lhs ) );
 			}
 		},
 		{
@@ -215,7 +215,7 @@ namespace vtil::lifter::amd64
 
 				store_operand( block, insn, 0,
 							   __if( ~result, rhs ) |
-							   __if( result, lhs ) );
+							   __if( result, rhs.op.bit_count() == 32 ? __ucast( lhs, 64 ) : lhs ) );
 			}
 		},
 		{
@@ -231,7 +231,7 @@ namespace vtil::lifter::amd64
 
 				store_operand( block, insn, 0,
 							   __if( result, rhs ) |
-							   __if( ~result, lhs ) );
+							   __if( ~result, rhs.op.bit_count() == 32 ? __ucast( lhs, 64 ) : lhs ) );
 			}
 		},
 		{
@@ -247,7 +247,7 @@ namespace vtil::lifter::amd64
 
 				store_operand( block, insn, 0,
 							   __if( result, rhs ) |
-							   __if( ~result, lhs ) );
+							   __if( ~result, rhs.op.bit_count() == 32 ? __ucast( lhs, 64 ) : lhs ) );
 			}
 		},
 		{
@@ -263,7 +263,7 @@ namespace vtil::lifter::amd64
 
 				store_operand( block, insn, 0,
 							   __if( result, rhs ) |
-							   __if( ~result, lhs ) );
+							   __if( ~result, rhs.op.bit_count() == 32 ? __ucast( lhs, 64 ) : lhs ) );
 			}
 		},
 		{
@@ -279,7 +279,7 @@ namespace vtil::lifter::amd64
 
 				store_operand( block, insn, 0,
 							   __if( result, rhs ) |
-							   __if( ~result, lhs ) );
+							   __if( ~result, rhs.op.bit_count() == 32 ? __ucast( lhs, 64 ) : lhs ) );
 			}
 		},
 		{
@@ -295,7 +295,7 @@ namespace vtil::lifter::amd64
 
 				store_operand( block, insn, 0,
 							   __if( result, rhs ) |
-							   __if( ~result, lhs ) );
+							   __if( ~result, rhs.op.bit_count() == 32 ? __ucast( lhs, 64 ) : lhs ) );
 			}
 		},
 		{
@@ -311,7 +311,7 @@ namespace vtil::lifter::amd64
 
 				store_operand( block, insn, 0,
 							   __if( result, rhs ) |
-							   __if( ~result, lhs ) );
+							   __if( ~result, rhs.op.bit_count() == 32 ? __ucast( lhs, 64 ) : lhs ) );
 			}
 		},
 		{
@@ -327,7 +327,7 @@ namespace vtil::lifter::amd64
 
 				store_operand( block, insn, 0,
 							   __if( result, rhs ) |
-							   __if( ~result, lhs ) );
+							   __if( ~result, rhs.op.bit_count() == 32 ? __ucast( lhs, 64 ) : lhs ) );
 			}
 		},
 	};
