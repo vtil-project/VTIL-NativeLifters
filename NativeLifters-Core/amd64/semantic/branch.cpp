@@ -298,6 +298,7 @@ namespace vtil::lifter::amd64
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
 				block
+					->sub( X86_REG_RCX, 1 )
 					->js( ( operative( X86_REG_RCX ) != 0 ),
 						  load_operand( block, insn, 0 ),
 						  insn.address + insn.bytes.size() );
@@ -309,7 +310,8 @@ namespace vtil::lifter::amd64
 			{
 				operative zf( flags::ZF );
 				block
-					->js( ( operative( X86_REG_RCX ) != 0 && zf == 1 ),
+					->sub( X86_REG_RCX, 1 )
+					->js( ( ( operative( X86_REG_RCX ) != 0 ) && ( zf == 1 ) ),
 						  load_operand( block, insn, 0 ),
 						  insn.address + insn.bytes.size() );
 			}
@@ -320,7 +322,8 @@ namespace vtil::lifter::amd64
 			{
 				operative zf( flags::ZF );
 				block
-					->js( ( operative( X86_REG_RCX ) != 0 && zf == 0 ),
+					->sub( X86_REG_RCX, 1 )
+					->js( ( ( operative( X86_REG_RCX ) != 0 ) && ( zf == 0 ) ),
 						  load_operand( block, insn, 0 ),
 						  insn.address + insn.bytes.size() );
 			}
