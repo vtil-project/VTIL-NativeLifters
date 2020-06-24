@@ -42,9 +42,6 @@ namespace vtil::lifter::amd64
 			}
 		},
 		{
-			//
-			// Handling only 64-bit mode operation for time being.
-			//
 			X86_INS_ENTER,
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
@@ -57,58 +54,76 @@ namespace vtil::lifter::amd64
 				if ( insn.prefix[ 0 ] == X86_PREFIX_LOCK )
 					block->vemits( "int 0xB" );
 
-				auto op_size = 64;
-				auto frame_temp = block->tmp( 64 );
+				auto op_size = insn.addr_size * 8;
+				auto frame_tmp = block->tmp( op_size );
+				x86_reg spr, fpr;
 
-				switch( op_size )
+				switch ( op_size )
 				{
 					case 16:
+						spr = X86_REG_SP;
+						fpr = X86_REG_BP;
 						break;
 					case 32:
+						spr = X86_REG_ESP;
+						fpr = X86_REG_EBP;
 						break;
 					case 64:
-						block
-							->push( X86_REG_RBP )
-							->mov( X86_REG_RSP, X86_REG_RSP )
-							->mov( frame_temp, X86_REG_RSP );
+						spr = X86_REG_RSP;
+						fpr = X86_REG_RBP;
+						break;
 				}
+
+				block
+					->push( fpr )
+					->mov( spr, spr )
+					->mov( frame_tmp, spr );
 
 				if ( nesting_level == 0 )
 				{
-					if ( op_size == 64 )
-					{
-						block
-							->mov( X86_REG_RBP, frame_temp )
-							->sub( X86_REG_RSP, alloc_size );
-					}
+					block
+						->mov( fpr, frame_tmp )
+						->sub( spr, alloc_size );
 				}
 				else if( nesting_level > 1 )
 				{
 					for ( auto it = 1; it < nesting_level; it++ )
 					{
-						if ( op_size == 64 )
-						{
-							block
-								->sub( X86_REG_RBP, 8 )
-								->push( X86_REG_RBP );
-						}
+						block
+							->sub( fpr, insn.addr_size )
+							->push( fpr );
 					}
 				}
 				else
-					if ( op_size == 64 )
-						block->push( frame_temp );
+					block->push( frame_tmp );
 			}
 		},
 		{
 			X86_INS_LEAVE,
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
-				// 
-				// Only handling 64-bit operation currently.
-				//
+				auto op_size = insn.addr_size * 8;
+				x86_reg spr, fpr;
+
+				switch ( op_size )
+				{
+					case 16:
+						spr = X86_REG_SP;
+						fpr = X86_REG_BP;
+						break;
+					case 32:
+						spr = X86_REG_ESP;
+						fpr = X86_REG_EBP;
+						break;
+					case 64:
+						spr = X86_REG_RSP;
+						fpr = X86_REG_RBP;
+						break;
+				}
+
 				block
-					->mov( X86_REG_RSP, X86_REG_RBP )
-					->pop( X86_REG_RBP );
+					->mov( spr, fpr )
+					->pop( fpr );
 			}
 		},
 		{
