@@ -73,6 +73,27 @@ namespace vtil::lifter::amd64
 			}
 		},
 		{
+			X86_INS_CMPXCHG,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto accumulator = operative( X86_REG_RAX );
+				auto lhs = operative( load_operand( block, insn, 0 ) );
+				auto rhs = operative( load_operand( block, insn, 1 ) );
+				auto temp = lhs;
+
+				block
+					->mov( flags::ZF, 
+						   __if( accumulator == temp, 1 ) )
+					->mov( X86_REG_RAX, 
+						   __if( accumulator == temp, lhs ) | 
+						   __if( ~( accumulator == temp ), temp ) );
+
+				store_operand( block, insn, 0, 
+							   __if( accumulator == temp, rhs ) | 
+							   __if( ~(accumulator == temp), temp ) );
+			}
+		},
+		{
 			X86_INS_CMOVA,
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
