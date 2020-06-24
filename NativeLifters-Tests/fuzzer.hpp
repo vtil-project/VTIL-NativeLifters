@@ -56,13 +56,15 @@ static void fuzz_step( const lifter::byte_input& input )
 		X86_REG_R15,
 	};
 
-	auto gen_random = [ ] () -> uint64_t
+	auto gen_random = [ ] ( bool strict = false ) -> uint64_t
 	{
 		// TODO: Improve to prioritize edge cases.
 		//
 		static std::random_device rd;
 		static std::mt19937 gen( rd() );
 		static std::uniform_int_distribution<uint64_t> distrib{};
+
+		if ( strict ) return distrib( gen );
 
 		switch ( distrib( gen ) % 7 )
 		{
@@ -121,6 +123,10 @@ static void fuzz_step( const lifter::byte_input& input )
 		emu.set( ( x86_reg ) op.reg().local_id, value );
 		vm.write_register( op.reg(), value );
 	}
+
+	uint64_t rng_rflags = ( gen_random( true ) & 0b110011010101 ) | 0x202;
+	emu.v_rflags = rng_rflags;
+	vm.write_register( REG_FLAGS, rng_rflags );
 
 	// Debug
 	//
