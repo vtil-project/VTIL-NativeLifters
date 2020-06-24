@@ -111,10 +111,6 @@ namespace vtil::lifter
 				}
 			}
 
-			// Run local optimizer passes on this block.
-			//
-			optimizer::apply_all( start_block );
-
 			// Try to explore branches.
 			//
 			cached_tracer local_tracer = {};
@@ -151,17 +147,9 @@ namespace vtil::lifter
 				//
 				entries.clear();
 
-				// Clone the CFG.
+				// For every block in the routine
 				//
-				auto cloned = entry->owner->clone();
-
-				// Run cross-block optimizations.
-				//
-				optimizer::apply_all( cloned );
-
-				// For every block in the newly-cloned routine
-				//
-				for ( auto [vip, explored_block] : cloned->explored_blocks )
+				for ( auto [vip, explored_block] : entry->owner->explored_blocks )
 				{
 					// Try to explore branches.
 					//
@@ -192,9 +180,6 @@ namespace vtil::lifter
 						}
 					}
 				}
-
-				// Delete cloned cfg.
-				delete cloned;
 			}
 			while ( changed );
 		}

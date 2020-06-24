@@ -71,7 +71,7 @@ static void fuzz_step( const lifter::byte_input& input )
 	amd64_recursive_descent rec_desc( &input, 0 );
 	rec_desc.entry->owner->routine_convention = amd64::preserve_all_convention;
 	rec_desc.entry->owner->routine_convention.purge_stack = false;
-	rec_desc.populate( rec_desc.entry );
+	rec_desc.explore();
 	auto rtn = rec_desc.entry->owner;
 
 	// Hardware emulator.

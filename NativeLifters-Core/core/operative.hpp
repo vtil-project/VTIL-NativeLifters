@@ -88,11 +88,11 @@ namespace vtil::lifter
 
 		operative popcnt() const
 		{
-			auto tmp = translator->block->tmp( op.bit_count() );
+			auto tmp = translator->block->tmp( 32 );
 			translator->block
 				->mov( tmp, op )
 				->popcnt( tmp );
-			return { operand{ tmp } };
+			return operand{ tmp };
 		}
 
 		operative zext( bitcnt_t bit_size ) const
@@ -100,6 +100,14 @@ namespace vtil::lifter
 			auto tmp = translator->block->tmp( bit_size );
 			translator->block
 				->mov( tmp, op );
+			return { operand{ tmp } };
+		}
+
+		operative sext( bitcnt_t bit_size ) const
+		{
+			auto tmp = translator->block->tmp( bit_size );
+			translator->block
+				->movsx( tmp, op );
 			return { operand{ tmp } };
 		}
 	};

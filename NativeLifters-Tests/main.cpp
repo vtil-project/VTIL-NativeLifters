@@ -50,7 +50,7 @@ int main( int argc, char** argv )
 	amd64_recursive_descent rec_desc( &input, 0 );
 	rec_desc.entry->owner->routine_convention = amd64::preserve_all_convention;
 	rec_desc.entry->owner->routine_convention.purge_stack = false;
-	rec_desc.populate( rec_desc.entry );
+	rec_desc.explore();
 
 	debug::dump( rec_desc.entry->owner );
 	return 0;
