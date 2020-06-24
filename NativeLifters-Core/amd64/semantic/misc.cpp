@@ -42,6 +42,59 @@ namespace vtil::lifter::amd64
 			}
 		},
 		{
+			//
+			// Handling only 64-bit mode operation for time being.
+			//
+			X86_INS_ENTER,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				auto alloc_size = insn.operands[ 0 ].imm;
+				auto nesting_level = insn.operands[ 1 ].imm % 32;
+
+				//
+				// LOCK prefix #UD in protected-mode.
+				//
+				if ( insn.prefix[ 0 ] == X86_PREFIX_LOCK )
+					block->vemit( "int 0xB" );
+
+				auto op_size = 64;
+				auto frame_temp = block->tmp( 64 );
+
+				if ( op_size == 64 )
+				{
+					block
+						->push( X86_REG_RBP )
+						->ldd( frame_temp, X86_REG_RSP );
+				}
+
+				if ( nesting_level == 0 )
+					goto create64_stack_frame;
+				else if( nesting_level > 1 )
+				{
+					for ( auto it = 1; it < nesting_level; it++ )
+					{
+						if ( op_size == 64 )
+						{
+							block
+								->mov( X86_REG_RBP, operative( X86_REG_RBP ) - 8 )
+								->push( X86_REG_RBP );
+						}
+					}
+				}
+				else
+					if ( op_size == 64 )
+						block->push( frame_temp );
+
+			create64_stack_frame:
+				if ( op_size == 64 )
+				{
+					block
+						->mov( X86_REG_RBP, frame_temp )
+						->mov( X86_REG_RSP, operative( X86_REG_RSP ) - alloc_size );
+				}
+			}
+		},
+		{
 			X86_INS_LEA,
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
