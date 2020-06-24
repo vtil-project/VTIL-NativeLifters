@@ -29,7 +29,4 @@
     </ClInclude>
     <ClInclude Include="fuzzer.hpp" />
   </ItemGroup>
-  <ItemGroup>
-    <MASM Include="emulator\_emulator.masm" />
-  </ItemGroup>
 </Project>

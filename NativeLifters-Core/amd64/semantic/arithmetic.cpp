@@ -48,7 +48,8 @@ namespace vtil::lifter::amd64
 
 	// List of handlers.
 	//
-	static handler_map_t subhandlers = {
+	handler_map_t arithmetic_handlers = 
+	{
 		{
 			X86_INS_ADC,
 			[ ] ( basic_block* block, const instruction_info& insn )
@@ -796,6 +797,4 @@ namespace vtil::lifter::amd64
 		DEFINE_BINOP( X86_INS_XOR, xor, bxor ),
 		DEFINE_BINOP( X86_INS_OR,  or,  bor  ),
 	};
-
-	static bool __init = register_subhandlers( std::move( subhandlers ) );
 }

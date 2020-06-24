@@ -34,7 +34,7 @@ namespace vtil::lifter::amd64
 {
 	// List of handlers.
 	//
-	static handler_map_t subhandlers = {
+	handler_map_t comparison_handlers = {
 		{
 			X86_INS_CMP,
 			[ ] ( basic_block* block, const instruction_info& insn )
@@ -331,6 +331,4 @@ namespace vtil::lifter::amd64
 			}
 		},
 	};
-
-	static bool __init = register_subhandlers( std::move( subhandlers ) );
 }

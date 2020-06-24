@@ -9,7 +9,7 @@ add_executable(${PROJECT_NAME}
 )  
 
 if(MSVC)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /STACK:0x10000000 /WHOLEARCHIVE:NativeLifters-Core")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /STACK:0x10000000")
 endif()
 
 target_link_libraries(${PROJECT_NAME} NativeLifters-Core)

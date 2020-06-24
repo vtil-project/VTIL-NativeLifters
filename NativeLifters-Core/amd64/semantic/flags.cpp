@@ -219,11 +219,34 @@ namespace vtil::lifter::amd64
 			->mov( REG_FLAGS, X86_REG_AH );
 	}
 
-	static bool __init = register_subhandlers(
-		{ { X86_INS_CLD, process_cld },		{ X86_INS_CLI, process_cli },	  { X86_INS_STC, process_stc },		{ X86_INS_STD, process_std },	  { X86_INS_STI, process_sti },
-		  { X86_INS_CMC, process_cmc },		{ X86_INS_SETA, process_seta },	  { X86_INS_SETAE, process_setae }, { X86_INS_SETB, process_setb },	  { X86_INS_SETBE, process_setbe },
-		  { X86_INS_SETE, process_sete },	{ X86_INS_SETGE, process_setge }, { X86_INS_SETG, process_setg },	{ X86_INS_SETLE, process_setle }, { X86_INS_SETL, process_setl },
-		  { X86_INS_SETNE, process_setne }, { X86_INS_SETNO, process_setno }, { X86_INS_SETNP, process_setnp }, { X86_INS_SETNS, process_setns }, { X86_INS_SETO, process_seto },
-		  { X86_INS_SETP, process_setp },	{ X86_INS_SETS, process_sets },	  { X86_INS_BT, process_bt },		{ X86_INS_BTC, process_btc },	  { X86_INS_BTR, process_btr },
-		  { X86_INS_BTS, process_bts }, { X86_INS_LAHF, process_lahf }, { X86_INS_SAHF, process_sahf } } );
+	handler_map_t flags_handlers = { 
+		  { X86_INS_CLD, process_cld },
+		  { X86_INS_CLI, process_cli },	  
+		  { X86_INS_STC, process_stc },
+		  { X86_INS_STD, process_std },
+		  { X86_INS_STI, process_sti },
+		  { X86_INS_CMC, process_cmc },
+		  { X86_INS_SETA, process_seta },	  
+		  { X86_INS_SETAE, process_setae }, 
+		  { X86_INS_SETB, process_setb },	  
+		  { X86_INS_SETBE, process_setbe },
+		  { X86_INS_SETE, process_sete },
+		  { X86_INS_SETGE, process_setge }, 
+		  { X86_INS_SETG, process_setg },	
+		  { X86_INS_SETLE, process_setle }, 
+		  { X86_INS_SETL, process_setl },
+		  { X86_INS_SETNE, process_setne },
+		  { X86_INS_SETNO, process_setno }, 
+		  { X86_INS_SETNP, process_setnp }, 
+		  { X86_INS_SETNS, process_setns }, 
+		  { X86_INS_SETO, process_seto },
+		  { X86_INS_SETP, process_setp },
+		  { X86_INS_SETS, process_sets },	  
+		  { X86_INS_BT, process_bt },		
+		  { X86_INS_BTC, process_btc },	  
+		  { X86_INS_BTR, process_btr },
+		  { X86_INS_BTS, process_bts }, 
+		  { X86_INS_LAHF, process_lahf }, 
+		  { X86_INS_SAHF, process_sahf } 
+	};
 }

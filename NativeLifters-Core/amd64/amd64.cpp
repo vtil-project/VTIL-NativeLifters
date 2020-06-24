@@ -123,7 +123,7 @@ namespace vtil::lifter::amd64
 		const auto& insns = vtil::amd64::disasm( code, vip, 0 );
 		if ( insns.empty() )
 		{
-			instruction_handlers[ X86_INS_INVALID ]( block, { } );
+			handle_instruction( block, { .id = X86_INS_INVALID } );
 			return 0;
 		}
 
@@ -135,39 +135,39 @@ namespace vtil::lifter::amd64
 
 		block->mov( X86_REG_RIP, vip + insn.bytes.size() );
 
-		x86_insn opcode = static_cast< x86_insn >( insn.id );
-		auto mapping = instruction_handlers.find( opcode );
-
-		auto is_invalid = mapping == instruction_handlers.cend();
-		if ( !is_invalid )
+		// Validate operands:
+		//
+		bool is_invalid = false;
+		for ( auto& operand : insn.operands )
 		{
-			for ( auto& operand : insn.operands )
+			if ( operand.type == X86_OP_REG && !vtil::amd64::is_generic( operand.reg ) )
 			{
-				if ( operand.type == X86_OP_REG && !vtil::amd64::is_generic( operand.reg ) )
+				is_invalid = true;
+				break;
+			}
+
+			if ( operand.type == X86_OP_MEM )
+			{
+				if ( operand.mem.base != X86_REG_INVALID && !vtil::amd64::is_generic( operand.mem.base ) )
 				{
 					is_invalid = true;
 					break;
 				}
 
-				if ( operand.type == X86_OP_MEM )
+				if ( operand.mem.index != X86_REG_INVALID && !vtil::amd64::is_generic( operand.mem.index ) )
 				{
-					if ( operand.mem.base != X86_REG_INVALID && !vtil::amd64::is_generic( operand.mem.base ) )
-					{
-						is_invalid = true;
-						break;
-					}
-
-					if ( operand.mem.index != X86_REG_INVALID && !vtil::amd64::is_generic( operand.mem.index ) )
-					{
-						is_invalid = true;
-						break;
-					}
+					is_invalid = true;
+					break;
 				}
 			}
 		}
-
-		if ( is_invalid )
+		
+		// If is invalid or could not handle:
+		//
+		if ( is_invalid || !handle_instruction( block, insn ) )
 		{
+			// Hint all side effects.
+			//
 			for ( auto& operand : insn.operands )
 			{
 				if ( operand.type == X86_OP_REG && ( operand.access & CS_AC_READ ) )
@@ -190,43 +190,24 @@ namespace vtil::lifter::amd64
 				if ( operand.type == X86_OP_REG && ( operand.access & CS_AC_WRITE ) )
 					block->vpinw( operand.reg );
 
-			if ( insn.eflags & X86_EFLAGS_MODIFY_CF )
-				block->vpinw( flags::CF );
-			if ( insn.eflags & X86_EFLAGS_MODIFY_DF )
-				block->vpinw( flags::DF );
-			if ( insn.eflags & X86_EFLAGS_MODIFY_OF )
-				block->vpinw( flags::OF );
-			if ( insn.eflags & X86_EFLAGS_MODIFY_ZF )
-				block->vpinw( flags::ZF );
-			if ( insn.eflags & X86_EFLAGS_MODIFY_PF )
-				block->vpinw( flags::PF );
-			if ( insn.eflags & X86_EFLAGS_MODIFY_AF )
-				block->vpinw( flags::AF );
-			if ( insn.eflags & X86_EFLAGS_MODIFY_SF )
-				block->vpinw( flags::SF );
-			if ( insn.eflags & X86_EFLAGS_MODIFY_IF )
-				block->vpinw( flags::IF );
-		}
-		else
-		{
-			// Call the instruction handler.
-			mapping->second( block, insn );
+			if ( insn.eflags & X86_EFLAGS_MODIFY_CF ) block->vpinw( flags::CF );
+			if ( insn.eflags & X86_EFLAGS_MODIFY_DF ) block->vpinw( flags::DF );
+			if ( insn.eflags & X86_EFLAGS_MODIFY_OF ) block->vpinw( flags::OF );
+			if ( insn.eflags & X86_EFLAGS_MODIFY_ZF ) block->vpinw( flags::ZF );
+			if ( insn.eflags & X86_EFLAGS_MODIFY_PF ) block->vpinw( flags::PF );
+			if ( insn.eflags & X86_EFLAGS_MODIFY_AF ) block->vpinw( flags::AF );
+			if ( insn.eflags & X86_EFLAGS_MODIFY_SF ) block->vpinw( flags::SF );
+			if ( insn.eflags & X86_EFLAGS_MODIFY_IF ) block->vpinw( flags::IF );
 		}
 
-		// Assign undefined registers.
+		// Enforce undefined bits.
 		//
-		if ( insn.eflags & X86_EFLAGS_UNDEFINED_OF )
-			block->mov( flags::OF, UNDEFINED );
-		if ( insn.eflags & X86_EFLAGS_UNDEFINED_SF )
-			block->mov( flags::SF, UNDEFINED );
-		if ( insn.eflags & X86_EFLAGS_UNDEFINED_ZF )
-			block->mov( flags::ZF, UNDEFINED );
-		if ( insn.eflags & X86_EFLAGS_UNDEFINED_PF )
-			block->mov( flags::PF, UNDEFINED );
-		if ( insn.eflags & X86_EFLAGS_UNDEFINED_AF )
-			block->mov( flags::AF, UNDEFINED );
-		if ( insn.eflags & X86_EFLAGS_UNDEFINED_CF )
-			block->mov( flags::CF, UNDEFINED );
+		if ( insn.eflags & X86_EFLAGS_UNDEFINED_OF ) block->mov( flags::OF, UNDEFINED );
+		if ( insn.eflags & X86_EFLAGS_UNDEFINED_SF ) block->mov( flags::SF, UNDEFINED );
+		if ( insn.eflags & X86_EFLAGS_UNDEFINED_ZF ) block->mov( flags::ZF, UNDEFINED );
+		if ( insn.eflags & X86_EFLAGS_UNDEFINED_PF ) block->mov( flags::PF, UNDEFINED );
+		if ( insn.eflags & X86_EFLAGS_UNDEFINED_AF ) block->mov( flags::AF, UNDEFINED );
+		if ( insn.eflags & X86_EFLAGS_UNDEFINED_CF ) block->mov( flags::CF, UNDEFINED );
 
 		return insn.bytes.size();
 	}

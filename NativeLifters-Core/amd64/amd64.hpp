@@ -29,7 +29,7 @@
 #include <vtil/amd64>
 #include <vtil/arch>
 #include <functional>
-#include <unordered_map>
+#include <map>
 
 // This file defines any global arch-specific information for the AMD64 target
 // architecture.
@@ -38,7 +38,6 @@ namespace vtil::lifter::amd64
 {
 	using operand_info = cs_x86_op;
 	using instruction_info = vtil::amd64::instruction;
-	using handler_map_t = std::unordered_map<x86_insn, std::function<void( basic_block*, const instruction_info& )>>;
 
 	struct lifter_t
 	{
@@ -48,19 +47,50 @@ namespace vtil::lifter::amd64
 		static size_t process( basic_block* block, uint64_t vip, uint8_t* code );
 	};
 
-	inline handler_map_t instruction_handlers = {};
-
 	operand load_operand( basic_block* block, const instruction_info& insn, size_t idx );
 	register_desc get_disp_from_operand( basic_block* block, const operand_info& operand );
 	void store_operand( basic_block* block, const instruction_info& insn, size_t idx, const operand& source );
 
-	static bool register_subhandlers( handler_map_t&& sub_handlers )
+	// Implement ::handle_instruction.
+	//
+	using handler_map_t = std::map<x86_insn, std::function<void( basic_block*, const instruction_info& )>>;
+
+	namespace impl
 	{
-		for ( auto&& [k, v] : sub_handlers )
+		static handler_map_t& merge_maps( handler_map_t& m0 ) { return m0; }
+
+		template<typename... Tx>
+		static handler_map_t& merge_maps( handler_map_t& m0, handler_map_t& m1, Tx&&... maps )
 		{
-			fassert( !instruction_handlers.contains( k ) );
-			instruction_handlers.emplace( k, std::move( v ) );
+			for ( auto&& [k, v] : m1 )
+			{
+				fassert( !m0.contains( k ) );
+				m0.emplace( k, std::move( v ) );
+			}
+			return merge_maps( m0, std::forward<Tx>( maps )... );
 		}
-		return true;
+	};
+
+	extern handler_map_t flags_handlers;
+	extern handler_map_t misc_handlers;
+	extern handler_map_t comparison_handlers;
+	extern handler_map_t branch_handlers;
+	extern handler_map_t arithmetic_handlers;
+
+	static bool handle_instruction( basic_block* block, const instruction_info& ins )
+	{
+		static handler_map_t& instruction_handlers = impl::merge_maps(
+			flags_handlers,      misc_handlers,        comparison_handlers, 
+			branch_handlers,     arithmetic_handlers
+		);
+
+		auto it = instruction_handlers.find( ( x86_insn ) ins.id );
+		if ( it != instruction_handlers.end() )
+		{
+			it->second( block, ins );
+			return true;
+		}
+
+		return false;
 	}
 };
