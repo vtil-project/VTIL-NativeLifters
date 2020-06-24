@@ -95,7 +95,7 @@ namespace vtil::lifter::amd64
 					}
 				}
 				else
-						block->push( frame_tmp );
+					block->push( frame_tmp );
 			}
 		},
 		{
