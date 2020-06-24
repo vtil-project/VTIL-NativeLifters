@@ -131,61 +131,62 @@ namespace vtil::lifter
 
 		void explore()
 		{
-			std::unordered_set<basic_block*> entries { entry };
-
-			bool changed;
-			do
-			{
-				changed = false;
-
-				// Populate entries.
-				//
-				for ( auto entry_blk : entries )
-					populate( entry_blk );
-
-				// Clear entries vector.
-				//
-				entries.clear();
-
-				// For every block in the routine
-				//
-				for ( auto [vip, explored_block] : entry->owner->explored_blocks )
-				{
-					// Try to explore branches.
-					//
-					cached_tracer local_tracer = {};
-					auto lbranch_info = optimizer::aux::analyze_branch( explored_block, &local_tracer, true, true );
-
-					// For every branch
-					//
-					for ( auto branch : lbranch_info.destinations )
-					{
-						// Is the branch result a constant/
-						//
-						if ( branch.is_constant() )
-						{
-							const auto branch_imm = *branch.get< uint64_t >();
-
-							// If we're not jumping to invalid_vip
-							if ( branch_imm == invalid_vip )
-								continue;
-
-							// Have we found something unexplored?
-							//
-
-							if ( leaders.find( branch_imm ) == leaders.cend())
-							{
-								// Set to changed, add to entries.
-								//
-
-								changed = true;
-								entries.emplace( entry->fork( branch_imm ));
-							}
-						}
-					}
-				}
-			}
-			while ( changed );
+			populate( entry );
+			//std::unordered_set<basic_block*> entries { entry };
+			//
+			//bool changed;
+			//do
+			//{
+			//	changed = false;
+			//
+			//	// Populate entries.
+			//	//
+			//	for ( auto entry_blk : entries )
+			//		populate( entry_blk );
+			//
+			//	// Clear entries vector.
+			//	//
+			//	entries.clear();
+			//
+			//	// For every block in the routine
+			//	//
+			//	for ( auto [vip, explored_block] : entry->owner->explored_blocks )
+			//	{
+			//		// Try to explore branches.
+			//		//
+			//		cached_tracer local_tracer = {};
+			//		auto lbranch_info = optimizer::aux::analyze_branch( explored_block, &local_tracer, true, true );
+			//
+			//		// For every branch
+			//		//
+			//		for ( auto branch : lbranch_info.destinations )
+			//		{
+			//			// Is the branch result a constant/
+			//			//
+			//			if ( branch.is_constant() )
+			//			{
+			//				const auto branch_imm = *branch.get< uint64_t >();
+			//
+			//				// If we're not jumping to invalid_vip
+			//				if ( branch_imm == invalid_vip )
+			//					continue;
+			//
+			//				// Have we found something unexplored?
+			//				//
+			//
+			//				if ( leaders.find( branch_imm ) == leaders.cend())
+			//				{
+			//					// Set to changed, add to entries.
+			//					//
+			//
+			//					changed = true;
+			//					entries.emplace( entry->fork( branch_imm ));
+			//				}
+			//			}
+			//		}
+			//	}
+			//}
+			//while ( changed );
 		}
 	};
 }

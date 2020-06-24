@@ -60,15 +60,28 @@ namespace vtil::lifter::amd64
 				auto op_size = 64;
 				auto frame_temp = block->tmp( 64 );
 
-				if ( op_size == 64 )
+				switch( op_size )
 				{
-					block
-						->push( X86_REG_RBP )
-						->ldd( frame_temp, X86_REG_RSP, 0 );
+					case 16:
+						break;
+					case 32:
+						break;
+					case 64:
+						block
+							->push( X86_REG_RBP )
+							->mov( X86_REG_RSP, X86_REG_RSP )
+							->mov( frame_temp, X86_REG_RSP );
 				}
 
 				if ( nesting_level == 0 )
-					goto create64_stack_frame;
+				{
+					if ( op_size == 64 )
+					{
+						block
+							->mov( X86_REG_RBP, frame_temp )
+							->sub( X86_REG_RSP, alloc_size );
+					}
+				}
 				else if( nesting_level > 1 )
 				{
 					for ( auto it = 1; it < nesting_level; it++ )
@@ -84,14 +97,18 @@ namespace vtil::lifter::amd64
 				else
 					if ( op_size == 64 )
 						block->push( frame_temp );
-
-			create64_stack_frame:
-				if ( op_size == 64 )
-				{
-					block
-						->mov( X86_REG_RBP, frame_temp )
-						->sub( X86_REG_RSP, alloc_size );
-				}
+			}
+		},
+		{
+			X86_INS_LEAVE,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				// 
+				// Only handling 64-bit operation currently.
+				//
+				block
+					->mov( X86_REG_RSP, X86_REG_RBP )
+					->pop( X86_REG_RBP );
 			}
 		},
 		{
@@ -157,7 +174,7 @@ namespace vtil::lifter::amd64
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
 				auto tmp = block->tmp( 64 );
-				block->ldd( tmp, X86_REG_RSP, 0 );
+				block->ldd( tmp, X86_REG_RSP, block->sp_offset );
 				store_operand( block, insn, 0, tmp );
 				if ( insn.operands[ 0 ].size == 2 )
 					block->add( X86_REG_RSP, 2 );

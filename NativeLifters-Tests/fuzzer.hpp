@@ -127,6 +127,7 @@ static void fuzz_step( const lifter::byte_input& input )
 	uint64_t rng_rflags = ( gen_random( true ) & 0b110011010101 ) | 0x202;
 	emu.v_rflags = rng_rflags;
 	vm.write_register( REG_FLAGS, rng_rflags );
+	vm.write_register( REG_SP, ( uint64_t ) &emu.v_stack[ -1 ] );
 
 	// Debug
 	//
