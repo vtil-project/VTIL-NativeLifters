@@ -292,6 +292,38 @@ namespace vtil::lifter::amd64
 				block->add( X86_REG_RSP, to_pop_after_ret + 8 );
 				block->jmp( retaddr );
 			}
+		},
+		{
+			X86_INS_LOOP,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				block
+					->js( ( operative( X86_REG_RCX ) != 0 ),
+						  load_operand( block, insn, 0 ),
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
+			X86_INS_LOOPE,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				operative zf( flags::ZF );
+				block
+					->js( ( operative( 	X86_REG_RCX ) != 0 && zf == 1 ),
+						  load_operand( block, insn, 0 ),
+						  insn.address + insn.bytes.size() );
+			}
+		},
+		{
+			X86_INS_LOOPNE,
+			[ ] ( basic_block* block, const instruction_info& insn )
+			{
+				operative zf( flags::ZF );
+				block
+					->js( ( operative( X86_REG_RCX ) != 0 && zf == 0 ),
+						  load_operand( block, insn, 0 ),
+						  insn.address + insn.bytes.size() );
+			}
 		}
 	};
 }
