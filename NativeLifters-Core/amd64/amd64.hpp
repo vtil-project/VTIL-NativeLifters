@@ -77,7 +77,7 @@ namespace vtil::lifter::amd64
 	extern handler_map_t branch_handlers;
 	extern handler_map_t arithmetic_handlers;
 
-	static handler_map_t& get_instruction_handlers()
+	inline handler_map_t& get_instruction_handlers()
 	{
 		static handler_map_t& instruction_handlers = impl::merge_maps(
 			flags_handlers, misc_handlers, comparison_handlers,
