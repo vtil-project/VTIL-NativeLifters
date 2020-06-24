@@ -309,7 +309,7 @@ namespace vtil::lifter::amd64
 			{
 				operative zf( flags::ZF );
 				block
-					->js( ( operative( 	X86_REG_RCX ) != 0 && zf == 1 ),
+					->js( ( operative( X86_REG_RCX ) != 0 && zf == 1 ),
 						  load_operand( block, insn, 0 ),
 						  insn.address + insn.bytes.size() );
 			}
