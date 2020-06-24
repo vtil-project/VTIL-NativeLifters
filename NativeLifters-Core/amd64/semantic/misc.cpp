@@ -102,12 +102,28 @@ namespace vtil::lifter::amd64
 			X86_INS_LEAVE,
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
-				// 
-				// Only handling 64-bit operation currently.
-				//
+				auto op_size = insn.addr_size * 8;
+				x86_reg spr, fpr;
+
+				switch ( op_size )
+				{
+					case 16:
+						spr = X86_REG_SP;
+						fpr = X86_REG_BP;
+						break;
+					case 32:
+						spr = X86_REG_ESP;
+						fpr = X86_REG_EBP;
+						break;
+					case 64:
+						spr = X86_REG_RSP;
+						fpr = X86_REG_RBP;
+						break;
+				}
+
 				block
-					->mov( X86_REG_RSP, X86_REG_RBP )
-					->pop( X86_REG_RBP );
+					->mov( spr, fpr )
+					->pop( fpr );
 			}
 		},
 		{
