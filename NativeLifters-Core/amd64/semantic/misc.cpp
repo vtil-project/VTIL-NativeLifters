@@ -51,7 +51,7 @@ namespace vtil::lifter::amd64
 				//
 				// LOCK prefix #UD in protected-mode.
 				//
-				if ( insn.prefix[ 0 ] == X86_PREFIX_LOCK )
+				if ( insn.prefix[ 0 ] == X86_PREFIX_LOCK || ( insn.operands[ 0 ].imm >= INT16_MAX || insn.operands[ 0 ].imm <= 0 ) )
 					block->vemits( "int 0xB" );
 
 				auto op_size = insn.addr_size * 8;
