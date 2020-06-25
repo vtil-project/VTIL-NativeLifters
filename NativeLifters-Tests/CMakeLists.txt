@@ -3,9 +3,12 @@ cmake_minimum_required(VERSION 3.16)
 project(NativeLifters-Tests)
 
 add_executable(${PROJECT_NAME}
-   main.cpp
-   emulator/emulator.cpp
-   emulator/rwx_allocator.cpp
+    emulator/emulator.cpp
+    emulator/emulator.hpp
+    emulator/rwx_allocator.cpp
+    emulator/rwx_allocator.hpp
+    fuzzer.hpp
+    main.cpp
 )  
 
 if(MSVC)
