@@ -36,7 +36,7 @@ using namespace vtil;
 using namespace logger;
 using amd64_recursive_descent = lifter::recursive_descent<lifter::byte_input, lifter::amd64::lifter_t>;
 
-static bool run_test(const char* assembly, const char* file, int line, bool optimize, bool dump_info)
+static bool run_test(uint64_t address, const char* assembly, const char* file, int line, bool optimize, bool dump_info)
 {
 	std::vector<uint8_t> code = amd64::assemble(assembly);
 	if (code.empty())
@@ -45,9 +45,11 @@ static bool run_test(const char* assembly, const char* file, int line, bool opti
 		log("%s\n", assembly);
 		return false;
 	}
-	lifter::byte_input input = { code.data(), code.size() };
 
-	auto dasm = amd64::disasm(code.data(), 0, code.size());
+	
+	lifter::byte_input input = { code.data(), code.size(), address };
+
+	auto dasm = amd64::disasm(code.data(), address, code.size());
 	for (auto& ins : dasm)
 		log("%s\n", ins.to_string());
 
@@ -67,12 +69,19 @@ static bool run_test(const char* assembly, const char* file, int line, bool opti
 	else
 	{
 		log("\nVTIL:\n");
-		amd64_recursive_descent rec_desc(&input, 0);
+		amd64_recursive_descent rec_desc( &input, input.base );
 		rec_desc.entry->owner->routine_convention = amd64::preserve_all_convention;
 		rec_desc.entry->owner->routine_convention.purge_stack = false;
 		rec_desc.explore();
 
-		debug::dump(rec_desc.entry->owner);
+		// Insert proper vexits
+		rec_desc.entry->owner->for_each([](basic_block* blk)
+		{
+			if (blk->stream.back().base == &ins::jmp && blk->next.empty())
+				blk->stream.back().base = &ins::vexit;
+		});
+
+		debug::dump(rec_desc.entry);
 
 		log<CON_RED>("Test failed! (%s:%d)\n\n", file, line);
 	}
@@ -86,10 +95,12 @@ static bool run_test(const char* assembly, const char* file, int line, bool opti
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 #endif // _WIN32
 
-#define TEST(assembly) tests.push_back({ assembly, __FILENAME__, __LINE__ })
+#define TEST_ADDR(address, assembly) tests.push_back({ address, assembly, __FILENAME__, __LINE__ })
+#define TEST(assembly) TEST_ADDR(0, assembly)
 
 struct Test
 {
+	uint64_t address = 0;
 	const char* assembly = nullptr;
 	const char* file = nullptr;
 	int line = 0;
@@ -119,6 +130,8 @@ static bool runTests()
 		enter 0x40, 1
 		leave
 )");
+	TEST_ADDR(0x140001000, R"(push rax
+pop rbx)");
 	/* TODO: expect failure: TEST(R"(
 		enter 0xFFFF, 0
 		leave
@@ -128,14 +141,14 @@ static bool runTests()
 	for (size_t i = 0; i < tests.size(); i++)
 	{
 		const auto& test = tests[i];
-		passed += run_test(test.assembly, test.file, test.line, false, false);
+		passed += run_test(test.address, test.assembly, test.file, test.line, false, false);
 	}
 
 	log("%zu/%zu tests passed\n", passed, tests.size());
 	return passed == tests.size();
 }
 
-#define EXPERIMENT(assembly) run_test(assembly, __FILENAME__, __LINE__, false, false)
+#define EXPERIMENT(address, assembly) run_test(address, assembly, __FILENAME__, __LINE__, false, false)
 
 int main(int argc, char** argv)
 {
@@ -145,7 +158,7 @@ int main(int argc, char** argv)
 	}
 
 	// Experiment with things
-	EXPERIMENT("mov rax, 0x1234");
+	EXPERIMENT(0x140001000, "mov rax, 0x1234");
 
 	return 0;
 }
