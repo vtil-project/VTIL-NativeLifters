@@ -220,6 +220,7 @@ namespace vtil::lifter::amd64
 	}
 
 	handler_map_t flags_handlers = { 
+		  { X86_INS_CLC, process_clc },
 		  { X86_INS_CLD, process_cld },
 		  { X86_INS_CLI, process_cli },	  
 		  { X86_INS_STC, process_stc },
