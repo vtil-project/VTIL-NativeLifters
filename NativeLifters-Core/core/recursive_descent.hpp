@@ -42,7 +42,7 @@ namespace vtil::lifter
 
 		bool is_valid( vip_t vip ) const
 		{
-			return vip >= base && (vip - base) < size;
+			return vip >= base && ( vip - base ) < size;
 		}
 
 		uint8_t* get_at( vip_t vip ) const
@@ -91,7 +91,7 @@ namespace vtil::lifter
 			{
 				if ( !input->is_valid( vip ) )
 				{
-					start_block->vexit( invalid_vip );
+					start_block->vexit( vip );
 					return;
 				}
 
@@ -129,9 +129,16 @@ namespace vtil::lifter
 				if ( branch.is_constant( ) )
 				{
 					const auto branch_imm = *branch.get<uint64_t>( );
-					if ( auto next_blk = start_block->fork( branch_imm ) )
+					if (auto next_blk = start_block->fork( branch_imm ))
 					{
-						populate( next_blk );
+						if ( input->is_valid( branch_imm ) )
+						{
+							populate( next_blk );
+						}
+						else
+						{
+							next_blk->vexit( branch_imm );
+						}
 					}
 				}
 			}
