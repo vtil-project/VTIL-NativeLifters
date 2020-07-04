@@ -4,7 +4,7 @@ install:
 - cmd: git submodule update --init --recursive --no-recommend-shallow
 build_script:
 - cmd: mkdir build && cd build
-- cmd: cmake -DVTIL_BUILD_TESTS=ON ..
+- cmd: cmake -DNATIVELIFTERS_BUILD_TESTS=ON ..
 - cmd: cmake --build . --config Release
 test_script:
 - cmd: NativeLifters-Tests\Release\NativeLifters-Tests.exe --tests
