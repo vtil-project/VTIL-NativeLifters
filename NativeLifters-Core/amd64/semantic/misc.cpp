@@ -131,7 +131,9 @@ namespace vtil::lifter::amd64
 			X86_INS_LEA,
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
-				store_operand( block, insn, 0, get_disp_from_operand( block, insn.operands[ 1 ] ) );
+				auto tmp = block->tmp(insn.operands[1].size * 8);
+				block->mov(tmp, get_disp_from_operand(block, insn.operands[1]));
+				store_operand(block, insn, 0, tmp);
 			}
 		},
 		{

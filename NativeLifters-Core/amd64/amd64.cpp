@@ -155,7 +155,7 @@ namespace vtil::lifter::amd64
 
 			if ( operand.type == X86_OP_MEM )
 			{
-				if ( operand.mem.base != X86_REG_INVALID && !vtil::amd64::is_generic( operand.mem.base ) )
+				if ( operand.mem.base != X86_REG_INVALID && operand.mem.base != X86_REG_RIP && !vtil::amd64::is_generic( operand.mem.base ) )
 				{
 					is_invalid = true;
 					break;
