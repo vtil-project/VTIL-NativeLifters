@@ -112,9 +112,15 @@ namespace vtil::lifter
 			}
 
 			// Try to explore branches.
+			// - Do not set resolving of opaques since this block can be jumped into 
+			//   later on, we cannot make these kind of assumptions in this scope.
 			//
 			cached_tracer local_tracer = {};
-			auto lbranch_info = optimizer::aux::analyze_branch( start_block, &local_tracer, true, true );
+			auto lbranch_info = optimizer::aux::analyze_branch( 
+				start_block, 
+				&local_tracer, 
+				{ .cross_block = true, .pack = true } 
+			);
 
 			for ( auto branch : lbranch_info.destinations )
 			{
