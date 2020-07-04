@@ -36,17 +36,19 @@ namespace vtil::lifter
 {
 	struct byte_input
 	{
-		uint8_t* bytes;
-		uint64_t size;
+		uint8_t* bytes = nullptr;
+		uint64_t size = 0;
+		uint64_t base = 0;
 
 		bool is_valid( vip_t vip ) const
 		{
-			return vip < size;
+			return vip >= base && (vip - base) < size;
 		}
 
-		uint8_t* get_at( vip_t offs ) const
+		uint8_t* get_at( vip_t vip ) const
 		{
-			return &bytes[ offs ];
+			dassert( is_valid( vip ) );
+			return &bytes[ vip - base ];
 		}
 	};
 
