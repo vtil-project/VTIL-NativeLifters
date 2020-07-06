@@ -9,7 +9,7 @@
 // 2. Redistributions in binary form must reproduce the above copyright   
 //    notice, this list of conditions and the following disclaimer in the   
 //    documentation and/or other materials provided with the distribution.   
-// 3. Neither the name of mosquitto nor the names of its   
+// 3. Neither the name of VTIL nor the names of its   
 //    contributors may be used to endorse or promote products derived from   
 //    this software without specific prior written permission.   
 //    
@@ -130,15 +130,15 @@ namespace vtil::lifter
 				{
 					const auto branch_imm = *branch.get<uint64_t>( );
 					if (auto next_blk = start_block->fork( branch_imm ))
-					{
-						if ( input->is_valid( branch_imm ) )
+					{
+						if ( input->is_valid( branch_imm ) )
 						{
-							populate( next_blk );
-						}
-						else
-						{
-							next_blk->vexit( branch_imm );
-						}
+							populate( next_blk );
+						}
+						else
+						{
+							next_blk->vexit( branch_imm );
+						}
 					}
 				}
 			}

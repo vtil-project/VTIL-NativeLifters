@@ -9,7 +9,7 @@
 // 2. Redistributions in binary form must reproduce the above copyright   
 //    notice, this list of conditions and the following disclaimer in the   
 //    documentation and/or other materials provided with the distribution.   
-// 3. Neither the name of mosquitto nor the names of its   
+// 3. Neither the name of VTIL nor the names of its   
 //    contributors may be used to endorse or promote products derived from   
 //    this software without specific prior written permission.   
 //    
@@ -156,6 +156,79 @@ int main(int argc, char** argv)
 	{
 		return runTests() ? 0 : 1;
 	}
+
+	{
+
+
+
+		std::vector<uint8_t> code = amd64::assemble( R"(
+        xor     ecx, ecx
+        xor     eax, eax
+        lea     edx, [rax + rcx]
+        test    cl, 8
+        je      .LBB0_4
+        jmp     .LBB0_2
+.LBB0_7:                               
+        add     ecx, 2
+        cmp     ecx, 512
+        je      .LBB0_10
+        lea     edx, [rax + rcx]
+        test    cl, 8
+        je      .LBB0_4
+.LBB0_2:
+        test    cl, 16
+        je      .LBB0_8
+        or      edx, 1
+.LBB0_4:                           
+        lea     eax, [rdx + rcx]
+        add     eax, 1
+        test    cl, 8
+        je      .LBB0_7
+        test    cl, 16
+        je      .LBB0_9
+        or      eax, 1
+        jmp     .LBB0_7
+.LBB0_8:
+        add     eax, ecx
+        ret
+.LBB0_9:
+        lea     eax, [rdx + rcx]
+        add     eax, 1
+.LBB0_10:
+        ret
+
+	)" );
+		lifter::byte_input input = { code.data(), code.size() };
+
+		auto dasm = amd64::disasm( code.data(), 0, code.size() );
+		for ( auto& ins : dasm )
+			logger::log( "%s\n", ins.to_string() );
+
+		amd64_recursive_descent rec_desc( &input, 0 );
+		rec_desc.entry->owner->routine_convention = amd64::default_call_convention;
+		rec_desc.entry->owner->routine_convention.purge_stack = false;
+		rec_desc.explore();
+
+		rec_desc.entry->owner->for_each( [ ] ( basic_block* blk )
+		{
+			if ( blk->stream.back().base == &ins::jmp && blk->next.empty() )
+				blk->stream.back().base = &ins::vexit;
+		} );
+
+		save_routine( rec_desc.entry->owner, "S:\\test_loop.vtil" );
+
+		optimizer::local_pass<optimizer::collective_local_pass>{}( rec_desc.entry->owner );
+
+
+
+		debug::dump( rec_desc.entry->owner );
+
+		optimizer::apply_all_profiled( rec_desc.entry->owner );
+		debug::dump( rec_desc.entry->owner );
+	}
+
+
+
 
 	// Experiment with things
 	EXPERIMENT(0x140001000, "mov rax, 0x1234");
