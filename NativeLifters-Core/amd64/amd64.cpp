@@ -30,6 +30,16 @@
 
 namespace vtil::lifter::amd64
 {
+	// Converts from x86_reg to register_cast, handling RIP.
+	//
+	static operand reg2op( x86_reg reg )
+	{
+		if ( reg == X86_REG_RIP ) return register_desc{ register_internal, 0, 64, 0, architecture_amd64 };
+		if ( reg == X86_REG_EIP ) return register_desc{ register_internal, 0, 32, 0, architecture_amd64 };
+		if ( reg == X86_REG_IP )  return register_desc{ register_internal, 0, 8,  0, architecture_amd64 };
+		return register_cast<x86_reg>{}( reg );
+	}
+
 	// Create a series of instructions representing memory displacement given the current operand and basic block.
 	// 
 	register_desc get_disp_from_operand( basic_block* block, const operand_info& operand )
@@ -45,7 +55,7 @@ namespace vtil::lifter::amd64
 		{
 			block
 				// Move the index register into the offset
-				->mov( current_offs, operand.mem.index )
+				->mov( current_offs, reg2op( operand.mem.index ) )
 
 				// Multiply it by the scale (unsigned).
 				->mul( current_offs, operand.mem.scale );
@@ -55,7 +65,7 @@ namespace vtil::lifter::amd64
 		{
 			block
 				// Add the base offset.
-				->add( current_offs, operand.mem.base );
+				->add( current_offs, reg2op( operand.mem.base ) );
 		}
 
 		block
@@ -79,7 +89,7 @@ namespace vtil::lifter::amd64
 			case X86_OP_IMM:
 				return { opr.imm, opr.size * 8 };
 			case X86_OP_REG:
-				return { opr.reg };
+				return reg2op( opr.reg );
 			case X86_OP_MEM:
 			{
 				auto tmp = block->tmp( opr.size * 8 );
@@ -104,7 +114,7 @@ namespace vtil::lifter::amd64
 		{
 			case X86_OP_REG:
 			{
-				operand op = { ( x86_reg ) opr.reg };
+				operand op = reg2op( opr.reg );
 				if ( op.bit_count() == 32 )
 				{
 					operand op_hi = op;
@@ -140,28 +150,32 @@ namespace vtil::lifter::amd64
 		batch_translator translator = { block };
 		lifter::operative::translator = &translator;
 
-		block->mov( X86_REG_RIP, vip + insn.bytes.size() );
+		block->mov( reg2op( X86_REG_RIP ), vip + insn.bytes.size() );
 
 		// Validate operands:
 		//
+		constexpr auto is_valid = [ ] ( const auto& op )
+		{
+			return vtil::amd64::is_generic( op ) ||
+				op == X86_REG_RIP || op == X86_REG_EIP || op == X86_REG_IP;
+		};
+
 		bool is_invalid = false;
 		for ( auto& operand : insn.operands )
 		{
-			if ( operand.type == X86_OP_REG && !vtil::amd64::is_generic( operand.reg ) )
+			if ( operand.type == X86_OP_REG && !is_valid( operand.reg ) )
 			{
 				is_invalid = true;
 				break;
 			}
-
-			if ( operand.type == X86_OP_MEM )
+			else if ( operand.type == X86_OP_MEM )
 			{
-				if ( operand.mem.base != X86_REG_INVALID && !vtil::amd64::is_generic( operand.mem.base ) )
+				if ( operand.mem.base != X86_REG_INVALID && !is_valid( operand.mem.base ) )
 				{
 					is_invalid = true;
 					break;
 				}
-
-				if ( operand.mem.index != X86_REG_INVALID && !vtil::amd64::is_generic( operand.mem.index ) )
+				else if ( operand.mem.index != X86_REG_INVALID && !is_valid( operand.mem.index ) )
 				{
 					is_invalid = true;
 					break;

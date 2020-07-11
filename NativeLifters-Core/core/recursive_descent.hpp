@@ -74,6 +74,7 @@ namespace vtil::lifter
 		recursive_descent( const input_type* input, uint64_t entry_point ) : input( input ), leaders( { } )
 		{
 			entry = basic_block::begin( entry_point );
+			entry->owner->alloc( 64 ); // reserve one internal for RIP.
 		}
 
 		// Start recursive descent.
@@ -128,17 +129,13 @@ namespace vtil::lifter
 			{
 				if ( branch.is_constant( ) )
 				{
-					const auto branch_imm = *branch.get<uint64_t>( );
-					if (auto next_blk = start_block->fork( branch_imm ))
-					{
-						if ( input->is_valid( branch_imm ) )
-						{
-							populate( next_blk );
-						}
-						else
-						{
-							next_blk->vexit( branch_imm );
-						}
+					const auto branch_imm = *branch.get<uint64_t>();
+					if ( auto next_blk = start_block->fork( branch_imm ) )
+					{
+						if ( input->is_valid( branch_imm ) )
+							populate( next_blk );
+						else
+							next_blk->vexit( branch_imm );
 					}
 				}
 			}
