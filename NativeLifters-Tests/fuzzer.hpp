@@ -150,14 +150,14 @@ static bool fuzz_step( const lifter::byte_input& input, bool optimize, bool dump
 		{
 			if ( op.is_immediate() )
 				return op.imm().u64;
-			return *vm.read_register( op.reg() ).get<vip_t>();
+			return *vm.read_register( op.reg() )->get<vip_t>();
 		};
 
 		// Handle JCC:
 		//
 		if ( *lim->base == ins::js )
 		{
-			vip_t next = *vm.read_register( lim->operands[ 0 ].reg() ).get<bool>()
+			vip_t next = *vm.read_register( lim->operands[ 0 ].reg() )->get<bool>()
 				? get_imm( lim->operands[ 1 ] )
 				: get_imm( lim->operands[ 2 ] );
 			it = rtn->explored_blocks[ next ]->begin();
@@ -203,12 +203,12 @@ static bool fuzz_step( const lifter::byte_input& input, bool optimize, bool dump
 	for ( operand op : GP_REGS )
 	{
 		uint64_t emu_v = emu.get( ( x86_reg ) op.reg().local_id );
-		uint64_t vm_v = *vm.read_register( op.reg() ).get<uint64_t>();
+		uint64_t vm_v = *vm.read_register( op.reg() )->get<uint64_t>();
 		if ( emu_v != vm_v )
 		{
 			log<CON_BRG>( "%-8s: ", op );
 			log<CON_GRN>( "%p ", emu.get( ( x86_reg ) op.reg().local_id ) );
-			log<CON_RED>( "%p\n", *vm.read_register( op.reg() ).get<uint64_t>() );
+			log<CON_RED>( "%p\n", *vm.read_register( op.reg() )->get<uint64_t>() );
 			passed = false;
 		}
 	}
@@ -216,12 +216,13 @@ static bool fuzz_step( const lifter::byte_input& input, bool optimize, bool dump
 	// Push flag state:
 	//
 	math::bit_vector emu_v = math::bit_vector{ emu.v_rflags, 32 };
-	math::bit_vector vm_v = vm.read_register( REG_FLAGS ).value.resize( 32 );
+	math::bit_vector vm_v = vm.read_register( REG_FLAGS )->value;
+	vm_v.resize( 32 );
 	if ( ( vm_v.known_mask() & emu.v_rflags ) != vm_v.known_one() )
 	{
 		log<CON_BRG>( "%-8s: ", "eflags" );
 		log<CON_GRN>( "%s\n", math::bit_vector{ emu.v_rflags, 32 } );
-		log<CON_RED>( "          %s\n", vm.read_register( REG_FLAGS ).value.resize( 32 ) );
+		log<CON_RED>( "          %s\n", vm_v );
 		passed = false;
 	}
 

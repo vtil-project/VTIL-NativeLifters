@@ -127,9 +127,9 @@ namespace vtil::lifter
 
 			for ( auto branch : lbranch_info.destinations )
 			{
-				if ( branch.is_constant( ) )
+				if ( branch->is_constant( ) )
 				{
-					const auto branch_imm = *branch.get<uint64_t>();
+					const auto branch_imm = *branch->get<vip_t>();
 					if ( auto next_blk = start_block->fork( branch_imm ) )
 					{
 						if ( input->is_valid( branch_imm ) )
