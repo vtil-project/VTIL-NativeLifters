@@ -36,11 +36,11 @@
     <ClInclude Include="amd64\flags.hpp">
       <Filter>amd64</Filter>
     </ClInclude>
+    <ClInclude Include="core\processing_flags.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="core\recursive_descent.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="amd64\amd64.cpp">
       <Filter>amd64</Filter>
     </ClCompile>

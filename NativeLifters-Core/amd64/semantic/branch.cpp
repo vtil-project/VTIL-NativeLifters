@@ -27,6 +27,7 @@
 //
 #include "../amd64.hpp"
 #include "../flags.hpp"
+#include "../../core/processing_flags.hpp"
 
 // Branching instructions.
 // 
@@ -276,10 +277,17 @@ namespace vtil::lifter::amd64
 			X86_INS_CALL,
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
-				auto vip_after_insn = insn.address + insn.bytes.size();
-				block->sub( X86_REG_RSP, 8 );
-				block->str( X86_REG_RSP, 0, vip_after_insn );
-				block->jmp( load_operand( block, insn, 0 ) );
+				if ( block->owner->context.get<processing_flags>().inline_calls )
+				{
+					auto vip_after_insn = insn.address + insn.bytes.size();
+					block->sub( X86_REG_RSP, 8 );
+					block->str( X86_REG_RSP, 0, vip_after_insn );
+					block->jmp( load_operand( block, insn, 0 ) );
+				}
+				else
+				{
+					block->vxcall( load_operand( block, insn, 0 ) );
+				}
 			}
 		},
 		{

@@ -209,20 +209,6 @@ int main(int argc, char** argv)
 		rec_desc.entry->owner->routine_convention.purge_stack = false;
 		rec_desc.explore();
 
-		rec_desc.entry->owner->for_each( [ ] ( basic_block* blk )
-		{
-			if ( blk->stream.back().base == &ins::jmp && blk->next.empty() )
-				blk->stream.back().base = &ins::vexit;
-		} );
-
-		save_routine( rec_desc.entry->owner, "S:\\test_loop.vtil" );
-
-		optimizer::local_pass<optimizer::collective_local_pass>{}( rec_desc.entry->owner );
-
-
-
-		debug::dump( rec_desc.entry->owner );
-
 		optimizer::apply_all_profiled( rec_desc.entry->owner );
 		debug::dump( rec_desc.entry->owner );
 	}

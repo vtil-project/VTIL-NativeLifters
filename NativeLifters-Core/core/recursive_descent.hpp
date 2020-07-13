@@ -31,6 +31,7 @@
 
 #include <unordered_set>
 #include <deque>
+#include "processing_flags.hpp"
 
 namespace vtil::lifter
 {
@@ -71,10 +72,11 @@ namespace vtil::lifter
 
 		// Constructor.
 		//
-		recursive_descent( const input_type* input, uint64_t entry_point ) : input( input ), leaders( { } )
+		recursive_descent( const input_type* input, uint64_t entry_point, processing_flags flags = {} ) : input( input ), leaders( { } )
 		{
 			entry = basic_block::begin( entry_point );
 			entry->owner->alloc( 64 ); // reserve one internal for RIP.
+			entry->owner->context.get<processing_flags>() = flags;
 		}
 
 		// Start recursive descent.
@@ -88,7 +90,7 @@ namespace vtil::lifter
 
 			leaders.emplace( vip, start_block );
 
-			while ( true)
+			while ( true )
 			{
 				if ( !input->is_valid( vip ) )
 				{
@@ -97,19 +99,24 @@ namespace vtil::lifter
 				}
 
 				auto offs = arch::process( start_block, vip, entry_ptr );
-
-				if ( start_block->is_complete() )
-					break;
-
 				entry_ptr += offs;
 				vip += offs;
+
+				if ( start_block->is_complete() )
+				{
+					if ( start_block->stream.back().base == &ins::vxcall )
+						return populate( start_block->fork( vip ) );
+					else if ( start_block->stream.back().base == &ins::vexit )
+						return;
+					else
+						break;
+				}
 				
 				if ( auto ldr = leaders.find( vip ); ldr != leaders.cend( ) )
 				{
 					start_block
 						->jmp( vip )
 						->fork( vip );
-
 					break;
 				}
 			}
@@ -124,19 +131,32 @@ namespace vtil::lifter
 				&local_tracer, 
 				{ .cross_block = true, .pack = true } 
 			);
+			fassert( !lbranch_info.is_vm_exit );
 
+			// If not all constants, vmexit, declare preserve all.
+			//
 			for ( auto branch : lbranch_info.destinations )
 			{
-				if ( branch->is_constant( ) )
+				if ( !branch->is_constant() )
 				{
-					const auto branch_imm = *branch->get<vip_t>();
-					if ( auto next_blk = start_block->fork( branch_imm ) )
-					{
-						if ( input->is_valid( branch_imm ) )
-							populate( next_blk );
-						else
-							next_blk->vexit( branch_imm );
-					}
+					fassert( start_block->stream.back().base == &ins::jmp );
+					start_block->stream.back().base = &ins::vexit;
+					start_block->owner->routine_convention = amd64::preserve_all_convention;
+					return;
+				}
+			}
+
+			// Follow the branches.
+			//
+			for ( auto branch : lbranch_info.destinations )
+			{
+				const auto branch_imm = *branch->get<vip_t>();
+				if ( auto next_blk = start_block->fork( branch_imm ) )
+				{
+					if ( input->is_valid( branch_imm ) )
+						populate( next_blk );
+					else
+						next_blk->vexit( branch_imm );
 				}
 			}
 		}

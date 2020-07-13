@@ -25,12 +25,12 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE  
 // POSSIBILITY OF SUCH DAMAGE.        
 //
-#include "recursive_descent.hpp"
-
-#include <unordered_set>
-#include <deque>
+#pragma once
 
 namespace vtil::lifter
 {
-	
-}
+	struct processing_flags
+	{
+		bool inline_calls = false;
+	};
+};

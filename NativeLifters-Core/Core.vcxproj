@@ -171,6 +171,7 @@
     <ClInclude Include="amd64\amd64.hpp" />
     <ClInclude Include="amd64\flags.hpp" />
     <ClInclude Include="core\operative.hpp" />
+    <ClInclude Include="core\processing_flags.hpp" />
     <ClInclude Include="core\recursive_descent.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -180,7 +181,6 @@
     <ClCompile Include="amd64\semantic\comparison.cpp" />
     <ClCompile Include="amd64\semantic\flags.cpp" />
     <ClCompile Include="amd64\semantic\misc.cpp" />
-    <ClCompile Include="core\recursive_descent.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
