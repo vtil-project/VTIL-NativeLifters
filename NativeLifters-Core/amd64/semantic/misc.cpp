@@ -228,6 +228,78 @@ namespace vtil::lifter::amd64
 			{
 				block->popf();
 			}
-		}
+		},
+		{
+			X86_INS_LODSB,
+			[](basic_block* block, const instruction_info& insn)
+			{
+				operative df(flags::DF);
+				store_operand(block, insn, 0, load_operand(block, insn, 1));
+				block->add(X86_REG_RSI, (-(__ucast(df, 64) << 1) + 1) * insn.operands[0].size);
+			}
+		},
+		{
+			X86_INS_LODSW,
+			[](basic_block* block, const instruction_info& insn)
+			{
+				operative df(flags::DF);
+				store_operand(block, insn, 0, load_operand(block, insn, 1));
+				block->add(X86_REG_RSI, (-(__ucast(df, 64) << 1) + 1) * insn.operands[0].size);
+			}
+		},
+		{
+			X86_INS_LODSD,
+			[](basic_block* block, const instruction_info& insn)
+			{
+				operative df(flags::DF);
+				store_operand(block, insn, 0, load_operand(block, insn, 1));
+				block->add(X86_REG_RSI, (-(__ucast(df, 64) << 1) + 1) * insn.operands[0].size);
+			}
+		},
+		{
+			X86_INS_LODSQ,
+			[](basic_block* block, const instruction_info& insn)
+			{
+				operative df(flags::DF);
+				store_operand(block, insn, 0, load_operand(block, insn, 1));
+				block->add(X86_REG_RSI, (-(__ucast(df, 64) << 1) + 1) * insn.operands[0].size);
+			}
+		},
+		{
+			X86_INS_STOSB,
+			[](basic_block* block, const instruction_info& insn)
+			{
+				operative df(flags::DF);
+				store_operand(block, insn, 0, load_operand(block, insn, 1));
+				block->add(X86_REG_RDI, (-(__ucast(df, 64) << 1) + 1) * insn.operands[0].size);
+			}
+		},
+		{
+			X86_INS_STOSW,
+			[](basic_block* block, const instruction_info& insn)
+			{
+				operative df(flags::DF);
+				store_operand(block, insn, 0, load_operand(block, insn, 1));
+				block->add(X86_REG_RDI, (-(__ucast(df, 64) << 1) + 1) * insn.operands[0].size);
+			}
+		},
+		{
+			X86_INS_STOSD,
+			[](basic_block* block, const instruction_info& insn)
+			{
+				operative df(flags::DF);
+				store_operand(block, insn, 0, load_operand(block, insn, 1));
+				block->add(X86_REG_RDI, (-(__ucast(df, 64) << 1) + 1) * insn.operands[0].size);
+			}
+		},
+		{
+			X86_INS_STOSQ,
+			[](basic_block* block, const instruction_info& insn)
+			{
+				operative df(flags::DF);
+				store_operand(block, insn, 0, load_operand(block, insn, 1));
+				block->add(X86_REG_RDI, (-(__ucast(df, 64) << 1) + 1) * insn.operands[0].size);
+			}
+		},
 	};
 }
