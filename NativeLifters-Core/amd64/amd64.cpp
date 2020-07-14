@@ -204,6 +204,16 @@ namespace vtil::lifter::amd64
 				}
 			}
 
+			for ( auto& reg : insn.regs_read )
+			{
+				block->vpinr(static_cast<x86_reg>(reg));
+			}
+
+			for ( auto& reg : insn.regs_write )
+			{
+				block->vpinw(static_cast<x86_reg>(reg));
+			}
+
 			for ( auto byte : insn.bytes )
 				block->vemit( byte );
 
