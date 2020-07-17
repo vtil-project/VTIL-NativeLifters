@@ -47,10 +47,10 @@ namespace vtil::lifter
 		operative( const operative& lhs, math::operator_id opr, const operative& rhs )
 		{
 			auto elhs = lhs.op.is_register()
-				? symbolic::make_register_ex( lhs.op.reg() )
+				? symbolic::CTX[ lhs.op.reg() ]
 				: symbolic::expression{ lhs.op.imm().u64, lhs.op.bit_count() };
 			auto erhs = rhs.op.is_register()
-				? symbolic::make_register_ex( rhs.op.reg() )
+				? symbolic::CTX[ rhs.op.reg() ]
 				: symbolic::expression{ rhs.op.imm().u64, rhs.op.bit_count() };
 
 			op = *translator << symbolic::variable::pack_all( symbolic::expression{ elhs, opr, erhs } );
@@ -59,7 +59,7 @@ namespace vtil::lifter
 		operative( math::operator_id opr, const operative& rhs )
 		{
 			auto erhs = rhs.op.is_register()
-				? symbolic::make_register_ex( rhs.op.reg() )
+				? symbolic::CTX[ rhs.op.reg() ]
 				: symbolic::expression{ rhs.op.imm().u64, rhs.op.bit_count() };
 
 			op = *translator << symbolic::variable::pack_all( symbolic::expression{ opr, erhs } );
@@ -125,7 +125,7 @@ namespace vtil
 	template<>
 	struct register_cast<lifter::operative>
 	{
-		auto&& operator()( lifter::operative&& opr )     { return opr.op.descriptor; }
-		auto& operator()( const lifter::operative& opr ) { return opr.op.descriptor; }
+		auto&  operator()( const lifter::operative& opr ) { return opr.op.descriptor; }
+		auto&& operator()( lifter::operative&& opr )      { return std::move( opr.op.descriptor ); }
 	};
 };

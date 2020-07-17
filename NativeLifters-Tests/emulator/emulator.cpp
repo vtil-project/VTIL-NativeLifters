@@ -132,7 +132,7 @@ void emulator::invoke( const void* routine_pointer )
 //
 std::pair<int32_t, uint8_t> emulator::resolve( x86_reg reg ) const
 {
-    auto [base_reg, offset, size] = vtil::amd64::resolve_mapping( reg );
+    auto [base_reg, offset, size] = vtil::amd64::registers.resolve_mapping( reg );
 
     const void* base;
     switch ( base_reg )

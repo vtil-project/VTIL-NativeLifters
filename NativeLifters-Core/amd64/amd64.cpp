@@ -156,7 +156,7 @@ namespace vtil::lifter::amd64
 		//
 		constexpr auto is_valid = [ ] ( const auto& op )
 		{
-			return vtil::amd64::is_generic( op ) ||
+			return vtil::amd64::registers.is_generic( op ) ||
 				op == X86_REG_RIP || op == X86_REG_EIP || op == X86_REG_IP;
 		};
 
