@@ -205,17 +205,13 @@ namespace vtil::lifter::amd64
 			}
 
 			for ( auto& reg : insn.regs_read )
-			{
-				block->vpinr(static_cast<x86_reg>(reg));
-			}
-
-			for ( auto& reg : insn.regs_write )
-			{
-				block->vpinw(static_cast<x86_reg>(reg));
-			}
+				block->vpinr( ( x86_reg ) reg );
 
 			for ( auto byte : insn.bytes )
 				block->vemit( byte );
+
+			for ( auto& reg : insn.regs_write )
+				block->vpinw( ( x86_reg ) reg );
 
 			for ( auto& operand : insn.operands )
 				if ( operand.type == X86_OP_REG && ( operand.access & CS_AC_WRITE ) )
