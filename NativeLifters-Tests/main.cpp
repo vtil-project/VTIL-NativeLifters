@@ -77,8 +77,8 @@ static bool run_test(uint64_t address, const char* assembly, const char* file, i
 		// Insert proper vexits
 		rec_desc.entry->owner->for_each([](basic_block* blk)
 		{
-			if (blk->stream.back().base == &ins::jmp && blk->next.empty())
-				blk->stream.back().base = &ins::vexit;
+			if (blk->back().base == &ins::jmp && blk->next.empty())
+				blk->wback().base = &ins::vexit;
 		});
 
 		debug::dump(rec_desc.entry);
@@ -162,39 +162,14 @@ int main(int argc, char** argv)
 
 
 		std::vector<uint8_t> code = amd64::assemble( R"(
-        xor     ecx, ecx
-        xor     eax, eax
-        lea     edx, [rax + rcx]
-        test    cl, 8
-        je      .LBB0_4
-        jmp     .LBB0_2
-.LBB0_7:                               
-        add     ecx, 2
-        cmp     ecx, 512
-        je      .LBB0_10
-        lea     edx, [rax + rcx]
-        test    cl, 8
-        je      .LBB0_4
+        add     edi, esi
+        je      .LBB0_2
+        jae     .LBB0_3
 .LBB0_2:
-        test    cl, 16
-        je      .LBB0_8
-        or      edx, 1
-.LBB0_4:                           
-        lea     eax, [rdx + rcx]
-        add     eax, 1
-        test    cl, 8
-        je      .LBB0_7
-        test    cl, 16
-        je      .LBB0_9
-        or      eax, 1
-        jmp     .LBB0_7
-.LBB0_8:
-        add     eax, ecx
+        int 3
         ret
-.LBB0_9:
-        lea     eax, [rdx + rcx]
-        add     eax, 1
-.LBB0_10:
+.LBB0_3:
+        int 4
         ret
 
 	)" );

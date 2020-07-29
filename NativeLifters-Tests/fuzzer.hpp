@@ -102,13 +102,13 @@ static bool fuzz_step( const lifter::byte_input& input, bool optimize, bool dump
 
 		// If hint is hit, skip.
 		//
-		if ( *ins.base == vtil::ins::vpinr ) return true;
-		if ( *ins.base == vtil::ins::vpinw ) return true;
+		if ( *ins.base == vtil::ins::vpinr ) return vm_exit_reason::none;
+		if ( *ins.base == vtil::ins::vpinw ) return vm_exit_reason::none;
 
 		// If branch is hit, exit VM if jcc/jmp, continue if vmexit. 
 		//
-		if ( ins.base->is_branching_virt() ) return false;
-		if ( ins.base->is_branching_real() ) return true;
+		if ( ins.base->is_branching_virt() ) return vm_exit_reason::none;
+		if ( ins.base->is_branching_real() ) return vm_exit_reason::unknown_instruction;
 
 		// If none matches, redirect to original handler.
 		//
@@ -143,7 +143,7 @@ static bool fuzz_step( const lifter::byte_input& input, bool optimize, bool dump
 	{
 		// Run until it VM exits:
 		//
-		auto lim = vm.run( it, true );
+		auto [lim, rsn] = vm.run( it );
 		if ( lim.is_end() ) break;
 
 		auto get_imm = [ & ] ( const operand& op ) -> vip_t
@@ -160,16 +160,23 @@ static bool fuzz_step( const lifter::byte_input& input, bool optimize, bool dump
 			vip_t next = *vm.read_register( lim->operands[ 0 ].reg() )->get<bool>()
 				? get_imm( lim->operands[ 1 ] )
 				: get_imm( lim->operands[ 2 ] );
-			it = rtn->explored_blocks[ next ]->begin();
-			vm.write_register( REG_SP, vm.read_register( REG_SP ) + lim.container->sp_offset );
+			if ( auto jit = rtn->explored_blocks.find( next ); jit != rtn->explored_blocks.end() )
+				it = jit->second->begin();
+			else
+				break;
+			vm.write_register( REG_SP, vm.read_register( REG_SP ) + lim.block->sp_offset );
 			continue;
 		}
 		// Handle JMP:
 		//
 		else if ( *lim->base == ins::jmp )
 		{
-			it = rtn->explored_blocks[ get_imm( lim->operands[ 0 ] ) ]->begin();
-			vm.write_register( REG_SP, vm.read_register( REG_SP ) + lim.container->sp_offset );
+			vip_t next = get_imm( lim->operands[ 0 ] );
+			if ( auto jit = rtn->explored_blocks.find( next ); jit != rtn->explored_blocks.end() )
+				it = jit->second->begin();
+			else
+				break;
+			vm.write_register( REG_SP, vm.read_register( REG_SP ) + lim.block->sp_offset );
 			continue;
 		}
 
@@ -184,7 +191,7 @@ static bool fuzz_step( const lifter::byte_input& input, bool optimize, bool dump
 	{
 		debug::dump( rtn );
 		for ( auto& [k, v] : vm.register_state )
-			logger::log( "%s => %s\n", k, v );
+			logger::log( "%s => %s\n", register_desc{ k, 64 }, vm.read_register( register_desc{ k, 64 } ) );
 	}
 
 	// Begin executing in the hardware emulator.

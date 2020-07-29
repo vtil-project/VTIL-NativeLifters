@@ -104,9 +104,9 @@ namespace vtil::lifter
 
 				if ( start_block->is_complete() )
 				{
-					if ( start_block->stream.back().base == &ins::vxcall )
+					if ( start_block->back().base == &ins::vxcall )
 						return populate( start_block->fork( vip ) );
-					else if ( start_block->stream.back().base == &ins::vexit )
+					else if ( start_block->back().base == &ins::vexit )
 						return;
 					else
 						break;
@@ -139,8 +139,8 @@ namespace vtil::lifter
 			{
 				if ( !branch->is_constant() )
 				{
-					fassert( start_block->stream.back().base == &ins::jmp );
-					start_block->stream.back().base = &ins::vexit;
+					fassert( start_block->back().base == &ins::jmp );
+					start_block->wback().base = &ins::vexit;
 					start_block->owner->routine_convention = amd64::preserve_all_convention;
 					return;
 				}
