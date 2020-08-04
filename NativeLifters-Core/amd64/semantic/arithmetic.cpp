@@ -220,6 +220,17 @@ namespace vtil::lifter::amd64
 								->mov( X86_REG_EDX, hi )
 								->tne( flags::CF, hi, 0 )
 								->tne( flags::OF, hi, 0 );
+
+							operand op_eax = register_cast<x86_reg>{}(X86_REG_EAX);
+							operand op_edx = register_cast<x86_reg>{}(X86_REG_EDX);
+
+							op_eax.reg().bit_offset += 32;
+							op_edx.reg().bit_offset += 32;
+
+							block
+								->mov(op_eax, 0ull)
+								->mov(op_edx, 0ull);
+
 							break;
 						}
 
@@ -291,6 +302,17 @@ namespace vtil::lifter::amd64
 										->mov( X86_REG_EDX, hi )
 										->tne( flags::CF, hi, 0 )
 										->tne( flags::OF, hi, 0 );
+
+									operand op_eax = register_cast<x86_reg>{}(X86_REG_EAX);									
+									operand op_edx = register_cast<x86_reg>{}(X86_REG_EDX);
+
+									op_eax.reg().bit_offset += 32;
+									op_edx.reg().bit_offset += 32;
+
+									block
+										->mov(op_eax, 0ull)
+										->mov(op_edx, 0ull);
+
 									break;
 								}
 
@@ -406,6 +428,16 @@ namespace vtil::lifter::amd64
 								->rem( t2, t0, op )
 								->mov( X86_REG_EAX, t1 )
 								->mov( X86_REG_EDX, t2 );
+
+							operand op_eax = register_cast<x86_reg>{}(X86_REG_EAX);
+							operand op_edx = register_cast<x86_reg>{}(X86_REG_EDX);
+
+							op_eax.reg().bit_offset += 32;
+							op_edx.reg().bit_offset += 32;
+
+							block
+								->mov(op_eax, 0ull)
+								->mov(op_edx, 0ull);
 							break;
 						}
 
@@ -480,6 +512,16 @@ namespace vtil::lifter::amd64
 								->irem( t2, t0, op )
 								->mov( X86_REG_EAX, t1 )
 								->mov( X86_REG_EDX, t2 );
+
+							operand op_eax = register_cast<x86_reg>{}(X86_REG_EAX);
+							operand op_edx = register_cast<x86_reg>{}(X86_REG_EDX);
+
+							op_eax.reg().bit_offset += 32;
+							op_edx.reg().bit_offset += 32;
+
+							block
+								->mov(op_eax, 0ull)
+								->mov(op_edx, 0ull);
 							break;
 						}
 
