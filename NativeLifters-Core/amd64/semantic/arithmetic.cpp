@@ -605,6 +605,55 @@ namespace vtil::lifter::amd64
 				}
 			},
 			{
+				X86_INS_SHLD,
+				[]( basic_block* block, const instruction_info& insn ) {
+					auto o1 = operative( load_operand( block, insn, 0 ) );
+					auto o2 = operative( load_operand( block, insn, 1 ) );
+					auto o3 = operative( load_operand( block, insn, 2 ) );
+
+					auto count = operative( o3 ) & ( o1.op.size() == 8 ? 0x3F : 0x1F );
+
+					auto result = ( ( operative( o1 ) << ( count ) ) | ( operative( o2 ) >> ( operative( o1.bit_count() ) - count ) ) ).op;
+					auto lhs_sign = flags::sign( { o1 } );
+
+					// last bit shifted out position
+					auto lbso_pos = operative(o1.bit_count()) - count;
+
+					block
+						->bxor( flags::CF, ( o3 != 0 ) & ( operative( flags::CF ) ^ ( (operative( o1 ) >> lbso_pos) & 1 ) ) )
+						->bxor( flags::OF, ( o3 != 0 ) & ( operative( flags::OF ) ^ ( flags::sign( { result } ) ^ lhs_sign ) ) )
+						->bxor( flags::SF, ( o3 != 0 ) & ( operative( flags::SF ) ^ flags::sign( result ) ) )
+						->bxor( flags::ZF, ( o3 != 0 ) & ( operative( flags::ZF ) ^ flags::zero( result ) ) )
+						->bxor( flags::PF, ( o3 != 0 ) & ( operative( flags::PF ) ^ flags::parity( result ) ) );
+
+					store_operand( block, insn, 0, result );
+				}
+			},
+			{
+				X86_INS_SHRD,
+				[]( basic_block* block, const instruction_info& insn ) {
+					auto o1 = operative( load_operand( block, insn, 0 ) );
+					auto o2 = operative( load_operand( block, insn, 1 ) );
+					auto o3 = operative( load_operand( block, insn, 2 ) );
+
+					auto count = operative( o3 ) & ( o1.op.size() == 8 ? 0x3F : 0x1F );
+
+					auto result = ( ( operative( o1 ) >> ( count ) ) | ( operative( o2 ) << ( operative( o1.bit_count() ) - count ) ) ).op;
+
+					// last bit shifted out position
+					auto lbso_pos = count - operative(1);
+
+					block
+						->bxor( flags::CF, ( o3 != 0 ) & ( operative( flags::CF ) ^ ( (operative( o1 ) >> lbso_pos) & 1 ) ) )
+						->bxor( flags::OF, ( o3 != 0 ) & ( operative( flags::OF ) ^ flags::sign( { o1 } ) ) )
+						->bxor( flags::SF, ( o3 != 0 ) & ( operative( flags::SF ) ^ flags::sign( result ) ) )
+						->bxor( flags::ZF, ( o3 != 0 ) & ( operative( flags::ZF ) ^ flags::zero( result ) ) )
+						->bxor( flags::PF, ( o3 != 0 ) & ( operative( flags::PF ) ^ flags::parity( result ) ) );
+
+					store_operand( block, insn, 0, result );
+				}
+			},
+			{
 				X86_INS_ROL,
 				[]( basic_block *block, const instruction_info &insn )
 				{
