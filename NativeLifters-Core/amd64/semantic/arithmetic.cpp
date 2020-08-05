@@ -48,6 +48,27 @@ namespace vtil::lifter::amd64
 
 // List of handlers.
 //
+	// Because SHL and SAL are equivalent, they share this handler
+	//
+	static auto shl_handler =
+	[]( basic_block *block, const instruction_info &insn )
+	{
+		auto lhs = operative( load_operand( block, insn, 0 ));
+		auto rhs = operative( load_operand( block, insn, 1 ));
+
+		auto result = ( operative( lhs ) << ( operative( rhs ) & ( lhs.op.size() == 8 ? 0x3F : 0x1F ))).op;
+		auto lhs_sign = flags::sign( { lhs } );
+
+		block
+			->bxor( flags::CF, ( rhs != 0 ) & ( operative( flags::CF ) ^ lhs_sign ))
+			->bxor( flags::OF, ( rhs != 0 ) & ( operative( flags::OF ) ^ ( flags::sign( { result } ) ^ lhs_sign )))
+			->bxor( flags::SF, ( rhs != 0 ) & ( operative( flags::SF ) ^ flags::sign( result )))
+			->bxor( flags::ZF, ( rhs != 0 ) & ( operative( flags::ZF ) ^ flags::zero( result )))
+			->bxor( flags::PF, ( rhs != 0 ) & ( operative( flags::PF ) ^ flags::parity( result )));
+
+		store_operand( block, insn, 0, result );
+	};
+
 	handler_map_t arithmetic_handlers =
 		{
 			{
@@ -548,23 +569,11 @@ namespace vtil::lifter::amd64
 			// operation. :^)
 			{
 				X86_INS_SHL,
-				[]( basic_block *block, const instruction_info &insn )
-				{
-					auto lhs = operative( load_operand( block, insn, 0 ));
-					auto rhs = operative( load_operand( block, insn, 1 ));
-
-					auto result = ( operative( lhs ) << ( operative( rhs ) & ( lhs.size() == 8 ? 0x3F : 0x1F ))).op;
-					auto lhs_sign = flags::sign( { lhs } );
-
-					block
-						->bxor( flags::CF, ( rhs != 0 ) & ( operative( flags::CF ) ^ lhs_sign ))
-						->bxor( flags::OF, ( rhs != 0 ) & ( operative( flags::OF ) ^ ( flags::sign( { result } ) ^ lhs_sign )))
-						->bxor( flags::SF, ( rhs != 0 ) & ( operative( flags::SF ) ^ flags::sign( result )))
-						->bxor( flags::ZF, ( rhs != 0 ) & ( operative( flags::ZF ) ^ flags::zero( result )))
-						->bxor( flags::PF, ( rhs != 0 ) & ( operative( flags::PF ) ^ flags::parity( result )));
-
-					store_operand( block, insn, 0, result );
-				}
+				shl_handler
+			},
+			{
+				X86_INS_SAL,
+				shl_handler
 			},
 			{
 				X86_INS_SHR,
