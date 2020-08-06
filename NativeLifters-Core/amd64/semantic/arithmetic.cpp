@@ -629,11 +629,11 @@ namespace vtil::lifter::amd64
 					auto lbso_pos = operative(o1.bit_count()) - count;
 
 					block
-						->bxor( flags::CF, ( o3 != 0 ) & ( operative( flags::CF ) ^ ( (operative( o1 ) >> lbso_pos) & 1 ) ) )
-						->bxor( flags::OF, ( o3 != 0 ) & ( operative( flags::OF ) ^ ( flags::sign( { result } ) ^ lhs_sign ) ) )
-						->bxor( flags::SF, ( o3 != 0 ) & ( operative( flags::SF ) ^ flags::sign( result ) ) )
-						->bxor( flags::ZF, ( o3 != 0 ) & ( operative( flags::ZF ) ^ flags::zero( result ) ) )
-						->bxor( flags::PF, ( o3 != 0 ) & ( operative( flags::PF ) ^ flags::parity( result ) ) );
+						->bxor( flags::CF, ( count != 0 ) & ( operative( flags::CF ) ^ ( (operative( o1 ) >> lbso_pos) & 1 ) ) )
+						->bxor( flags::OF, ( count != 0 ) & ( operative( flags::OF ) ^ ( flags::sign( { result } ) ^ lhs_sign ) ) )
+						->bxor( flags::SF, ( count != 0 ) & ( operative( flags::SF ) ^ flags::sign( result ) ) )
+						->bxor( flags::ZF, ( count != 0 ) & ( operative( flags::ZF ) ^ flags::zero( result ) ) )
+						->bxor( flags::PF, ( count != 0 ) & ( operative( flags::PF ) ^ flags::parity( result ) ) );
 
 					store_operand( block, insn, 0, result );
 				}
@@ -653,11 +653,11 @@ namespace vtil::lifter::amd64
 					auto lbso_pos = count - operative(1);
 
 					block
-						->bxor( flags::CF, ( o3 != 0 ) & ( operative( flags::CF ) ^ ( (operative( o1 ) >> lbso_pos) & 1 ) ) )
-						->bxor( flags::OF, ( o3 != 0 ) & ( operative( flags::OF ) ^ flags::sign( { o1 } ) ) )
-						->bxor( flags::SF, ( o3 != 0 ) & ( operative( flags::SF ) ^ flags::sign( result ) ) )
-						->bxor( flags::ZF, ( o3 != 0 ) & ( operative( flags::ZF ) ^ flags::zero( result ) ) )
-						->bxor( flags::PF, ( o3 != 0 ) & ( operative( flags::PF ) ^ flags::parity( result ) ) );
+						->bxor( flags::CF, ( count != 0 ) & ( operative( flags::CF ) ^ ( (operative( o1 ) >> lbso_pos) & 1 ) ) )
+						->bxor( flags::OF, ( count != 0 ) & ( operative( flags::OF ) ^ flags::sign( { o1 } ) ) )
+						->bxor( flags::SF, ( count != 0 ) & ( operative( flags::SF ) ^ flags::sign( result ) ) )
+						->bxor( flags::ZF, ( count != 0 ) & ( operative( flags::ZF ) ^ flags::zero( result ) ) )
+						->bxor( flags::PF, ( count != 0 ) & ( operative( flags::PF ) ^ flags::parity( result ) ) );
 
 					store_operand( block, insn, 0, result );
 				}
