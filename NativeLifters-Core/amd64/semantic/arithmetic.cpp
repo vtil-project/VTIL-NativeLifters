@@ -48,6 +48,27 @@ namespace vtil::lifter::amd64
 
 // List of handlers.
 //
+	// Because SHL and SAL are equivalent, they share this handler
+	//
+	static auto shl_handler =
+	[]( basic_block *block, const instruction_info &insn )
+	{
+		auto lhs = operative( load_operand( block, insn, 0 ));
+		auto rhs = operative( load_operand( block, insn, 1 ));
+
+		auto result = ( operative( lhs ) << ( operative( rhs ) & ( lhs.op.size() == 8 ? 0x3F : 0x1F ))).op;
+		auto lhs_sign = flags::sign( { lhs } );
+
+		block
+			->bxor( flags::CF, ( rhs != 0 ) & ( operative( flags::CF ) ^ lhs_sign ))
+			->bxor( flags::OF, ( rhs != 0 ) & ( operative( flags::OF ) ^ ( flags::sign( { result } ) ^ lhs_sign )))
+			->bxor( flags::SF, ( rhs != 0 ) & ( operative( flags::SF ) ^ flags::sign( result )))
+			->bxor( flags::ZF, ( rhs != 0 ) & ( operative( flags::ZF ) ^ flags::zero( result )))
+			->bxor( flags::PF, ( rhs != 0 ) & ( operative( flags::PF ) ^ flags::parity( result )));
+
+		store_operand( block, insn, 0, result );
+	};
+
 	handler_map_t arithmetic_handlers =
 		{
 			{
@@ -548,23 +569,11 @@ namespace vtil::lifter::amd64
 			// operation. :^)
 			{
 				X86_INS_SHL,
-				[]( basic_block *block, const instruction_info &insn )
-				{
-					auto lhs = operative( load_operand( block, insn, 0 ));
-					auto rhs = operative( load_operand( block, insn, 1 ));
-
-					auto result = ( operative( lhs ) << ( operative( rhs ) & ( lhs.size() == 8 ? 0x3F : 0x1F ))).op;
-					auto lhs_sign = flags::sign( { lhs } );
-
-					block
-						->bxor( flags::CF, ( rhs != 0 ) & ( operative( flags::CF ) ^ lhs_sign ))
-						->bxor( flags::OF, ( rhs != 0 ) & ( operative( flags::OF ) ^ ( flags::sign( { result } ) ^ lhs_sign )))
-						->bxor( flags::SF, ( rhs != 0 ) & ( operative( flags::SF ) ^ flags::sign( result )))
-						->bxor( flags::ZF, ( rhs != 0 ) & ( operative( flags::ZF ) ^ flags::zero( result )))
-						->bxor( flags::PF, ( rhs != 0 ) & ( operative( flags::PF ) ^ flags::parity( result )));
-
-					store_operand( block, insn, 0, result );
-				}
+				shl_handler
+			},
+			{
+				X86_INS_SAL,
+				shl_handler
 			},
 			{
 				X86_INS_SHR,
@@ -600,6 +609,55 @@ namespace vtil::lifter::amd64
 						->bxor( flags::SF, ( rhs != 0 ) & ( operative( flags::SF ) ^ flags::sign( result )))
 						->bxor( flags::ZF, ( rhs != 0 ) & ( operative( flags::ZF ) ^ flags::zero( result )))
 						->bxor( flags::PF, ( rhs != 0 ) & ( operative( flags::PF ) ^ flags::parity( result )));
+
+					store_operand( block, insn, 0, result );
+				}
+			},
+			{
+				X86_INS_SHLD,
+				[]( basic_block* block, const instruction_info& insn ) {
+					auto o1 = operative( load_operand( block, insn, 0 ) );
+					auto o2 = operative( load_operand( block, insn, 1 ) );
+					auto o3 = operative( load_operand( block, insn, 2 ) );
+
+					auto count = operative( o3 ) & ( o1.op.size() == 8 ? 0x3F : 0x1F );
+
+					auto result = ( ( operative( o1 ) << ( count ) ) | ( operative( o2 ) >> ( operative( o1.bit_count() ) - count ) ) ).op;
+					auto lhs_sign = flags::sign( { o1 } );
+
+					// last bit shifted out position
+					auto lbso_pos = operative(o1.bit_count()) - count;
+
+					block
+						->bxor( flags::CF, ( count != 0 ) & ( operative( flags::CF ) ^ ( (operative( o1 ) >> lbso_pos) & 1 ) ) )
+						->bxor( flags::OF, ( count != 0 ) & ( operative( flags::OF ) ^ ( flags::sign( { result } ) ^ lhs_sign ) ) )
+						->bxor( flags::SF, ( count != 0 ) & ( operative( flags::SF ) ^ flags::sign( result ) ) )
+						->bxor( flags::ZF, ( count != 0 ) & ( operative( flags::ZF ) ^ flags::zero( result ) ) )
+						->bxor( flags::PF, ( count != 0 ) & ( operative( flags::PF ) ^ flags::parity( result ) ) );
+
+					store_operand( block, insn, 0, result );
+				}
+			},
+			{
+				X86_INS_SHRD,
+				[]( basic_block* block, const instruction_info& insn ) {
+					auto o1 = operative( load_operand( block, insn, 0 ) );
+					auto o2 = operative( load_operand( block, insn, 1 ) );
+					auto o3 = operative( load_operand( block, insn, 2 ) );
+
+					auto count = operative( o3 ) & ( o1.op.size() == 8 ? 0x3F : 0x1F );
+
+					auto result = ( ( operative( o1 ) >> ( count ) ) | ( operative( o2 ) << ( operative( o1.bit_count() ) - count ) ) ).op;
+
+					// last bit shifted out position
+					auto lbso_pos = count - operative(1);
+
+					block
+						->bxor( flags::CF, ( count != 0 ) & ( operative( flags::CF ) ^ ( (operative( o1 ) >> lbso_pos) & 1 ) ) )
+						->bxor( flags::OF, ( count != 0 ) & ( operative( flags::OF ) ^ flags::sign( { o1 } ) ) )
+						->bxor( flags::SF, ( count != 0 ) & ( operative( flags::SF ) ^ flags::sign( result ) ) )
+						->bxor( flags::ZF, ( count != 0 ) & ( operative( flags::ZF ) ^ flags::zero( result ) ) )
+						->bxor( flags::PF, ( count != 0 ) & ( operative( flags::PF ) ^ flags::parity( result ) ) );
 
 					store_operand( block, insn, 0, result );
 				}
