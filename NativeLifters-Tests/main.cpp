@@ -182,6 +182,13 @@ pop rbx)");
 	TEST("shrd rax, rbx, 63");
 	TEST("shrd rax, rbx, cl");
 
+	TEST(R"(
+		mov rax, 1
+		je .L
+		mov rax, 2
+	.L: nop
+	)");
+
 	size_t passed = 0;
 	for (size_t i = 0; i < tests.size(); i++)
 	{

@@ -107,8 +107,8 @@ static bool fuzz_step( const lifter::byte_input& input, bool optimize, bool dump
 
 		// If branch is hit, exit VM if jcc/jmp, continue if vmexit. 
 		//
-		if ( ins.base->is_branching_virt() ) return vm_exit_reason::none;
-		if ( ins.base->is_branching_real() ) return vm_exit_reason::unknown_instruction;
+		if ( ins.base->is_branching_virt() || ins.base->is_branching_real())
+			return vm_exit_reason::unknown_instruction;
 
 		// If none matches, redirect to original handler.
 		//
