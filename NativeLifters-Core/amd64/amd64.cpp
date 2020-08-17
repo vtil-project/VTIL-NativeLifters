@@ -68,9 +68,12 @@ namespace vtil::lifter::amd64
 				->add( current_offs, reg2op( operand.mem.base ) );
 		}
 
-		block
-			// Add the displacement offset.
-			->add( current_offs, operand.mem.disp );
+		if ( operand.mem.disp != 0 )
+		{
+			block
+				// Add the displacement offset.
+				->add(current_offs, operand.mem.disp);
+		}
 
 		// Return resulting temporary.
 		return current_offs;
