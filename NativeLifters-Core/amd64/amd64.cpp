@@ -42,37 +42,63 @@ namespace vtil::lifter::amd64
 
 	// Create a series of instructions representing memory displacement given the current operand and basic block.
 	// 
-	register_desc get_disp_from_operand( basic_block* block, const operand_info& operand )
+	register_desc get_disp_from_operand(basic_block* block, const operand_info& operand)
 	{
-		// Create a temporary register to store the current displacement.
-		auto current_offs = block->tmp( 64 );
+		// Avoid temporary register if only base is used without displacement.
+		if (operand.mem.base != X86_REG_INVALID &&
+			operand.mem.index == X86_REG_INVALID &&
+			operand.mem.disp == 0)
+		{
+			return register_cast<x86_reg>{}(operand.mem.base);
+		}
 
-		// Zero it out, in case one of these doesn't actually have a value and we add junk data.
-		block
-			->mov( current_offs, 0ULL );
+		// Create a temporary register to store the current displacement.
+		auto current_offs = block->tmp(64);
 
 		if ( operand.mem.index != X86_REG_INVALID )
 		{
 			block
 				// Move the index register into the offset
-				->mov( current_offs, reg2op( operand.mem.index ) )
+				->mov(current_offs, reg2op(operand.mem.index));
 
-				// Multiply it by the scale (unsigned).
-				->mul( current_offs, operand.mem.scale );
+			if (operand.mem.scale > 1)
+			{
+				block
+					// Multiply it by the scale (unsigned).
+					->mul(current_offs, operand.mem.scale);
+			}
 		}
 
 		if ( operand.mem.base != X86_REG_INVALID )
 		{
-			block
-				// Add the base offset.
-				->add( current_offs, reg2op( operand.mem.base ) );
+			if ( operand.mem.index == X86_REG_INVALID )
+			{
+				block
+					// Add the base offset.
+					->mov(current_offs, reg2op(operand.mem.base));
+			}
+			else
+			{
+				block
+					// Add the base offset.
+					->add(current_offs, reg2op(operand.mem.base));
+			}
 		}
 
 		if ( operand.mem.disp != 0 )
 		{
-			block
-				// Add the displacement offset.
-				->add(current_offs, operand.mem.disp);
+			if ( operand.mem.index != X86_REG_INVALID || operand.mem.base != X86_REG_INVALID )
+			{
+				block
+					// Add the displacement offset.
+					->add(current_offs, operand.mem.disp);
+			}
+			else
+			{
+				block
+					// Move the displacement offset.
+					->mov(current_offs, operand.mem.disp);
+			}
 		}
 
 		// Return resulting temporary.
