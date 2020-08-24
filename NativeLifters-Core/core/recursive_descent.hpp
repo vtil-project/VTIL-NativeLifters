@@ -66,6 +66,10 @@ namespace vtil::lifter
 		//
 		basic_block* entry;
 
+		// Routine to which entry belongs
+		//
+		std::unique_ptr<routine> owner_rtn;
+
 		// Instructions corresponding to their basic blocks.
 		//
 		std::unordered_map<uint64_t, basic_block*> leaders;
@@ -75,6 +79,8 @@ namespace vtil::lifter
 		recursive_descent( const input_type* input, uint64_t entry_point, processing_flags flags = {} ) : input( input ), leaders( { } )
 		{
 			entry = basic_block::begin( entry_point );
+			owner_rtn = std::unique_ptr<routine>(entry->owner);
+
 			entry->owner->alloc( 64 ); // reserve one internal for RIP.
 			entry->owner->context.get<processing_flags>() = flags;
 		}
