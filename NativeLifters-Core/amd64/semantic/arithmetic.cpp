@@ -56,15 +56,22 @@ namespace vtil::lifter::amd64
 		auto lhs = operative( load_operand( block, insn, 0 ));
 		auto rhs = operative( load_operand( block, insn, 1 ));
 
-		auto result = ( operative( lhs ) << ( operative( rhs ) & ( lhs.op.size() == 8 ? 0x3F : 0x1F ))).op;
-		auto lhs_sign = flags::sign( { lhs } );
+		auto shft_amt = operative(rhs) & (lhs.op.size() == 8 ? 0x3F : 0x1F);
+		auto lbso_pos = operative(lhs.bit_count()) - shft_amt;
+
+		auto result = ( lhs << shft_amt).op;
+		auto lhs_sign = flags::sign({ lhs });
+
+		// Temp var to set OF to ?UD in case of multibit shift 
+		auto undef = __if(shft_amt > 1, operative(UNDEFINED)) & 1;
 
 		block
-			->bxor( flags::CF, ( rhs != 0 ) & ( operative( flags::CF ) ^ lhs_sign ))
-			->bxor( flags::OF, ( rhs != 0 ) & ( operative( flags::OF ) ^ ( flags::sign( { result } ) ^ lhs_sign )))
-			->bxor( flags::SF, ( rhs != 0 ) & ( operative( flags::SF ) ^ flags::sign( result )))
-			->bxor( flags::ZF, ( rhs != 0 ) & ( operative( flags::ZF ) ^ flags::zero( result )))
-			->bxor( flags::PF, ( rhs != 0 ) & ( operative( flags::PF ) ^ flags::parity( result )));
+			->bxor(flags::CF, (shft_amt != 0) & (operative(flags::CF) ^ ((lhs >> lbso_pos) & 1)))
+			->bxor(flags::OF, (shft_amt != 0) & (operative(flags::OF) ^ (flags::sign({ result }) ^ lhs_sign)))
+			->add(flags::OF, undef)
+			->bxor( flags::SF, (shft_amt != 0 ) & ( operative( flags::SF ) ^ flags::sign( result )))
+			->bxor( flags::ZF, (shft_amt != 0 ) & ( operative( flags::ZF ) ^ flags::zero( result )))
+			->bxor( flags::PF, (shft_amt != 0 ) & ( operative( flags::PF ) ^ flags::parity( result )));
 
 		store_operand( block, insn, 0, result );
 	};
