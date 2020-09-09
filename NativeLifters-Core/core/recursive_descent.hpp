@@ -147,7 +147,7 @@ namespace vtil::lifter
 				{
 					fassert( start_block->back().base == &ins::jmp );
 					start_block->wback().base = &ins::vexit;
-					start_block->owner->routine_convention = amd64::preserve_all_convention;
+					start_block->owner->routine_convention = vtil::amd64::preserve_all_convention;
 					return;
 				}
 			}
