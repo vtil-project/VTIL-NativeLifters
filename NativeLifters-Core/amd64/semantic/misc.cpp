@@ -189,13 +189,28 @@ namespace vtil::lifter::amd64
 			X86_INS_POP,
 			[ ] ( basic_block* block, const instruction_info& insn )
 			{
-				auto tmp = block->tmp( 64 );
-				block->ldd( tmp, X86_REG_RSP, block->sp_offset );
-				store_operand( block, insn, 0, tmp );
-				if ( insn.operands[ 0 ].size == 2 )
-					block->add( X86_REG_RSP, 2 );
+				const auto sp_inc = insn.operands[0].size == 2 ? 2 : 8;
+				if (insn.operands[0].type == X86_OP_REG && insn.operands[0].reg == X86_REG_RSP)
+				{
+					// The POP ESP instruction increments the stack pointer (ESP) before data at the old top of stack is written into the destination.
+					//block->add(X86_REG_RSP, sp_inc);
+					block->ldd(X86_REG_RSP, X86_REG_RSP, 0);
+				}
+				else if (insn.operands[0].type == X86_OP_MEM && insn.operands[0].mem.base == X86_REG_RSP)
+				{
+					// the POP instruction computes the effective address of the operand after it increments the ESP register.
+					auto tmp = block->tmp(64);
+					block->ldd(tmp, X86_REG_RSP, 0);
+					block->add(X86_REG_RSP, sp_inc);
+					store_operand(block, insn, 0, tmp);
+				}
 				else
-					block->add( X86_REG_RSP, 8 );
+				{
+					auto tmp = block->tmp(64);
+					block->ldd(tmp, X86_REG_RSP, 0);
+					store_operand(block, insn, 0, tmp);
+					block->add(X86_REG_RSP, sp_inc);
+				}
 			}
 		},
 		{
