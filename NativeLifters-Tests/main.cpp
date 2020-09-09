@@ -201,6 +201,34 @@ pop rbx)");
 	TEST("shl rax, 1");
 	TEST("shl rax, cl");
 	TEST("shl rax, 33");
+	
+	TEST( R"(
+		push rbx
+		lea  rax, [rsp]
+		push rcx
+		push rax
+		pop  rsp
+		pop  rbx
+	)" );
+
+	TEST( R"(
+		push 3
+		push 2
+		pop qword ptr [rsp]
+		pop rax
+	)" );
+
+	TEST( R"(
+		push rax
+		push qword ptr [rsp]
+		pop rax
+		pop rbx
+	)" );
+
+	TEST( R"(
+		push rsp
+		pop rax
+	)" );
 
 	size_t passed = 0;
 	for (size_t i = 0; i < tests.size(); i++)
@@ -217,7 +245,7 @@ pop rbx)");
 
 int main(int argc, char** argv)
 {
-	if (argc > 1 && strcmp(argv[1], "--tests") == 0)
+	//if (argc > 1 && strcmp(argv[1], "--tests") == 0)
 	{
 		return runTests() ? 0 : 1;
 	}
