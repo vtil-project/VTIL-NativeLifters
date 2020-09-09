@@ -118,7 +118,12 @@ namespace vtil::lifter::amd64
 			case X86_OP_IMM:
 				return { opr.imm, opr.size * 8 };
 			case X86_OP_REG:
-				return reg2op( opr.reg );
+			{
+				auto tmp = block->tmp( opr.size * 8 );
+				auto reg = reg2op( opr.reg );
+				block->mov( tmp, reg );
+				return { tmp };
+			}
 			case X86_OP_MEM:
 			{
 				auto tmp = block->tmp( opr.size * 8 );
