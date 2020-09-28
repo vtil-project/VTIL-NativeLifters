@@ -104,7 +104,9 @@ namespace vtil::lifter
 					return;
 				}
 
+				start_block->label_begin(vip);
 				auto offs = arch::process( start_block, vip, entry_ptr );
+				start_block->label_end();
 				entry_ptr += offs;
 				vip += offs;
 
