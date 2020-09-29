@@ -7,6 +7,12 @@ project(VTIL-NativeLifters)
 option(NATIVELIFTERS_BUILD_TESTS "Build tests" OFF)
 
 # Add VTIL-Core as a dependency
+# Automatically initialize the submodule if necessary
+file(GLOB CORE_CONTENTS Dependencies/VTIL-Core/*)
+if(NOT CORE_CONTENTS)
+	message(STATUS "Empty VTIL-Core directory, initializing submodule...")
+	execute_process(COMMAND git submodule update --init)
+endif()
 add_subdirectory(Dependencies/VTIL-Core)
 
 # Include subprojects
