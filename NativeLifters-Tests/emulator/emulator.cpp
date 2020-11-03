@@ -124,7 +124,7 @@ void emulator::invoke( const void* routine_pointer )
 
 	// Invoke shellcode.
 	//
-	( ( void( __stdcall* )( emulator* ) )emulator_shellcode.data() )( this );
+	( ( void( * )( emulator* ) )emulator_shellcode.data() )( this );
 }
 
 // Resolves the offset<0> where the value is saved at for the given register
