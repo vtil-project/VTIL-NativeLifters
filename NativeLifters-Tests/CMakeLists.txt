@@ -6,6 +6,8 @@ add_executable(${PROJECT_NAME}
     ${SOURCES}
 )
 
+source_group(TREE ${PROJECT_SOURCE_DIR} FILES ${SOURCES})
+
 if(MSVC)
     target_link_options(${PROJECT_NAME} PRIVATE /STACK:0x10000000)
 endif()
