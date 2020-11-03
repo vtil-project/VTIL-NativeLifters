@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.16)
+# Require at least CMake version 3.15 or later for FetchContent
+cmake_minimum_required(VERSION 3.14.5)
 
 # Define project
 project(VTIL-NativeLifters)
@@ -6,16 +7,15 @@ project(VTIL-NativeLifters)
 # Project options
 option(NATIVELIFTERS_BUILD_TESTS "Build tests" OFF)
 
-# Add VTIL-Core as a dependency
-# Automatically initialize the submodule if necessary
-file(GLOB CORE_CONTENTS Dependencies/VTIL-Core/*)
-if(NOT CORE_CONTENTS)
-	message(STATUS "Empty VTIL-Core directory, initializing submodule...")
-	execute_process(COMMAND git submodule update --init)
-endif()
-add_subdirectory(Dependencies/VTIL-Core)
+# Enable solution folder support
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+# Add dependencies
+set(CMAKE_FOLDER "VTIL-NativeLifters/Dependencies")
+add_subdirectory(Dependencies)
 
 # Include subprojects
+set(CMAKE_FOLDER "VTIL-NativeLifters")
 add_subdirectory(NativeLifters-Core)
 
 # Tests

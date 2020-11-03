@@ -124,7 +124,7 @@ void emulator::invoke( const void* routine_pointer )
 
 	// Invoke shellcode.
 	//
-	( ( void( __stdcall* )( emulator* ) )emulator_shellcode.data() )( this );
+	( ( void( * )( emulator* ) )emulator_shellcode.data() )( this );
 }
 
 // Resolves the offset<0> where the value is saved at for the given register
@@ -155,7 +155,7 @@ std::pair<int32_t, uint8_t> emulator::resolve( x86_reg reg ) const
         default:            unreachable();
     }
 
-    return { ( ( uint8_t* ) base - ( uint8_t* ) this ) + offset, size };
+    return { ( ( uint8_t* ) base - ( uint8_t* ) this ) + offset, static_cast<int64_t>(size) };
 }
 
 // Sets the value of a register.

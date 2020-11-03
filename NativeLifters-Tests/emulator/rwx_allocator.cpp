@@ -27,8 +27,6 @@
 //
 #include "rwx_allocator.hpp"
 #if _WIN64
-	#define WIN32_LEAN_AND_MEAN
-	#define NOMINMAX
 	#include <Windows.h>
 #else
 	#include <sys/mman.h>
@@ -104,7 +102,7 @@ namespace mem
 #else
 		// Free the page(s) we've allocated.
 		//
-		mmunmap( desc, desc->allocation_size );
+		munmap( desc, desc->allocation_size );
 #endif
 	}
 };
