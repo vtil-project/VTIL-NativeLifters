@@ -155,7 +155,7 @@ std::pair<int32_t, uint8_t> emulator::resolve( x86_reg reg ) const
         default:            unreachable();
     }
 
-    return { ( ( uint8_t* ) base - ( uint8_t* ) this ) + offset, size };
+    return { ( ( uint8_t* ) base - ( uint8_t* ) this ) + offset, static_cast<int64_t>(size) };
 }
 
 // Sets the value of a register.
