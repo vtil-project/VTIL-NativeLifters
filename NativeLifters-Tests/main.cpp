@@ -70,7 +70,7 @@ static bool run_test(uint64_t address, const char* assembly, const char* file, i
 	{
 		log("\nVTIL:\n");
 		amd64_recursive_descent rec_desc( &input, input.base );
-		rec_desc.entry->owner->routine_convention = amd64::preserve_all_convention;
+		rec_desc.entry->owner->routine_convention = lifter::host_preserve_all_convention();
 		rec_desc.entry->owner->routine_convention.purge_stack = false;
 		rec_desc.explore();
 
@@ -273,7 +273,7 @@ int main(int argc, char** argv)
 			logger::log( "%s\n", ins.to_string() );
 
 		amd64_recursive_descent rec_desc( &input, 0 );
-		rec_desc.entry->owner->routine_convention = amd64::default_call_convention;
+		rec_desc.entry->owner->routine_convention = lifter::host_default_call_convention();
 		rec_desc.entry->owner->routine_convention.purge_stack = false;
 		rec_desc.explore();
 

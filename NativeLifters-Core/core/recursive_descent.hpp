@@ -35,6 +35,32 @@
 
 namespace vtil::lifter
 {
+	inline call_convention host_preserve_all_convention()
+	{
+#if _M_X64 || __x86_64__
+		return amd64::preserve_all_convention;
+#elif _M_IX86 || __i386__
+		return x86::preserve_all_convention;
+#elif _M_ARM64 || __aarch64__
+		return arm64::preserve_all_convention;
+#else
+		return {};
+#endif
+	}
+
+	inline call_convention host_default_call_convention()
+	{
+#if _M_X64 || __x86_64__
+		return amd64::default_call_convention;
+#elif _M_IX86 || __i386__
+		return x86::default_call_convention;
+#elif _M_ARM64 || __aarch64__
+		return arm64::default_call_convention;
+#else
+		return {};
+#endif
+	}
+
 	struct byte_input
 	{
 		uint8_t* bytes = nullptr;
@@ -149,7 +175,7 @@ namespace vtil::lifter
 				{
 					fassert( start_block->back().base == &ins::jmp );
 					start_block->wback().base = &ins::vexit;
-					start_block->owner->routine_convention = vtil::amd64::preserve_all_convention;
+					start_block->owner->routine_convention = host_preserve_all_convention();
 					return;
 				}
 			}
