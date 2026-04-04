@@ -10,34 +10,43 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2019, macos-11, ubuntu-20.04]
+        include:
+          - os: windows-2022
+            build_parallel: 4
+          - os: ubuntu-24.04
+            build_parallel: 2
+          - os: macos-14
+            build_parallel: 2
     env:
       BUILD_TYPE: Release
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
-    - name: Install ninja-build tool
-      uses: seanmiddleditch/gha-setup-ninja@v3
+    - name: Install Ninja (Linux)
+      if: ${{ runner.os == 'Linux' }}
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ninja-build
+
+    - name: Install Ninja (macOS)
+      if: ${{ runner.os == 'macOS' }}
+      run: brew install ninja
+
+    - name: Install Ninja (Windows)
+      if: ${{ runner.os == 'Windows' }}
+      run: choco install ninja -y
 
     - name: Enable Developer Command Prompt
       if: ${{ runner.os == 'Windows' }}
-      uses: ilammy/msvc-dev-cmd@v1.7.0
-
-    - name: Set up GCC
-      if: ${{ runner.os == 'Linux' }}
-      uses: egor-tensin/setup-gcc@v1
-      with:
-        version: 11
+      uses: ilammy/msvc-dev-cmd@v1
 
     - name: Build
       run: |
-        cmake -G Ninja -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
-        cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+        cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DNATIVELIFTERS_BUILD_TESTS=ON -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+        cmake --build build --config ${{ env.BUILD_TYPE }} --parallel ${{ matrix.build_parallel }} --verbose
 
     - name: Test
-      if: ${{ runner.os == 'Windows' }}
       run: |
         ctest --version
-        cd build
-        ctest . -C ${{ env.BUILD_TYPE }} --verbose
+        ctest --test-dir build -C ${{ env.BUILD_TYPE }} --output-on-failure --verbose
