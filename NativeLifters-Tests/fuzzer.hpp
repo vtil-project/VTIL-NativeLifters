@@ -149,7 +149,7 @@ static bool fuzz_step( const lifter::byte_input& input, bool optimize, bool dump
 		auto get_imm = [ & ] ( const operand& op ) -> vip_t
 		{
 			if ( op.is_immediate() )
-				return op.imm().u64;
+				return ( vip_t ) op.imm().uval;
 			return *vm.read_register( op.reg() )->get<vip_t>();
 		};
 

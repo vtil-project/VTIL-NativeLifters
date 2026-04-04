@@ -48,10 +48,10 @@ namespace vtil::lifter
 		{
 			auto elhs = lhs.op.is_register()
 				? symbolic::CTX[ lhs.op.reg() ]
-				: symbolic::expression{ lhs.op.imm().u64, lhs.op.bit_count() };
+				: symbolic::expression{ lhs.op.imm().uval, lhs.op.bit_count() };
 			auto erhs = rhs.op.is_register()
 				? symbolic::CTX[ rhs.op.reg() ]
-				: symbolic::expression{ rhs.op.imm().u64, rhs.op.bit_count() };
+				: symbolic::expression{ rhs.op.imm().uval, rhs.op.bit_count() };
 
 			op = *translator << symbolic::variable::pack_all( symbolic::expression{ elhs, opr, erhs } );
 		}
@@ -60,7 +60,7 @@ namespace vtil::lifter
 		{
 			auto erhs = rhs.op.is_register()
 				? symbolic::CTX[ rhs.op.reg() ]
-				: symbolic::expression{ rhs.op.imm().u64, rhs.op.bit_count() };
+				: symbolic::expression{ rhs.op.imm().uval, rhs.op.bit_count() };
 
 			op = *translator << symbolic::variable::pack_all( symbolic::expression{ opr, erhs } );
 		}
