@@ -68,20 +68,23 @@ static bool run_test(uint64_t address, const char* assembly, const char* file, i
 	}
 	else
 	{
-		log("\nVTIL:\n");
-		amd64_recursive_descent rec_desc( &input, input.base );
-		rec_desc.entry->owner->routine_convention = lifter::host_preserve_all_convention();
-		rec_desc.entry->owner->routine_convention.purge_stack = false;
-		rec_desc.explore();
-
-		// Insert proper vexits
-		rec_desc.entry->owner->for_each([](basic_block* blk)
+		if ( dump_info )
 		{
-			if (blk->back().base == &ins::jmp && blk->next.empty())
-				blk->wback().base = &ins::vexit;
-		});
+			log("\nVTIL:\n");
+			amd64_recursive_descent rec_desc( &input, input.base );
+			rec_desc.entry->owner->routine_convention = lifter::host_preserve_all_convention();
+			rec_desc.entry->owner->routine_convention.purge_stack = false;
+			rec_desc.explore();
 
-		debug::dump(rec_desc.entry);
+			// Insert proper vexits
+			rec_desc.entry->owner->for_each([](basic_block* blk)
+			{
+				if (blk->back().base == &ins::jmp && blk->next.empty())
+					blk->wback().base = &ins::vexit;
+			});
+
+			debug::dump(rec_desc.entry);
+		}
 
 		log<CON_RED>("Test failed! (%s:%d)\n\n", file, line);
 	}

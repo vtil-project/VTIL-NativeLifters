@@ -127,7 +127,7 @@ static bool fuzz_step( const lifter::byte_input& input, bool optimize, bool dump
 	uint64_t rng_rflags = ( gen_random( true ) & 0b110011010101 ) | 0x202;
 	emu.v_rflags = rng_rflags;
 	vm.write_register( REG_FLAGS, rng_rflags );
-	vm.write_register( REG_SP, ( uint64_t ) &emu.v_stack[ -1 ] );
+	vm.write_register( REG_SP, ( uint64_t ) &emu.v_reserved_stack[ ( emulator::reserved_stack_size / sizeof( uint64_t ) ) - 1 ] );
 
 	// Debug
 	//
@@ -196,6 +196,9 @@ static bool fuzz_step( const lifter::byte_input& input, bool optimize, bool dump
 
 	// Begin executing in the hardware emulator.
 	//
+#if !( _M_X64 || __x86_64__ )
+	return true;
+#else
 	std::vector<uint8_t, mem::rwx_allocator<uint8_t>> test = { 
 		input.bytes, 
 		input.bytes + input.size 
@@ -234,4 +237,5 @@ static bool fuzz_step( const lifter::byte_input& input, bool optimize, bool dump
 	}
 
 	return passed;
+#endif
 }

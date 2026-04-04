@@ -88,7 +88,9 @@
 	mov     rsp, [rsp+188h]
 	ret
 */
-static const std::vector<uint8_t, mem::rwx_allocator<uint8_t>> emulator_shellcode = {
+static std::vector<uint8_t, mem::rwx_allocator<uint8_t>> make_emulator_shellcode()
+{
+	std::vector<uint8_t, mem::rwx_allocator<uint8_t>> shellcode = {
 	0x48, 0x89, 0xE0, 0x48, 0x89, 0xCC, 0x48, 0x83, 0xC4, 0x20, 0x48, 0x89, 0x84, 0x24,
 	0x88, 0x01, 0x00, 0x00, 0x48, 0x8D, 0x84, 0x24, 0x78, 0x01, 0x00, 0x00, 0xFF, 0x30,
 	0x9C, 0x8F, 0x00, 0x9D, 0x48, 0x87, 0x84, 0x24, 0x00, 0x01, 0x00, 0x00, 0x48, 0x87,
@@ -111,7 +113,21 @@ static const std::vector<uint8_t, mem::rwx_allocator<uint8_t>> emulator_shellcod
 	0x24, 0x68, 0x01, 0x00, 0x00, 0x4C, 0x87, 0xBC, 0x24, 0x70, 0x01, 0x00, 0x00, 0x48,
 	0x8D, 0x84, 0x24, 0x78, 0x01, 0x00, 0x00, 0xFF, 0x30, 0x9C, 0x8F, 0x00, 0x9D, 0x48,
 	0x8B, 0xA4, 0x24, 0x88, 0x01, 0x00, 0x00, 0xC3
-};
+	};
+
+	// mov rsp, <first-arg-reg>
+	// Win64 ABI: RCX => 48 89 CC
+	// SysV ABI : RDI => 48 89 FC
+#if defined( _WIN64 )
+	shellcode[ 5 ] = 0xCC;
+#elif defined( __x86_64__ )
+	shellcode[ 5 ] = 0xFC;
+#endif
+
+	return shellcode;
+}
+
+static const std::vector<uint8_t, mem::rwx_allocator<uint8_t>> emulator_shellcode = make_emulator_shellcode();
 
 // Invokes routine at the pointer given with the current context and updates the context.
 // - Template argument is a small trick to make it work with ICC, declaring a constexpr within the scope does not work.
@@ -124,7 +140,11 @@ void emulator::invoke( const void* routine_pointer )
 
 	// Invoke shellcode.
 	//
+#if _M_X64 || __x86_64__
 	( ( void( * )( emulator* ) )emulator_shellcode.data() )( this );
+#else
+	unreachable();
+#endif
 }
 
 // Resolves the offset<0> where the value is saved at for the given register

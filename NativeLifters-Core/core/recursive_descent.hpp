@@ -38,26 +38,58 @@ namespace vtil::lifter
 	inline call_convention host_preserve_all_convention()
 	{
 #if _M_X64 || __x86_64__
-		return amd64::preserve_all_convention;
-#elif _M_IX86 || __i386__
-		return x86::preserve_all_convention;
-#elif _M_ARM64 || __aarch64__
-		return arm64::preserve_all_convention;
+		return vtil::amd64::preserve_all_convention;
 #else
-		return {};
+		return {
+			{
+				X86_REG_RAX, X86_REG_RBX, X86_REG_RCX, X86_REG_RDX,
+				X86_REG_RSI, X86_REG_RDI, X86_REG_RBP,
+				X86_REG_R8,  X86_REG_R9,  X86_REG_R10, X86_REG_R11,
+				X86_REG_R12, X86_REG_R13, X86_REG_R14, X86_REG_R15,
+				REG_FLAGS,
+			},
+			{
+				X86_REG_RAX, X86_REG_RBX, X86_REG_RCX, X86_REG_RDX,
+				X86_REG_RSI, X86_REG_RDI, X86_REG_RBP,
+				X86_REG_R8,  X86_REG_R9,  X86_REG_R10, X86_REG_R11,
+				X86_REG_R12, X86_REG_R13, X86_REG_R14, X86_REG_R15,
+				REG_FLAGS,
+			},
+			{
+				X86_REG_RAX, X86_REG_RBX, X86_REG_RCX, X86_REG_RDX,
+				X86_REG_RSI, X86_REG_RDI, X86_REG_RBP,
+				X86_REG_R8,  X86_REG_R9,  X86_REG_R10, X86_REG_R11,
+				X86_REG_R12, X86_REG_R13, X86_REG_R14, X86_REG_R15,
+				REG_FLAGS,
+			},
+			X86_REG_RBP,
+			0x0,
+			true,
+		};
 #endif
 	}
 
 	inline call_convention host_default_call_convention()
 	{
 #if _M_X64 || __x86_64__
-		return amd64::default_call_convention;
-#elif _M_IX86 || __i386__
-		return x86::default_call_convention;
-#elif _M_ARM64 || __aarch64__
-		return arm64::default_call_convention;
+		return vtil::amd64::default_call_convention;
 #else
-		return {};
+		return {
+			{
+				X86_REG_RCX, X86_REG_RDX, X86_REG_R8,
+				X86_REG_R9,  X86_REG_R10, X86_REG_R11,
+				REG_FLAGS,
+			},
+			{
+				X86_REG_RCX, X86_REG_RDX, X86_REG_R8, X86_REG_R9,
+			},
+			{
+				X86_REG_RAX,
+			},
+			X86_REG_RBP,
+			0x20,
+			true,
+		};
 #endif
 	}
 
@@ -92,10 +124,6 @@ namespace vtil::lifter
 		//
 		basic_block* entry;
 
-		// Routine to which entry belongs
-		//
-		std::unique_ptr<routine> owner_rtn;
-
 		// Instructions corresponding to their basic blocks.
 		//
 		std::unordered_map<uint64_t, basic_block*> leaders;
@@ -104,11 +132,25 @@ namespace vtil::lifter
 		//
 		recursive_descent( const input_type* input, uint64_t entry_point, processing_flags flags = {} ) : input( input ), leaders( { } )
 		{
-			entry = basic_block::begin( entry_point );
-			owner_rtn = std::unique_ptr<routine>(entry->owner);
+			entry = basic_block::begin( entry_point, architecture_amd64 );
 
 			entry->owner->alloc( 64 ); // reserve one internal for RIP.
 			entry->owner->context.get<processing_flags>() = flags;
+		}
+
+		~recursive_descent()
+		{
+			if ( !entry || !entry->owner )
+				return;
+
+			routine* owner = entry->owner;
+			owner->for_each( [ ] ( basic_block* blk )
+			{
+				blk->owner = nullptr;
+			} );
+
+			delete owner;
+			entry = nullptr;
 		}
 
 		// Start recursive descent.
